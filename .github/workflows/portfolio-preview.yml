@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: '22'
       - run: node check-portfolio.mjs
+      - run: node check-integrated-book.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: sandra-portfolio-preview
