@@ -1,0 +1,22 @@
+name: Check artist portfolio preview
+on:
+  pull_request:
+    paths:
+      - 'portfolio/**'
+      - 'check-portfolio.mjs'
+      - '.github/workflows/portfolio-preview.yml'
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node check-portfolio.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sandra-portfolio-preview
+          path: portfolio/
