@@ -172,9 +172,17 @@ function renderFilters() {
     return b;
   }));
 }
+// Masonry that keeps reading order: each work goes to the currently shortest column.
+function columnsFor() { const w = $('grid').clientWidth || window.innerWidth; return w < 700 ? 2 : w < 1100 ? 3 : 4; }
+let galleryCols = 0;
+function layoutGallery(items) {
+  const n = columnsFor(), cols = Array.from({length: n}, () => el('div', 'mcol')), h = new Array(n).fill(0);
+  items.forEach((b, i) => { const m = IMG.works[visible[i].id], k = h.indexOf(Math.min(...h)); cols[k].append(b); h[k] += m ? m.h / m.w : 1.2; });
+  galleryCols = n; $('grid').replaceChildren(...cols);
+}
 function renderGallery() {
   visible = S.works.filter(w => filter === 'all' || w.kind === filter);
-  $('grid').replaceChildren(...visible.map((w, i) => {
+  layoutGallery(visible.map((w, i) => {
     const b = el('button', 'work'); b.type = 'button'; b.style.animationDelay = Math.min(i, 8) * 45 + 'ms';
     b.setAttribute('aria-label', `${t('open')}: ${L(w.t)}`);
     const frame = el('span', 'frame'), m = IMG.works[w.id];
@@ -281,7 +289,7 @@ $$('.reveal').forEach(e => revealer ? revealer.observe(e) : e.classList.add('in'
 let ticking = false;
 function frame() { ticking = false; onScrollHeader(); updateJourney(); }
 window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, {passive: true});
-window.addEventListener('resize', () => requestAnimationFrame(frame));
+window.addEventListener('resize', () => { requestAnimationFrame(frame); if (columnsFor() !== galleryCols) renderGallery(); });
 reduced.addEventListener?.('change', () => { heroPlay(); frame(); });
 
 $('year').textContent = new Date().getFullYear();
