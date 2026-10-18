@@ -7,8 +7,8 @@ const root = new URL('./dist/', import.meta.url);
 const read = p => fs.readFileSync(new URL(p, root), 'utf8');
 const exists = p => fs.existsSync(new URL(p, root));
 const ctx = vm.createContext({window: {}});
-vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('dragon/story.js'), ctx);
-const {SITE, IMAGES, STORY} = ctx.window;
+vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js'), ctx);
+const {SITE, IMAGES} = ctx.window;
 
 // Works: unique, in a known series, with generated images.
 const ids = SITE.works.map(w => w.id);
@@ -46,13 +46,13 @@ for (const page of ['index.html', 'dragon/index.html', 'book/index.html']) {
 }
 for (const dir of ['book/', 'dragon/']) assert.ok(exists(dir + 'index.html'), dir);
 
-// Dragon tale: both languages complete and parallel.
-assert.equal(STORY.he.chapters.length, STORY.ru.chapters.length);
-STORY.he.chapters.forEach((c, i) => {
-  assert.ok(c.title && STORY.ru.chapters[i].title);
-  assert.equal(c.paragraphs.length, STORY.ru.chapters[i].paragraphs.length, `dragon chapter ${i + 1}`);
-});
+// Dragon tale: same reader format as the unicorn, 29 pages in both languages.
+const dragon = ['book.json', 'book-ru.json'].map(f => JSON.parse(read('dragon/' + f)));
+for (const b of dragon) {
+  assert.equal(b.length, 30);
+  b.forEach((p, n) => { assert.equal(p.n, n); assert.ok(n === 0 || p.text.length > 100, `dragon page ${n}`); assert.ok(exists('dragon/' + p.image), p.image); });
+}
+dragon[0].forEach((p, n) => assert.equal(p.chapter, dragon[1][n].chapter, `dragon chapter on page ${n}`));
 assert.ok(!html.includes('mailto:') && !html.includes('tel:'), 'no invented contact details');
 
-const paragraphs = STORY.he.chapters.reduce((n, c) => n + c.paragraphs.length, 0);
-console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew and Russian, local references, dragon tale ${STORY.he.chapters.length} chapters / ${paragraphs} paragraphs per language.`);
+console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew and Russian, local references, dragon tale 29 pages per language.`);
