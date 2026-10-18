@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 10 · הסטודיו של סנדרה</title><link rel="stylesheet" href="../shared.css">
+<style>
+html,body{height:100%;overflow:hidden;background:#1b1622}
+canvas{display:block;touch-action:none}
+.head{position:fixed;z-index:5;top:64px;inset-inline:0;text-align:center;pointer-events:none}
+.head h1{font-family:var(--serif);font-size:clamp(48px,7vw,100px);line-height:.85;margin:0}
+.head p{color:#c9bfd4;margin:8px 0 0}
+.tip{position:fixed;z-index:6;pointer-events:none;background:#f4efe6;color:#1a1520;border-radius:12px;padding:8px 14px;transform:translate(-50%,-130%);opacity:0;transition:opacity .2s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.tip b{display:block;font-family:var(--serif);font-size:28px;line-height:1}
+.tip span{font-size:12.5px;color:#6b605a}
+.legend{position:fixed;z-index:6;bottom:calc(16px + env(safe-area-inset-bottom));inset-inline:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 12px}
+.legend button{font:inherit;font-size:13.5px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);border-radius:30px;padding:8px 14px;cursor:pointer}
+.legend button:hover{background:var(--gold);color:#1a1408}
+.panel{position:fixed;z-index:8;top:0;bottom:0;right:0;width:min(440px,92vw);background:#f4efe6;color:#1a1520;transform:translateX(105%);transition:transform .5s cubic-bezier(.2,.7,.1,1);padding:90px 28px 28px;overflow:auto}
+.panel:not(.open){visibility:hidden;transition:transform .5s cubic-bezier(.2,.7,.1,1),visibility 0s .5s}
+.panel.open{transform:none}
+.panel h2{font-family:var(--serif);font-size:56px;line-height:.9;margin:0 0 12px}
+.panel p{color:#4d443e;line-height:1.7}
+.panel .imgs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}
+.panel .imgs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px}
+.panel a.go{display:inline-block;margin-top:8px;background:#1a1520;color:#f4efe6;padding:12px 22px;border-radius:30px}
+.panel .x{position:absolute;top:70px;inset-inline-end:20px;font-size:26px;background:none;border:0;cursor:pointer}
+</style>
+<script type="importmap">{"imports":{"three":"../../assets/vendor/three.module.min.js"}}</script>
+</head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="head"><h1>הסטודיו של סנדרה</h1><p>כל חפץ בחדר פותח חלק אחר באתר · גררו כדי להסתובב</p></div>
+<div class="tip" id="tip"><b id="tt"></b><span id="ts"></span></div>
+<div class="legend" id="legend"></div>
+<aside class="panel" id="panel"><button class="x" id="x" aria-label="סגירה">✕</button><div id="pc"></div></aside>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script type="module">
+import * as THREE from 'three';
+const renderer = new THREE.WebGLRenderer({antialias: true}); renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#1b1622');
+const aspect = innerWidth / innerHeight, Z = innerWidth < 700 ? 9.5 : 7.2;
+const camera = new THREE.OrthographicCamera(-Z * aspect, Z * aspect, Z, -Z, .1, 100);
+let theta = Math.PI / 4, phi = .62; const R = 30;
+function place() { camera.position.set(Math.sin(theta) * Math.cos(phi) * R, Math.sin(phi) * R + 1, Math.cos(theta) * Math.cos(phi) * R); camera.lookAt(0, 3.2, 0); }
+place();
+scene.add(new THREE.HemisphereLight('#fff4e6', '#463a52', 1.1));
+const sun = new THREE.DirectionalLight('#ffe2b8', 1.6); sun.position.set(6, 12, 8); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, {left: -10, right: 10, top: 10, bottom: -10}); scene.add(sun);
+const lam = c => new THREE.MeshStandardMaterial({color: c, roughness: .8});
+const box = (w, h, d, c, x, y, z, parent = scene) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof c === 'string' ? lam(c) : c); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; };
+const loader = new THREE.TextureLoader(), tex = src => { const t = loader.load(src); t.colorSpace = THREE.SRGBColorSpace; return t; };
+const pic = (src, w, h) => new THREE.MeshBasicMaterial({map: tex(src)});
+// room: floor and two walls (cut-away diorama)
+box(10, .3, 10, '#a77b52', 0, -.15, 0);
+box(10, 6, .3, '#e9e1d4', 0, 3, -5.15); box(.3, 6, 10, '#ddd3c4', -5.15, 3, 0);
+box(10, .2, .32, '#3a2c22', 0, .1, -4.98); box(.32, .2, 10, '#3a2c22', -4.98, .1, 0);
+// rug
+const rug = new THREE.Mesh(new THREE.CircleGeometry(2.6, 48), lam('#7a3b4a')); rug.rotation.x = -Math.PI / 2; rug.position.set(.6, .01, .8); rug.receiveShadow = true; scene.add(rug);
+// window with light
+box(.1, 2.2, 2.6, '#2b2430', -4.98, 3.6, 1.6); box(.05, 1.9, 2.3, new THREE.MeshBasicMaterial({color: '#bfe0ff'}), -4.92, 3.6, 1.6);
+const objects = [];
+function clickable(group, info) { group.traverse(o => { if (o.isMesh) o.userData.obj = objects.length; }); objects.push({group, ...info, y0: group.position.y}); }
+// paintings on the back wall -> gallery
+const wallArt = [['angels', -3.2, 3.4, 2.2], ['serpent', -.6, 3.6, 2.6], ['tree-tears', 1.9, 3.3, 2], ['night-faces', 3.9, 3.7, 1.6]];
+const artGroup = new THREE.Group(); scene.add(artGroup);
+for (const [id, x, y, h] of wallArt) { const w = h * C.ratio(id); box(w + .16, h + .16, .08, '#1a1512', x, y, -4.95, artGroup); const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), pic(C.src(id, 800))); p.position.set(x, y, -4.9); artGroup.add(p); }
+clickable(artGroup, {name: 'הקיר', sub: 'כל העבודות', key: 'works'});
+// side wall: exhibition photos
+const hallGroup = new THREE.Group(); scene.add(hallGroup);
+[['hall-1', 3.8, 1.2], ['hall-3', 4.4, -1.9]].forEach(([id, y, z]) => { box(.08, 1.5, 2.3, '#f8f4ec', -4.95, y, z, hallGroup); const p = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.3), pic(`../../assets/img/studio/${id}.webp`)); p.rotation.y = Math.PI / 2; p.position.set(-4.9, y, z); hallGroup.add(p); });
+hallGroup.children.forEach(c => c.position.z -= 0);
+clickable(hallGroup, {name: 'תמונות מהתערוכה', sub: 'התערוכה האחרונה', key: 'exhibition'});
+// easel with the work in progress -> about the paintings
+const easel = new THREE.Group(); easel.position.set(2.2, 0, 1.2); easel.rotation.y = -.5; scene.add(easel);
+const wood = lam('#8a5a36');
+for (const s of [-.7, .7]) { const leg = box(.1, 4, .1, wood, s, 2, 0, easel); leg.rotation.z = -s * .08; }
+const back = box(.1, 3.6, .1, wood, 0, 1.8, -.7, easel); back.rotation.x = -.35;
+box(1.8, .1, .3, wood, 0, 1.25, .05, easel);
+const cw = 1.6, ch = cw / C.ratio('flute'); box(cw + .06, ch + .06, .06, '#f2ede4', 0, 1.3 + ch / 2 + .05, .1, easel);
+const canvasPic = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), pic(C.src('flute', 800))); canvasPic.position.set(0, 1.3 + ch / 2 + .05, .14); easel.add(canvasPic);
+clickable(easel, {name: 'כן הציור', sub: 'על מה סנדרה עובדת עכשיו', key: 'easel'});
+// table with paints and singing bowl -> workshops
+const table = new THREE.Group(); table.position.set(-1.8, 0, 1.6); scene.add(table);
+box(3, .12, 1.6, '#c9a27a', 0, 1.3, 0, table); for (const [x, z] of [[-1.35, -.65], [1.35, -.65], [-1.35, .65], [1.35, .65]]) box(.1, 1.3, .1, '#6d4a30', x, .65, z, table);
+const colors = ['#e94f37', '#f6c445', '#3f88c5', '#44bba4', '#a14ebf', '#ff8c42'];
+colors.forEach((c, i) => { const j = new THREE.Mesh(new THREE.CylinderGeometry(.12, .12, .22, 16), lam(c)); j.position.set(-1 + i * .25, 1.47, -.35); j.castShadow = true; table.add(j); });
+const bowl = new THREE.Mesh(new THREE.SphereGeometry(.32, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshStandardMaterial({color: '#c9a043', metalness: .8, roughness: .3, side: THREE.DoubleSide})); bowl.position.set(.8, 1.68, .2); bowl.rotation.x = Math.PI; table.add(bowl);
+for (let i = 0; i < 4; i++) { const sheet = new THREE.Mesh(new THREE.PlaneGeometry(.6, .45), new THREE.MeshBasicMaterial({color: colors[(i + 2) % 6]})); sheet.rotation.x = -Math.PI / 2; sheet.rotation.z = (i - 1.5) * .3; sheet.position.set(-.8 + i * .45, 1.37, .35); table.add(sheet); }
+clickable(table, {name: 'שולחן הסדנה', sub: 'סדנאות נוירוגרפיקה וצבע', key: 'studio'});
+// bookshelf with the two tales -> stories
+const shelf = new THREE.Group(); shelf.position.set(4.2, 0, -2.6); scene.add(shelf);
+box(1.4, 3.2, .6, '#5b3d29', 0, 1.6, 0, shelf); for (const y of [.9, 1.9, 2.8]) box(1.3, .06, .5, '#3d281a', 0, y, .06, shelf);
+['#7c4dff', '#e94f37', '#3f88c5', '#44bba4', '#f6c445'].forEach((c, i) => box(.16, .7, .4, c, -.45 + i * .2, 2.28, .08, shelf));
+const covers = [['../../assets/img/unicorn-cover-900.webp', -.25], ['../../assets/img/dragon-cover-900.webp', .3]];
+covers.forEach(([src, x]) => { const b = box(.5, .75, .08, '#222', x, 1.33, .28, shelf); b.rotation.x = -.15; const c = new THREE.Mesh(new THREE.PlaneGeometry(.46, .7), pic(src)); c.position.set(x, 1.33, .33); c.rotation.x = -.15; shelf.add(c); });
+clickable(shelf, {name: 'מדף הספרים', sub: 'האגדות של סנדרה', key: 'stories'});
+// portrait frame on the side wall -> about Sandra
+const me = new THREE.Group(); scene.add(me);
+box(.08, 1.6, 1.3, '#1a1512', -4.95, 2.4, -3.6, me); const mp = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.5), pic('../../assets/img/portrait-900.webp')); mp.rotation.y = Math.PI / 2; mp.position.set(-4.9, 2.4, -3.6); me.add(mp);
+clickable(me, {name: 'סנדרה', sub: 'נעים להכיר', key: 'about'});
+// little phone/letter box on a stool -> contact
+const post = new THREE.Group(); post.position.set(3.6, 0, 3.4); scene.add(post);
+box(.9, .8, .9, '#d8b27a', 0, .4, 0, post); const env = box(.7, .05, .45, '#f4efe6', 0, .83, 0, post); const heart = box(.12, .06, .12, '#e94f37', 0, .86, 0, post); heart.rotation.y = Math.PI / 4;
+clickable(post, {name: 'מכתב לסנדרה', sub: 'יצירת קשר', key: 'contact'});
+// plant
+const plant = new THREE.Group(); plant.position.set(-4, 0, 4); scene.add(plant); box(.6, .7, .6, '#b4572e', 0, .35, 0, plant);
+for (let i = 0; i < 7; i++) { const l = new THREE.Mesh(new THREE.ConeGeometry(.18, 1.2, 6), lam('#3f7d4a')); l.position.set(Math.cos(i) * .15, 1.2, Math.sin(i) * .15); l.rotation.set(Math.cos(i * 2) * .5, 0, Math.sin(i * 2) * .5); l.castShadow = true; plant.add(l); }
+
+// interaction
+const sections = {
+  works: {t: 'כל העבודות', p: 'יותר מ־40 עבודות: ציור, עולמות נסתרים, נוירוגרפיקה ובודי־ארט.', imgs: ['angels', 'serpent', 'tree-tears', 'night-faces'], href: '../../#works'},
+  exhibition: {t: 'התערוכה', p: 'העבודות של סנדרה על הקירות של הגלריה.', st: ['hall-1', 'hall-3', 'hall-2', 'hall-4'], href: '../../#exhibition'},
+  easel: {t: 'על הכן', p: 'המנגן בענף, 2026. עבודה חדשה שבה דמות כחולה מנגנת בענף של עץ.', imgs: ['flute', 'skull', 'cosmic-face', 'embrace'], href: '../../#works'},
+  studio: {t: 'סדנאות', p: 'נוירוגרפיקה, צבע וחומר — לילדים, למבוגרים ולקבוצות.', st: ['ws-8', 'ws-0', 'ws-2', 'ws-6'], href: '../../#studio'},
+  stories: {t: 'אגדות', p: 'סיפור על החד־קרן וסיפור על הדרקון, בעברית וברוסית.', src: ['../../assets/img/unicorn-cover-900.webp', '../../assets/img/dragon-cover-900.webp'], href: '../../#stories'},
+  about: {t: 'סנדרה לייפר', p: 'אמנית ומורה לאמנות. מציירת, מלמדת וכותבת אגדות לילדים.', src: ['../../assets/img/portrait-900.webp'], href: '../../#about'},
+  contact: {t: 'לכתוב לסנדרה', p: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה.', href: '../../#contact'}
+};
+function openPanel(key) {
+  const s = sections[key], imgs = (s.imgs || []).map(id => C.src(id, 800)).concat((s.st || []).map(id => `../../assets/img/studio/${id}.webp`)).concat(s.src || []);
+  document.getElementById('pc').innerHTML = `<h2>${s.t}</h2><p>${s.p}</p>${imgs.length ? `<div class="imgs">${imgs.map(u => `<img src="${u}" alt="">`).join('')}</div>` : ''}<a class="go" href="${s.href}">לחלק הזה באתר ←</a>`;
+  document.getElementById('panel').classList.add('open');
+}
+document.getElementById('x').onclick = () => document.getElementById('panel').classList.remove('open');
+document.getElementById('legend').innerHTML = objects.map((o, i) => `<button data-i="${i}">${o.name}</button>`).join('');
+document.querySelectorAll('#legend button').forEach(b => b.onclick = () => openPanel(objects[+b.dataset.i].key));
+const ray = new THREE.Raycaster(), v = new THREE.Vector2(); let hover = -1, drag = null;
+const meshes = []; scene.traverse(o => { if (o.isMesh && o.userData.obj !== undefined) meshes.push(o); });
+function hit(e) { v.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(v, camera); const h = ray.intersectObjects(meshes)[0]; return h ? h.object.userData.obj : -1; }
+const cv = renderer.domElement;
+cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY, m: 0}; });
+addEventListener('pointerup', e => { if (drag && drag.m < 6) { const i = hit(e); if (i >= 0) openPanel(objects[i].key); } drag = null; });
+cv.addEventListener('pointermove', e => {
+  if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.m += Math.abs(dx) + Math.abs(dy); theta = Math.max(.1, Math.min(1.45, theta - dx * .005)); phi = Math.max(.3, Math.min(1.1, phi + dy * .003)); drag.x = e.clientX; drag.y = e.clientY; place(); return; }
+  const i = hit(e); hover = i; cv.style.cursor = i >= 0 ? 'pointer' : 'grab';
+  const tip = document.getElementById('tip'); if (i >= 0) { tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px'; document.getElementById('tt').textContent = objects[i].name; document.getElementById('ts').textContent = objects[i].sub; tip.style.opacity = 1; } else tip.style.opacity = 0;
+});
+const clock = new THREE.Clock();
+function tick() {
+  const t = clock.getElapsedTime();
+  objects.forEach((o, i) => { const target = o.y0 + (i === hover ? .18 : 0); o.group.position.y += (target - o.group.position.y) * .15; });
+  bowl.rotation.y = t * .5;
+  renderer.render(scene, camera); requestAnimationFrame(tick);
+}
+addEventListener('resize', () => { const a = innerWidth / innerHeight; camera.left = -Z * a; camera.right = Z * a; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+tick();
+</script></body></html>

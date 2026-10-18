@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 8 · סנדרה־וויז׳ן</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{background:#f4efe4;color:#1f1b18;min-height:100vh}
+.cbar{mix-blend-mode:normal;color:#1f1b18}.cbar .back{border-color:#1f1b18}
+.wrap{max-width:1100px;margin:0 auto;padding:100px 20px 60px}
+h1{font-family:var(--serif);font-size:clamp(60px,9vw,130px);line-height:.85;margin:0 0 6px;text-align:center}
+.sub{text-align:center;color:#6b6058;margin:0 0 34px}
+.set{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:22px;align-items:end;direction:ltr}
+.tv{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:16px;padding:26px;background:#d9cbb4;border-radius:34px}
+.tv .sk{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.sk path{fill:none;stroke:#1f1b18;stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.screen{position:relative;aspect-ratio:4/3;border-radius:28px/36px;overflow:hidden;background:#111;box-shadow:inset 0 0 60px rgba(0,0,0,.8)}
+.screen img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);animation:kb 14s ease-in-out infinite alternate}
+@keyframes kb{to{transform:scale(1.22) translate(-3%,-2%)}}
+.screen::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55));pointer-events:none}
+.static{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .08s}
+.static.on{opacity:1}
+.osd{position:absolute;top:14px;right:18px;direction:ltr;font-family:'Courier New',monospace;font-size:clamp(16px,2.4vw,30px);color:#7dff8c;text-shadow:0 0 8px #3f3;letter-spacing:2px;opacity:0;transition:opacity .2s}
+.osd.on{opacity:1}
+.title{position:absolute;bottom:0;inset-inline:0;padding:40px 22px 16px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent);color:#fff;direction:rtl;text-align:right}
+.title b{display:block;font-family:var(--serif);font-size:clamp(30px,4vw,56px);line-height:1}
+.title span{font-size:14px;opacity:.85}
+.off{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.off.go{animation:crt .55s forwards}
+@keyframes crt{0%{opacity:0}30%{opacity:1;clip-path:inset(48% 0 48% 0)}60%{clip-path:inset(49.6% 40% 49.6% 40%)}100%{opacity:1;clip-path:inset(0)}}
+.panel{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:8px}
+.lcd{font-family:'Courier New',monospace;background:#26301f;color:#9dff9d;padding:6px 10px;border-radius:6px;font-size:20px;letter-spacing:2px}
+.knob{width:62px;height:62px;border-radius:50%;background:#efe6d6;border:2.2px solid #1f1b18;position:relative;cursor:pointer;transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.knob::after{content:'';position:absolute;left:50%;top:6px;width:3px;height:20px;background:#1f1b18;transform:translateX(-50%);border-radius:2px}
+.knob.small{width:42px;height:42px}
+.grille{width:56px;display:grid;gap:5px;margin-top:6px}.grille i{height:2.2px;background:#1f1b18;border-radius:2px}
+.brand{font-family:var(--serif);font-weight:700;font-size:20px;writing-mode:vertical-rl;letter-spacing:2px}
+.remote{position:relative;background:#2a2522;border-radius:30px;padding:18px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;box-shadow:0 18px 40px rgba(0,0,0,.25);transform:rotate(-4deg)}
+.remote button{font-family:'Courier New',monospace;font-size:15px;color:#f4efe4;background:#3c3531;border:0;border-radius:50%;aspect-ratio:1;cursor:pointer;transition:background .2s,transform .1s}
+.remote button:active{transform:scale(.92)}
+.remote button.on{background:#e4b94d;color:#1f1b18}
+.remote .power{background:#c4473a;grid-column:1/-1;border-radius:20px;aspect-ratio:auto;height:30px}
+.remote .ch{grid-column:span 3;border-radius:16px;aspect-ratio:auto;height:30px;font-size:13px}
+.guide{margin-top:44px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.guide button{display:flex;gap:12px;align-items:center;text-align:start;font:inherit;background:#fff8ec;border:1.6px solid #1f1b18;border-radius:12px;padding:10px 14px;cursor:pointer;transition:transform .2s}
+.guide button:hover{transform:translateY(-2px) rotate(-.5deg)}
+.guide button.on{background:#1f1b18;color:#f4efe4}
+.guide .n{font-family:'Courier New',monospace;font-size:14px}
+.guide b{font-family:var(--serif);font-size:26px;font-weight:700}
+@media(max-width:760px){.set{grid-template-columns:1fr}.remote{transform:none;grid-template-columns:repeat(6,1fr)}.remote .ch{grid-column:span 3}.tv{grid-template-columns:1fr;padding:16px}.panel{flex-direction:row;justify-content:center}.brand{writing-mode:horizontal-tb}}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="wrap">
+<h1>סנדרה־וויז׳ן</h1><p class="sub">כל ערוץ — עולם אחר. סובבו את הכפתור, לחצו על השלט, או בחרו מהמדריך.</p>
+<div class="set">
+ <div class="tv" id="tv"><svg class="sk" id="sk" preserveAspectRatio="none" viewBox="0 0 100 100"></svg>
+  <div class="screen" id="screen"><img id="img" alt=""><canvas class="static" id="static"></canvas><div class="title"><b id="t"></b><span id="m"></span></div><div class="osd" id="osd"></div><div class="off" id="off"></div></div>
+  <div class="panel"><div class="lcd" id="lcd">01</div><div class="knob" id="knob" title="ערוץ הבא"></div><div class="knob small" id="vol" title="ערוץ קודם"></div><div class="grille"><i></i><i></i><i></i><i></i><i></i></div><div class="brand">SANDRAVISION</div></div>
+ </div>
+ <div class="remote" id="remote" aria-label="שלט"><button class="power" id="power" aria-label="הדלקה וכיבוי">⏻</button></div>
+</div>
+<div class="guide" id="guide"></div>
+</div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+const W = id => ({src: C.src(id, 1600), t: C.title(id), m: C.meta(id)});
+const ST = id => ({src: `../../assets/img/studio/${id}.webp`});
+const channels = [
+  {name: 'ציור', shows: [W('angels'), W('serpent'), W('flute'), W('skull')]},
+  {name: 'עולמות נסתרים', shows: [W('night-faces'), W('red-forest'), W('two-profiles')]},
+  {name: 'נוירוגרפיקה', shows: [W('tree-tears'), W('spiral'), W('stargaze')]},
+  {name: 'פנים', shows: [W('embrace'), W('cosmic-face'), W('star-voyage')]},
+  {name: 'בודי־ארט', shows: [W('gaze'), W('smoke'), W('petals')]},
+  {name: 'סדנאות', shows: [{...ST('ws-8'), t: 'סדנה עם סנדרה', m: 'נוירוגרפיקה וצבע'}, {...ST('ws-0'), t: 'פותחים בקערה', m: 'רגע של שקט'}]},
+  {name: 'תערוכה', shows: [{...ST('hall-1'), t: 'התערוכה', m: 'קיר העבודות הגדולות'}, {...ST('hall-3'), t: 'התערוכה', m: 'צבע לכל אורך הקיר'}]},
+  {name: 'אגדות', shows: [{src: '../../assets/img/unicorn-cover-900.webp', t: 'סיפור על החד־קרן', m: 'ספר מאויר'}, {src: '../../assets/img/dragon-cover-900.webp', t: 'סיפור על הדרקון', m: 'אגדה חדשה'}]},
+  {name: 'סנדרה', shows: [{src: '../../assets/img/portrait-900.webp', t: 'סנדרה לייפר', m: 'אמנית · מורה · מספרת סיפורים'}]}
+];
+let ch = 0, show = 0, on = true, showTimer = 0;
+const $ = id => document.getElementById(id);
+// hand-drawn outline that "boils" like a sketch
+function wobble(r) { const pts = [], n = 28; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, x = 50 + Math.cos(a) * 50, y = 50 + Math.sin(a) * 50, k = Math.max(Math.abs(Math.cos(a)), Math.abs(Math.sin(a))); pts.push([50 + (x - 50) / k * .985 + (Math.random() - .5) * r, 50 + (y - 50) / k * .985 + (Math.random() - .5) * r]); } return 'M' + pts.map(p => p.map(v => v.toFixed(2)).join(' ')).join(' L') + 'Z'; }
+setInterval(() => { $('sk').innerHTML = `<path d="${wobble(.9)}"/><path d="${wobble(1.2)}" opacity=".5"/>`; }, 160);
+// static noise
+const sc = $('static'), sx = sc.getContext('2d'); sc.width = 320; sc.height = 240; let noiseOn = 0;
+function noise() { if (noiseOn) { const d = sx.createImageData(320, 240); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } sx.putImageData(d, 0, 0); } requestAnimationFrame(noise); }
+noise();
+function paint() { const s = channels[ch].shows[show % channels[ch].shows.length]; const im = $('img'); im.src = s.src; im.style.animation = 'none'; void im.offsetWidth; im.style.animation = ''; $('t').textContent = s.t; $('m').textContent = s.m || ''; }
+function tune(n) {
+  if (!on) return; ch = (n + channels.length) % channels.length; show = 0;
+  noiseOn = 1; sc.classList.add('on'); $('osd').innerHTML = 'CH ' + String(ch + 1).padStart(2, '0') + ' <span dir="rtl" style="font-family:var(--serif);font-weight:700">' + channels[ch].name + '</span>'; $('osd').classList.add('on');
+  $('lcd').textContent = String(ch + 1).padStart(2, '0'); $('knob').style.transform = `rotate(${ch * 40}deg)`;
+  document.querySelectorAll('[data-ch]').forEach(b => b.classList.toggle('on', +b.dataset.ch === ch));
+  setTimeout(() => { paint(); sc.classList.remove('on'); noiseOn = 0; }, 380);
+  clearTimeout(tune.osd); tune.osd = setTimeout(() => $('osd').classList.remove('on'), 2200);
+  clearInterval(showTimer); showTimer = setInterval(() => { show++; paint(); }, 5000);
+}
+const remote = $('remote');
+channels.forEach((c, i) => { const b = document.createElement('button'); b.textContent = i + 1; b.dataset.ch = i; b.onclick = () => tune(i); remote.append(b); });
+remote.insertAdjacentHTML('beforeend', '<button class="ch" id="chUp">CH +</button><button class="ch" id="chDn">CH −</button>');
+$('chUp').onclick = $('knob').onclick = () => tune(ch + 1); $('chDn').onclick = $('vol').onclick = () => tune(ch - 1);
+$('guide').innerHTML = channels.map((c, i) => `<button data-ch="${i}"><span class="n">CH ${String(i + 1).padStart(2, '0')}</span><b>${c.name}</b></button>`).join('');
+$('guide').querySelectorAll('button').forEach(b => b.onclick = () => { tune(+b.dataset.ch); scrollTo({top: 0, behavior: 'smooth'}); });
+$('power').onclick = () => { const off = $('off'); if (on) { off.classList.remove('go'); void off.offsetWidth; off.classList.add('go'); on = false; clearInterval(showTimer); } else { on = true; off.classList.remove('go'); off.style.opacity = 0; tune(ch); setTimeout(() => off.style.opacity = '', 50); } };
+addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') tune(ch + 1); if (e.key === 'ArrowDown' || e.key === 'ArrowRight') tune(ch - 1); if (/^[1-9]$/.test(e.key)) tune(+e.key - 1); });
+tune(0);
+</script></body></html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 9 · פאזל שמתחבר בגלילה</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{background:radial-gradient(ellipse at 50% 40%,#211b2e,#09080c 70%) fixed}
+.track{height:calc(var(--n) * 170vh + 60vh)}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;perspective:1100px;display:grid;place-items:center}
+.board{position:relative;transform-style:preserve-3d}
+.tile{position:absolute;background-repeat:no-repeat;will-change:transform,opacity;box-shadow:0 0 0 .5px rgba(0,0,0,.25);backface-visibility:hidden}
+.cap{position:absolute;bottom:clamp(30px,8vh,80px);inset-inline:0;text-align:center;transition:opacity .4s}
+.cap b{display:block;font-family:var(--serif);font-weight:700;font-size:clamp(44px,6vw,90px);line-height:1}
+.cap span{color:#ccc;font-size:14px}
+.intro{position:absolute;top:18vh;inset-inline:0;text-align:center;pointer-events:none;transition:opacity .4s}
+.intro h1{font-family:var(--serif);font-size:clamp(60px,10vw,160px);line-height:.85;margin:0}
+.intro h1 em{font-style:normal;color:var(--gold)}
+.intro p{color:#bbb}
+.count{position:absolute;top:84px;inset-inline-end:clamp(16px,4vw,48px);font-size:13px;letter-spacing:.2em;direction:ltr;color:#aaa}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<section class="track" id="track"><div class="stage"><div class="intro" id="intro"><h1>כל ציור<br><em>מתחיל מחתיכות.</em></h1><p>גללו — והחלקים יתחברו.</p></div><div class="board" id="board"></div><div class="cap" id="cap"><b id="ct"></b><span id="cm"></span></div><div class="count" id="count"></div></div></section>
+<div class="chint" id="hint">גללו לאט</div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+const seq = ['angels', 'flute', 'serpent', 'tree-tears', 'embrace', 'night-faces'];
+const track = document.getElementById('track'), board = document.getElementById('board');
+track.style.setProperty('--n', seq.length);
+const COLS = innerWidth < 700 ? 5 : 8;
+let tiles = [], shown = -1;
+const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
+function build(i) {
+  const id = seq[i], r = C.ratio(id), maxW = innerWidth * .82, maxH = innerHeight * .66;
+  let w = maxW, h = w / r; if (h > maxH) { h = maxH; w = h * r; }
+  const rows = Math.max(3, Math.round(COLS / r)), tw = w / COLS, th = h / rows, src = C.src(id, 1600);
+  board.style.width = w + 'px'; board.style.height = h + 'px'; board.replaceChildren();
+  tiles = [];
+  for (let y = 0; y < rows; y++) for (let x = 0; x < COLS; x++) {
+    const t = document.createElement('div'); t.className = 'tile';
+    Object.assign(t.style, {left: x * tw + 'px', top: y * th + 'px', width: tw + 1 + 'px', height: th + 1 + 'px', backgroundImage: `url(${src})`, backgroundSize: `${w}px ${h}px`, backgroundPosition: `-${x * tw}px -${y * th}px`});
+    board.append(t);
+    const ang = rnd() * Math.PI * 2, dist = (.6 + rnd()) * Math.max(innerWidth, innerHeight) * .7;
+    tiles.push({t, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, dz: (rnd() - .3) * 900, rx: (rnd() - .5) * 540, ry: (rnd() - .5) * 540, rz: (rnd() - .5) * 360, delay: rnd() * .35});
+  }
+  document.getElementById('ct').textContent = C.title(id); document.getElementById('cm').textContent = C.meta(id);
+  document.getElementById('count').textContent = String(i + 1).padStart(2, '0') + ' / ' + String(seq.length).padStart(2, '0');
+}
+const ease = t => 1 - Math.pow(1 - t, 3);
+function frame() {
+  const total = track.offsetHeight - innerHeight, p = Math.min(.9999, Math.max(0, -track.getBoundingClientRect().top / total));
+  const pos = p * seq.length, i = Math.floor(pos), local = pos - i;
+  if (i !== shown) { shown = i; build(i); }
+  // 0..0.45 pieces fly together, 0.45..0.75 the whole work, 0.75..1 it bursts apart again
+  for (const k of tiles) {
+    let a;
+    if (local < .45) a = 1 - ease(Math.min(1, Math.max(0, (local / .45 - k.delay) / (1 - k.delay))));
+    else if (local < .75) a = 0;
+    else a = Math.pow(Math.min(1, Math.max(0, ((local - .75) / .25 - k.delay * .5) / (1 - k.delay * .5))), 2);
+    if (i === 0 && local < .45 && p < .02) a = 1;
+    k.t.style.transform = `translate3d(${k.dx * a}px,${k.dy * a}px,${k.dz * a}px) rotateX(${k.rx * a}deg) rotateY(${k.ry * a}deg) rotateZ(${k.rz * a}deg)`;
+    k.t.style.opacity = String(1 - a * .6);
+  }
+  const whole = local > .42 && local < .8;
+  document.getElementById('cap').style.opacity = whole ? 1 : 0;
+  document.getElementById('intro').style.opacity = p < .03 ? 1 : 0;
+  document.getElementById('hint').style.opacity = p < .03 ? 1 : 0;
+  requestAnimationFrame(frame);
+}
+frame();
+</script></body></html>
