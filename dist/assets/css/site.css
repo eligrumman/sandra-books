@@ -379,3 +379,7 @@ body{font-weight:300}
 @keyframes bob{50%{transform:translateY(6px)}}
 @media (prefers-reduced-motion:reduce){.wall-down{animation:none}}
 .wall::before{content:'';position:absolute;z-index:2;inset:0 0 auto 0;height:150px;background:linear-gradient(180deg,rgba(11,10,15,.85),transparent);pointer-events:none}
+
+.more-wrap{display:flex;justify-content:center;margin-top:10px}
+.btn-dark{background:var(--ink);color:var(--paper);min-width:220px}
+.btn-dark:hover{background:#3a2f28}
