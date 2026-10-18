@@ -21,6 +21,8 @@ body{background:radial-gradient(ellipse at center,#1a1630 0%,#07060b 70%) fixed}
 .lb b{display:block;font-family:var(--serif);font-size:40px;line-height:1}
 .lb span{color:#bbb;font-size:14px}
 .card.focus img{box-shadow:0 0 0 3px var(--gold),0 30px 90px rgba(0,0,0,.7)}
+.stop{position:absolute;left:0;width:1px;height:1px;scroll-snap-align:start}
+@media (pointer:coarse){html{scroll-snap-type:y mandatory}}
 .dust{position:absolute;inset:-50%;background-image:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),radial-gradient(1px 1px at 70% 60%,#fff6,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff5,transparent),radial-gradient(1px 1px at 85% 15%,#fff7,transparent);background-size:300px 300px;opacity:.5;pointer-events:none}
 </style></head><body>
 <header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
@@ -58,9 +60,15 @@ function frame() {
   document.getElementById('dust').style.transform = `scale(${1 + p * 2})`;
   requestAnimationFrame(frame);
 }
-// when scrolling stops, settle so the nearest work sits right in front of you
+// snap points: one per work, where it sits right in front of you (phones use native snapping)
+const coarse = matchMedia('(pointer:coarse)').matches;
+function stops() { track.querySelectorAll('.stop').forEach(n => n.remove()); const total = track.offsetHeight - innerHeight, per = (ids.length + .3) * gapZ;
+  [0, ...ids.map((_, i) => ((i + 1) * gapZ - FOCUS) / per)].forEach(f => { const st = document.createElement('div'); st.className = 'stop'; st.style.top = f * total + 'px'; track.append(st); });
+  const end = document.createElement('div'); end.className = 'stop'; end.style.top = total + 'px'; track.append(end); }
+stops(); addEventListener('resize', stops);
+// on desktop, settle on the nearest work when the wheel stops
 let snapT = 0;
-addEventListener('scroll', () => { clearTimeout(snapT); snapT = setTimeout(() => {
+addEventListener('scroll', () => { if (coarse) return; clearTimeout(snapT); snapT = setTimeout(() => {
   const total = track.offsetHeight - innerHeight, per = (ids.length + .3) * gapZ;
   const p = Math.min(1, Math.max(0, -track.getBoundingClientRect().top / total)), cam = p * per;
   if (p <= 0 || p >= 1) return;
