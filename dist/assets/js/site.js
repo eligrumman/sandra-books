@@ -47,7 +47,7 @@ function applyLang() {
   $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
   store.set('sl-lang', lang);
-  renderSeries(); renderFilters(); renderGallery(); renderStudio(); renderHeroCaption(); journeyText(-1, true);
+  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio(); renderHeroCaption(); journeyText(-1, true);
   if ($('lightbox').open) show(current);
 }
 $$('[data-lang]').forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) { lang = b.dataset.lang; applyLang(); } }));
@@ -261,6 +261,15 @@ $('lbStage').addEventListener('pointerup', e => {
     const forward = lang === 'he' ? dx > 0 : dx < 0; show(current + (forward ? 1 : -1));
   }
 });
+
+/* ---------- exhibition ---------- */
+function renderExhibition() {
+  $('hallGrid').replaceChildren(...S.exhibition.map((s, i) => {
+    const f = el('figure', 'hall' + (i === 0 ? ' wide' : '')), m = IMG.studio[s.id] || {w: 1400, h: 933, c: '#333'}, im = el('img');
+    im.src = `assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
+    f.style.background = m.c; f.append(im, el('figcaption', '', s[lang])); return f;
+  }));
+}
 
 /* ---------- studio reel ---------- */
 function renderStudio() {

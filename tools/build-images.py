@@ -40,7 +40,7 @@ WORKS = {
     'gaze': 'art:gaze.webp', 'smoke': 'art:smoke.webp', 'petals': 'art:petals.webp',
 }
 STUDIO = {
-    'ws-0': 'art:ws-bowl.jpg',
+    'ws-0': 'art:ws-bowl.jpg', 'ws-8': 'art:ws-explain.jpg',
     'hall-1': 'ALX_2948.jpg', 'hall-2': 'ALX_2950.jpg', 'hall-3': 'ALX_2973.jpg', 'hall-4': 'ALX_2988.jpg',
     'ws-1': 'ALX_2996.jpg', 'ws-2': 'ALX_2956.jpg', 'ws-3': 'ALX_2961.jpg', 'ws-4': 'ALX_2975.jpg',
     'ws-5': 'ALX_2966.jpg', 'ws-6': 'ALX_2987.jpg', 'ws-7': 'ALX_2995.jpg',
