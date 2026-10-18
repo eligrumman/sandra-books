@@ -47,7 +47,7 @@ function applyLang() {
   $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
   store.set('sl-lang', lang);
-  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio(); renderHeroCaption(); journeyText(-1, true);
+  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio(); journeyText(-1, true);
   if ($('lightbox').open) show(current);
 }
 $$('[data-lang]').forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) { lang = b.dataset.lang; applyLang(); } }));
@@ -69,38 +69,19 @@ menuBtn.addEventListener('click', () => setMenu(!nav.classList.contains('open'))
 $$('a', nav).forEach(a => a.addEventListener('click', () => setMenu(false)));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('open')) { setMenu(false); menuBtn.focus(); } });
 // highlight the section in view
-const navLinks = $$('a', nav), sections = navLinks.map(a => document.querySelector(a.getAttribute('href')));
+const navLinks = $$('a', nav).filter(a => a.getAttribute('href').startsWith('#')), sections = navLinks.map(a => document.querySelector(a.getAttribute('href')));
 const spy = new IntersectionObserver(entries => entries.forEach(en => {
   if (!en.isIntersecting) return;
   navLinks.forEach(a => a.getAttribute('href') === '#' + en.target.id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'));
 }), {rootMargin: '-45% 0px -50% 0px'});
 sections.forEach(s => s && spy.observe(s));
 
-/* ---------- hero ---------- */
-const arch = $('heroArch'), heroIds = S.hero.filter(id => work(id));
-let heroIndex = 0, heroTimer = 0;
-heroIds.forEach((id, i) => {
-  const im = img(id, {sizes: '(max-width:900px) 82vw, 560px', lazy: i > 0});
-  if (i === 0) { im.fetchPriority = 'high'; im.classList.add('on'); }
-  arch.append(im);
+/* ---------- hero: endless wall ---------- */
+window.EndlessWall($('hero'), S.works.map(w => w.id), {
+  base: '', title: id => L(work(id).t), reduced: reduced.matches,
+  calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum')],
+  onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
 });
-$('heroDots').replaceChildren(...heroIds.map((_, i) => el('i', i === 0 ? 'on' : '')));
-function renderHeroCaption() {
-  const w = work(heroIds[heroIndex]);
-  $('heroCaption').textContent = `${L(w.t)} · ${t(w.m)}`;
-  const m = IMG.works[w.id]; if (m) document.documentElement.style.setProperty('--glow', m.c);
-}
-function heroGo(n) {
-  const imgs = $$('img', arch);
-  imgs[heroIndex].classList.remove('on'); $('heroDots').children[heroIndex].classList.remove('on');
-  heroIndex = (n + imgs.length) % imgs.length;
-  imgs[heroIndex].classList.add('on'); $('heroDots').children[heroIndex].classList.add('on');
-  renderHeroCaption();
-}
-function heroPlay() { clearInterval(heroTimer); if (!reduced.matches) heroTimer = setInterval(() => { if (!document.hidden) heroGo(heroIndex + 1); }, 5200); }
-$('heroArt').addEventListener('click', () => { const i = S.works.findIndex(w => w.id === heroIds[heroIndex]); filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === S.works[i].id)); });
-$('heroArt').style.cursor = 'zoom-in';
-heroPlay();
 
 /* ---------- journey ---------- */
 const journey = $('journey'), layers = $('journeyLayers'), scenes = S.journey;
@@ -299,7 +280,7 @@ let ticking = false;
 function frame() { ticking = false; onScrollHeader(); updateJourney(); }
 window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, {passive: true});
 window.addEventListener('resize', () => { requestAnimationFrame(frame); if (columnsFor() !== galleryCols) renderGallery(); });
-reduced.addEventListener?.('change', () => { heroPlay(); frame(); });
+reduced.addEventListener?.('change', () => frame());
 
 $('year').textContent = new Date().getFullYear();
 applyLang();
