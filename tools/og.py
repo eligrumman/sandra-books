@@ -6,16 +6,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 S = ROOT / 'tools'
 W, H = 1200, 630
-bg = Image.open(f'{ROOT}/dist/assets/img/works/night-faces-1600.webp').convert('RGB')
-bg = ImageOps.fit(bg, (W, H), centering=(.5, .55))
-bg = ImageEnhance.Brightness(bg).enhance(.55)
+bg = Image.open(f'{ROOT}/dist/assets/img/works/angels-1600.webp').convert('RGB')
+bg = ImageOps.fit(bg, (W, H), centering=(.5, .3))
+bg = ImageEnhance.Brightness(bg).enhance(.8)
 # darker towards the text side (left)
 shade = Image.linear_gradient('L').rotate(90).resize((W, H))
 dark = Image.new('RGB', (W, H), (12, 10, 18))
 bg = Image.composite(bg, dark, shade.point(lambda v: int(70 + v * .7)))
 # portrait in an arch on the right
 pw, ph = 380, 500
-por = ImageOps.fit(Image.open(f'{ROOT}/src/art/portrait.webp').convert('RGB'), (pw, ph), centering=(.5, .35))
+por = ImageOps.fit(Image.open(f'{ROOT}/src/art/portrait-workshop.jpg').convert('RGB'), (pw, ph), centering=(.45, .3))
 mask = Image.new('L', (pw, ph), 0); m = ImageDraw.Draw(mask)
 m.rounded_rectangle((0, pw // 2, pw, ph), 14, fill=255); m.ellipse((0, 0, pw, pw), fill=255)
 x0, y0 = W - pw - 70, (H - ph) // 2
@@ -36,6 +36,7 @@ right = x0 - 60  # text block right edge
 def rtl(text, font, y, fill):
     w = d.textlength(text, font=font, direction='rtl', language='he')
     d.text((right - w, y), text, font=font, fill=fill, direction='rtl', language='he')
+amatic = lambda s: ImageFont.truetype(f'{S}/fonts/amatic.ttf', s)
 rtl('סנדרה', frank(118), 92, cream)
 rtl('לייפר', frank(118), 214, gold)
 rtl('אמנית · מורה לאמנות · סופרת', rub(30), 372, (225, 218, 210))
