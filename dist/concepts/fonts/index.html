@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>בחירת פונטים · עברית ורוסית</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Gveret+Levin&family=Caveat:wght@400;600&family=Bellefair&family=Cormorant:ital,wght@0,300;0,500;1,300&family=Karantina:wght@300;400;700&family=Prata&family=Amatic+SC:wght@400;700&family=Playpen+Sans+Hebrew:wght@300;500&family=Playpen+Sans:wght@300;500&family=Suez+One&family=Yeseva+One&family=Heebo:wght@300;400&family=Lora:ital@0;1&family=Varela+Round&family=Comfortaa:wght@300;400&family=Fredoka:wght@300;400&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+body{background:#0d0b11}
+.wrap{padding:90px clamp(16px,5vw,70px) 60px}
+.top h1{font-family:'Bona Nova',serif;font-weight:400;font-size:clamp(36px,5vw,64px);margin:0 0 10px}
+.top p{color:#bbb;max-width:700px;margin:0 0 40px;line-height:1.7}
+.opt{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border-radius:18px;overflow:hidden;margin-bottom:28px;min-height:360px;background:#16131c;border:1px solid rgba(255,255,255,.08)}
+.opt .art{position:relative;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;padding:30px;color:#fff;isolation:isolate}
+.opt .art::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,.1))}
+.opt .art .he{font-size:clamp(46px,6vw,92px);line-height:.95}
+.opt .art .ru{font-size:clamp(36px,4.6vw,68px);line-height:1;margin-top:14px;direction:ltr;text-align:left}
+.opt .info{padding:30px;display:flex;flex-direction:column;gap:14px}
+.opt .num{font-size:12px;letter-spacing:.2em;color:var(--gold)}
+.opt h2{margin:0;font-size:26px;font-weight:400;font-family:'Bona Nova',serif}
+.opt .names{font-size:13px;color:#aaa;direction:ltr;text-align:right}
+.opt .body-he{font-size:17px;line-height:1.8;color:#ddd}
+.opt .body-ru{font-size:16px;line-height:1.7;color:#ccc;direction:ltr;text-align:left}
+.opt .why{font-size:14px;color:#9d97a8;margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
+@media(max-width:800px){.opt{grid-template-columns:1fr}.opt .art{min-height:300px}}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="wrap">
+<div class="top"><h1>שבע אפשרויות לפונטים</h1><p>כל אפשרות מציגה כותרת בעברית וברוסית על יצירה של סנדרה, וגם טקסט רץ. בחרו מספר, ואפשר גם לשלב (למשל כותרות מאפשרות 2 וטקסט מאפשרות 1). כולם חינמיים ותומכים בעברית; ברוסית יש להם פונט אח מתאים.</p></div>
+<div id="list"></div>
+</div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+const opts = [
+ {n:'קלאסי של גלריה', he:"'Bona Nova'", ru:"'Bona Nova'", bodyHe:"'Heebo'", bodyRu:"'Lora'", names:'Bona Nova (HE+RU) · Heebo / Lora', art:'night-faces', why:'סריף קלאסי וחגיגי, משפחה אחת שמכסה גם עברית וגם קירילית — מראה של מוזיאון ושל ספר אמנות.'},
+ {n:'כתב יד של אמנית', he:"'Gveret Levin'", ru:"'Caveat'", bodyHe:"'Varela Round'", bodyRu:"'Comfortaa'", names:'Gveret Levin · Caveat · Varela Round / Comfortaa', art:'embrace', why:'״גברת לוין״ הוא אחד מפונטי כתב היד האהובים בעברית. נותן תחושה אישית, כאילו סנדרה כתבה ביד.'},
+ {n:'אלגנטי ודק', he:"'Bellefair'", ru:"'Cormorant'", bodyHe:"'Heebo'", bodyRu:"'Cormorant'", names:'Bellefair · Cormorant · Heebo', art:'stargaze', why:'קווים דקים ואווריריים, מראה של מגזין אופנה ועיצוב. יפה מאוד בגדלים ענקיים.'},
+ {n:'מגזיני ונועז', he:"'Karantina'", ru:"'Prata'", bodyHe:"'Heebo'", bodyRu:"'Lora'", names:'Karantina · Prata · Heebo / Lora', art:'horse', why:'״קרנטינה״ — פונט צר ודרמטי שמעצבים ישראלים אוהבים לפוסטרים. כותרות גדולות עם הרבה אופי.'},
+ {n:'אגדה מצוירת', he:"'Amatic SC'", ru:"'Amatic SC'", bodyHe:"'Fredoka'", bodyRu:"'Comfortaa'", names:'Amatic SC (HE+RU) · Fredoka / Comfortaa', art:'winter', why:'כתב מצויר ושובב, אותו פונט בשתי השפות. מתאים במיוחד לסיפורים ולסדנאות ילדים.'},
+ {n:'עכשווי וחם', he:"'Playpen Sans Hebrew'", ru:"'Playpen Sans'", bodyHe:"'Playpen Sans Hebrew'", bodyRu:"'Playpen Sans'", names:'Playpen Sans Hebrew · Playpen Sans', art:'stained', why:'פונט ״יד עגולה״ מודרני, חברותי ונגיש. משפחה אחת לכותרות ולטקסט.'},
+ {n:'כבד וסמכותי', he:"'Suez One'", ru:"'Yeseva One'", bodyHe:"'Heebo'", bodyRu:"'Lora'", names:'Suez One · Yeseva One · Heebo / Lora', art:'red-forest', why:'כותרות עבות עם סריף, מורגשות ומרשימות. מתאים אם רוצים מראה בטוח וחזק.'}
+];
+document.getElementById('list').innerHTML = opts.map((o, i) => `
+<section class="opt">
+ <div class="art" style="background-image:url(${C.src(o.art, 1600)})">
+  <div class="he" style="font-family:${o.he}">סנדרה לייפר</div>
+  <div class="ru" style="font-family:${o.ru}">Сандра Лейфер</div>
+ </div>
+ <div class="info">
+  <span class="num">אפשרות ${i + 1}</span><h2>${o.n}</h2><div class="names">${o.names}</div>
+  <p class="body-he" style="font-family:${o.bodyHe}">עולמות של צבע, קו ודמיון — על בד, על נייר ועל העור. סנדרה מלמדת ילדים ומבוגרים ומנחה סדנאות.</p>
+  <p class="body-ru" style="font-family:${o.bodyRu}">Миры цвета, линии и воображения — на холсте, на бумаге и на коже.</p>
+  <p class="why">${o.why}</p>
+ </div>
+</section>`).join('');
+</script></body></html>
