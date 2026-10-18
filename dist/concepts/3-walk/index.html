@@ -33,12 +33,12 @@ body{background:#16131b;transition:background-color 1s}
 // (left, then down, then right...). Scroll moves you along it.
 const S = window.SITE, vh = () => innerHeight, mobile = innerWidth < 700;
 const order = ['angels', 'flute', 'serpent', 'skull', 'night-faces', 'red-forest', 'two-profiles', 'tree-tears', 'stargaze', 'spiral', 'embrace', 'star-voyage', 'cosmic-face', 'night-light', 'mosaic', 'europa', 'lilac-dance', 'stained', 'gaze', 'smoke', 'petals', 'water-whisper', 'blue-tree', 'horse', 'alchemist'];
-const sizes = [4, 3, 5, 3, 4, 3, 3]; // works per corridor; the route turns after each
+const sizes = [4, 2, 4, 3, 3, 2, 4, 3]; // works per corridor; the route turns after each, down corridors included
 const rooms = []; for (let i = 0, k = 0; i < order.length; k++) { rooms.push({ids: order.slice(i, i + sizes[k % sizes.length])}); i += sizes[k % sizes.length]; }
-const dirs = [[-1, 0], [0, 1], [1, 0], [0, 1], [-1, 0], [0, 1], [1, 0], [0, 1], [-1, 0], [0, 1], [1, 0], [0, 1], [-1, 0], [0, 1]]; // left, down, right, down, ...
+const dirs = [[-1, 0], [0, 1], [1, 0], [0, 1]]; // left, down, right, down, then again
 const palette = ['#1d1622', '#121a26', '#1e1a12', '#22141a', '#13201c', '#1f1626', '#201812'];
 const world = document.getElementById('world'), floor = document.getElementById('floor');
-const H = vh() * (mobile ? .36 : .5), GAP = mobile ? 120 : 200, TURN = vh() * 1.15;
+const H = vh() * (mobile ? .36 : .5), GAP = mobile ? 120 : 200, GAP_V = mobile ? 140 : 170;
 const pts = [[0, 0]], marks = []; let x = 0, y = 0, seg = 0;
 const add = (dx, dy) => { x += dx; y += dy; pts.push([x, y]); };
 function place(id, cx, baseY, h) {
@@ -52,21 +52,21 @@ function place(id, cx, baseY, h) {
 // entrance
 const intro = document.createElement('div'); intro.className = 'start'; intro.style.left = '0px'; intro.style.top = '-110px';
 intro.innerHTML = '<h1>סנדרה<br><em>לייפר</em></h1>'; world.append(intro);
-add(-vh() * .7, 0);
+add(-vh() * .5, 0);
 rooms.forEach((room, r) => {
-  const [dx] = dirs[seg];
-  add(dx * 260, 0);
+  const [dx, dy] = dirs[r % dirs.length];
+  if (r > 0) add(dx * H * .75, dy * H * 1.05); // clear the corner so the turn never stacks works
   marks.push({at: pts.length - 1, tint: palette[r % palette.length]});
   room.ids.filter(id => C.IMG[id]).forEach((id, i) => {
-    const h = H * (i % 3 === 1 ? .82 : 1), w = h * C.ratio(id);
-    add(dx * (w / 2 + GAP / 2), 0);
+    let h = H * (i % 3 === 1 ? .82 : 1), w = h * C.ratio(id);
+    if (dy && w > innerWidth * .8) { w = innerWidth * .8; h = w / C.ratio(id); }
+    const step = dx ? w / 2 + GAP / 2 : h / 2 + GAP_V / 2;
+    add(dx * step, dy * step);
     place(id, x, y - 70, h);
-    add(dx * (w / 2 + GAP / 2), 0);
+    add(dx * step, dy * step);
   });
-  seg++;
-  if (r < rooms.length - 1) { add(0, dirs[seg][1] * TURN); seg++; }
 });
-add(dirs[seg - 1][0] * vh() * .6, 0);
+add(dirs[(rooms.length - 1) % dirs.length][0] * vh() * .6, dirs[(rooms.length - 1) % dirs.length][1] * vh() * .6);
 // the route the camera follows (not drawn)
 const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
 const minX = Math.min(...xs) - 600, maxX = Math.max(...xs) + 600, minY = Math.min(...ys) - 900, maxY = Math.max(...ys) + 400;

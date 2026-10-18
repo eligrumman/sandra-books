@@ -11,8 +11,8 @@ body{overscroll-behavior:none}
 .tile img{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
 .world:hover .tile{filter:saturate(.85) brightness(.8)}
 .world .tile:hover{filter:none}
-.down{position:absolute;z-index:30;bottom:calc(22px + env(safe-area-inset-bottom));inset-inline-start:22px;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#f4efe6;color:#14111a;font-size:24px;box-shadow:0 10px 30px rgba(0,0,0,.45);animation:bob 2.4s ease-in-out infinite}
-.down:hover{background:var(--gold)}
+.down{position:absolute;z-index:30;bottom:calc(22px + env(safe-area-inset-bottom));inset-inline-start:22px;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.85);color:#fff;font-size:24px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:bob 2.4s ease-in-out infinite;transition:background .25s}
+.down:hover{background:rgba(255,255,255,.22)}
 @keyframes bob{50%{transform:translateY(6px)}}
 .more{min-height:100vh;padding:110px clamp(16px,6vw,90px) 70px;background:#f4efe6;color:#1a1520}
 .more h2{font-family:var(--serif);font-size:clamp(56px,8vw,120px);line-height:.88;margin:0 0 30px}
@@ -71,7 +71,7 @@ function render() {
   }
 }
 // With a mouse, the wall glides toward wherever the pointer is (faster near the edges, still in the middle).
-let mx = null, my = null;
+let mx = null, my = null; const DRIFT = .7; // the wall drifts left and down when left alone
 addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { mx = e.clientX; my = e.clientY; } });
 document.addEventListener('mouseleave', () => { mx = my = null; });
 function loop() {
@@ -79,8 +79,9 @@ function loop() {
     if (mx !== null && !view.classList.contains('open')) {
       const nx = (mx / innerWidth - .5) * 2, ny = (my / innerHeight - .5) * 2, dead = .18;
       const fx = Math.sign(nx) * Math.max(0, Math.abs(nx) - dead) / (1 - dead), fy = Math.sign(ny) * Math.max(0, Math.abs(ny) - dead) / (1 - dead);
-      vx += (-fx * 9 - vx) * .06; vy += (-fy * 9 - vy) * .06;
-    } else { vx *= .94; vy *= .94; if (mx === null && Math.abs(vx) + Math.abs(vy) < .02 && !C.reduced) ox -= .25; }
+      const idle = Math.abs(fx) + Math.abs(fy) < .01 && !C.reduced; // pointer resting in the middle: keep drifting
+      vx += ((idle ? -DRIFT : -fx * 9) - vx) * .06; vy += ((idle ? DRIFT * .6 : -fy * 9) - vy) * .06;
+    } else { vx += ((C.reduced ? 0 : -DRIFT) - vx) * .03; vy += ((C.reduced ? 0 : DRIFT * .6) - vy) * .03; }
     ox += vx; oy += vy;
   }
   if (visible) render(); requestAnimationFrame(loop);
