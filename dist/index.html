@@ -36,6 +36,7 @@
   <nav class="nav" id="nav" aria-label="ניווט ראשי" data-t-label="navLabel">
     <a href="#works" data-t="navWorks">עבודות</a>
     <a href="#series" data-t="navSeries">סדרות</a>
+    <a href="museum/" data-t="navMuseum">מוזיאון</a>
     <a href="#exhibition" data-t="navExhibition">תערוכה</a>
     <a href="#studio" data-t="navStudio">סדנאות</a>
     <a href="#about" data-t="navAbout">סנדרה</a>
@@ -53,24 +54,11 @@
 
 <main id="top">
 
-<!-- HERO -->
-<section class="hero" id="hero" aria-labelledby="heroTitle">
-  <div class="hero-glow" id="heroGlow" aria-hidden="true"></div>
-  <div class="hero-copy">
-    <p class="eyebrow reveal"><span data-t="heroEyebrow">אמנית · מורה · מספרת סיפורים</span></p>
-    <h1 class="hero-title reveal" id="heroTitle"><span class="line" data-t="heroName1">סנדרה</span><span class="line accent" data-t="heroName2">לייפר</span></h1>
-    <p class="hero-lead reveal" data-t="heroLead">עולמות של צבע, קו ודמיון — על בד, על נייר ועל העור.</p>
-    <div class="hero-cta reveal">
-      <a class="btn btn-solid" href="#works" data-t="heroCta1">לגלות את העבודות</a>
-      <a class="btn btn-ghost" href="#stories" data-t="heroCta2">לסיפורים המאוירים</a>
-    </div>
-  </div>
-  <figure class="hero-art reveal" id="heroArt">
-    <div class="arch" id="heroArch"></div>
-    <figcaption class="hero-caption"><span id="heroCaption"></span><span class="hero-dots" id="heroDots" aria-hidden="true"></span></figcaption>
-  </figure>
+<!-- HERO: endless wall -->
+<section class="wall" id="hero" aria-label="קיר העבודות" data-t-label="wallLabel">
+  <a class="wall-btn wall-museum" href="museum/" data-t="museumBtn">להיכנס למוזיאון</a>
+  <a class="wall-btn wall-down" href="#journey" data-t-label="continue" aria-label="להמשיך"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </section>
-
 
 <!-- JOURNEY (scroll-driven scenes) -->
 <section class="journey" id="journey" aria-label="מסע בין העולמות" data-t-label="journeyLabel">
@@ -235,6 +223,7 @@
 <p class="sr" id="announce" aria-live="polite"></p>
 <script src="assets/js/images.js" defer></script>
 <script src="assets/js/data.js" defer></script>
+<script src="assets/js/wall.js" defer></script>
 <script src="assets/js/site.js" defer></script>
 </body>
 </html>

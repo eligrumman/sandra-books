@@ -90,6 +90,7 @@ window.SITE = {
 
   text: {
     he: {
+      wallLabel: 'קיר העבודות', museumBtn: 'להיכנס למוזיאון', continue: 'להמשיך', navMuseum: 'מוזיאון',
       exhibitionNote: 'העבודות של סנדרה על הקירות של הגלריה.',
       exhibitionTitle: 'התערוכה<br><em>האחרונה.</em>',
       exhibitionIndex: 'תערוכה',
@@ -121,6 +122,7 @@ window.SITE = {
       acrylic: 'אקריליק על בד', canvas: 'ציור על בד', inkcanvas: 'דיו על בד', water: 'צבעי מים על נייר', pastel: 'פסטל על נייר', marker: 'טושים על נייר', ink: 'דיו וטושים על נייר', paper: 'טכניקה מעורבת על נייר', body: 'בודי־ארט · צילום', cm: 'ס״מ'
     },
     ru: {
+      wallLabel: 'Стена работ', museumBtn: 'Войти в музей', continue: 'Дальше', navMuseum: 'Музей',
       exhibitionNote: 'Работы Сандры на стенах галереи.',
       exhibitionTitle: 'Последняя<br><em>выставка.</em>',
       exhibitionIndex: 'Выставка',
