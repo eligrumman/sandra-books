@@ -165,7 +165,8 @@ em{font-style:normal}
 .filters button:hover{border-color:var(--ink)}
 .filters button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .filters button sup{font-size:10.5px;margin-inline-start:4px;opacity:.6}
-.masonry{columns:3 300px;column-gap:clamp(18px,2.4vw,34px)}
+.masonry{display:flex;gap:clamp(14px,2.2vw,32px);align-items:flex-start}
+.mcol{flex:1;min-width:0}
 .work{break-inside:avoid;margin:0 0 clamp(26px,3vw,46px);display:block;width:100%;text-align:start;animation:fadeUp .7s var(--ease) both}
 .work .frame{position:relative;overflow:hidden;border-radius:6px;background:var(--bg,#ddd)}
 .work img{width:100%;height:auto;transition:transform 1s var(--ease),opacity .6s;opacity:0}
@@ -283,7 +284,6 @@ em{font-style:normal}
   .scroll-hint{display:none}
   .section-head{flex-direction:column;align-items:flex-start;gap:18px}
   .manifesto{grid-template-columns:1fr}
-  .masonry{columns:2 150px}
   .work h3{font-size:17px}
   .studio-points{grid-template-columns:1fr;gap:28px}
   .about{grid-template-columns:1fr}
@@ -297,7 +297,7 @@ em{font-style:normal}
   .lb-caption{flex-direction:column;align-items:flex-start;gap:8px}
 }
 @media (max-width:520px){
-  .masonry{column-gap:12px}
+  .masonry{gap:12px}
   .work{margin-bottom:22px}
   .work .no{display:none}
   .work p{font-size:12.5px}
@@ -331,3 +331,25 @@ em{font-style:normal}
 @media print{.header,.marquee,.journey,.lightbox,.scroll-hint{display:none}}
 
 #lbCount,#journeyCount,.work .no{direction:ltr;unicode-bidi:isolate}
+
+/* ---------- Typeface: Amatic SC for headings (Hebrew + Russian), Fredoka / Comfortaa for text ---------- */
+:root{--serif:'Amatic SC','Comfortaa',cursive;--sans:'Fredoka',system-ui,Arial,sans-serif}
+:lang(ru){--serif:'Amatic SC','Comfortaa',cursive;--sans:'Comfortaa',system-ui,Arial,sans-serif}
+body{font-weight:300}
+:lang(ru) em,:lang(ru) .hero-title .accent{font-style:normal!important}
+.hero-title,.section-title,.journey-copy h2,.manifesto-quote,.contact-title,.story-body h3,.series-card h3,.work h3,.lb-caption h2,.studio-points h3,.journey-static h2,.marquee-track span{font-weight:700;letter-spacing:0}
+.wordmark{font-family:'Amatic SC',cursive;font-weight:700;font-size:32px;letter-spacing:.04em}
+.hero-title{font-size:clamp(100px,14.5vw,250px);line-height:.82}
+.section-title{font-size:clamp(60px,8.2vw,134px);line-height:.92}
+.journey-copy h2{font-size:clamp(66px,9.4vw,156px);line-height:.9}
+.manifesto-quote{font-size:clamp(48px,6.2vw,100px);line-height:1.02}
+.contact-title{font-size:clamp(68px,11.5vw,190px);line-height:.9}
+.work h3{font-size:27px;line-height:1.05}
+.series-card h3{font-size:clamp(36px,2.8vw,46px);line-height:1}
+.story-body h3{font-size:clamp(44px,3.8vw,60px);line-height:.95}
+.lb-caption h2{font-size:clamp(34px,3.2vw,46px)}
+.studio-points h3{font-size:38px}
+.journey-static h2{font-size:clamp(40px,3.8vw,58px)}
+.about-copy .lead{font-family:var(--sans);font-weight:400;font-size:clamp(20px,1.9vw,26px)}
+.nav{font-size:16px}
+@media (max-width:900px){.nav{font-family:'Amatic SC',cursive;font-weight:700;font-size:34px}}

@@ -40,14 +40,22 @@ STUDIO = {
     'ws-1': 'ALX_2996.jpg', 'ws-2': 'ALX_2956.jpg', 'ws-3': 'ALX_2961.jpg', 'ws-4': 'ALX_2975.jpg',
     'ws-5': 'ALX_2966.jpg', 'ws-6': 'ALX_2987.jpg', 'ws-7': 'ALX_2995.jpg',
 }
-LARGE = {'horse', 'night-faces', 'gaze', 'spiral', 'mermaid', 'stargaze', 'embrace', 'europa', 'red-forest'}
+# Crop boxes (left, top, right, bottom as fractions) that remove mats and frames in the photographs.
+CROP = {
+    'ALX_0119.jpg': (.03, .035, .97, .945), 'ALX_0135.jpg': (.07, .06, .93, .945),
+    'ALX_0117.jpg': (.04, .02, .965, .975), 'ALX_0137.jpg': (.015, .01, .985, .99),
+}
+LARGE = {'night-faces', 'embrace', 'star-voyage', 'stargaze', 'spiral', 'mosaic', 'blue-tree', 'red-forest', 'europa', 'stained', 'mermaid', 'lilac-dance'}
 
 
 def load(src):
     kind, name = src.split(':', 1)
     path = (RAW / name) if kind == 'raw' else (ROOT / 'src/art' / name)
-    im = ImageOps.exif_transpose(Image.open(path))
-    return im.convert('RGB')
+    im = ImageOps.exif_transpose(Image.open(path)).convert('RGB')
+    if name in CROP:
+        l, t, r, b = CROP[name]
+        im = im.crop((round(l * im.width), round(t * im.height), round(r * im.width), round(b * im.height)))
+    return im
 
 
 def avg_colour(im):
