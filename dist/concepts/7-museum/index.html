@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<title>אפשרות 7 · חדר במוזיאון</title><link rel="stylesheet" href="../shared.css">
+<style>
+html,body{height:100%;overflow:hidden;background:#0c0b0f}
+canvas{display:block;touch-action:none;cursor:grab}
+canvas.drag{cursor:grabbing}
+.loading{position:fixed;inset:0;display:grid;place-items:center;z-index:50;background:#0c0b0f;transition:opacity .8s}
+.loading div{text-align:center}
+.loading h1{font-family:var(--serif);font-size:clamp(56px,9vw,120px);margin:0;line-height:.9}
+.loading p{color:#aaa}
+.loading .bar{width:220px;height:3px;background:#333;margin:18px auto 0;border-radius:3px;overflow:hidden}
+.loading .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.loading button{margin-top:22px;font:inherit;font-size:16px;padding:12px 28px;border-radius:40px;border:0;background:var(--paper);color:var(--ink);cursor:pointer}
+.ui{position:fixed;z-index:20;bottom:calc(18px + env(safe-area-inset-bottom));inset-inline:0;display:flex;justify-content:center;gap:10px;pointer-events:none}
+.ui button{pointer-events:auto;font:inherit;font-size:14px;color:#fff;background:rgba(20,18,26,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:10px 18px;cursor:pointer}
+.ui button.on{background:var(--gold);color:#1a1408;border-color:var(--gold)}
+.label{position:fixed;z-index:20;top:76px;inset-inline-start:50%;transform:translateX(50%);text-align:center;background:rgba(20,18,26,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 22px;opacity:0;transition:opacity .4s;pointer-events:none;min-width:240px}
+[dir=rtl] .label{transform:translateX(50%)}
+.label.show{opacity:1}
+.label b{display:block;font-family:var(--serif);font-size:34px;font-weight:700;line-height:1}
+.label span{font-size:13px;color:#ccc}
+.help{position:fixed;z-index:20;top:76px;inset-inline-end:18px;font-size:12px;color:#aaa;background:rgba(20,18,26,.6);padding:8px 12px;border-radius:10px;max-width:220px;line-height:1.6}
+.pad{position:fixed;z-index:21;bottom:calc(76px + env(safe-area-inset-bottom));inset-inline-end:18px;display:none;flex-direction:column;gap:8px}
+.pad button{width:54px;height:54px;border-radius:50%;font-size:22px;color:#fff;background:rgba(20,18,26,.7);border:1px solid rgba(255,255,255,.3);touch-action:none}
+@media (pointer:coarse){.pad{display:flex}.help{display:none}}
+</style>
+<script type="importmap">{"imports":{"three":"../../assets/vendor/three.module.min.js"}}</script>
+</head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="loading" id="loading"><div><h1>החדר של<br>סנדרה</h1><p>תלים את היצירות על הקירות…</p><div class="bar"><i id="bar"></i></div><button id="enter" hidden>להיכנס לחדר</button></div></div>
+<div class="label" id="label"><b id="lt"></b><span id="lm"></span></div>
+<div class="help">גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה</div>
+<div class="pad"><button id="fwd" aria-label="קדימה">▲</button><button id="back" aria-label="אחורה">▼</button></div>
+<div class="ui"><button id="prev">→ הקודמת</button><button id="tour">סיור מודרך ▶</button><button id="next">הבאה ←</button></div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script type="module">
+import * as THREE from 'three';
+const ROOM = {w: 22, d: 14, h: 4.6};
+const works = ['angels','flute','serpent','skull','embrace','tree-tears','night-faces','star-voyage','cosmic-face','night-light','two-profiles','red-forest','stargaze','spiral','mosaic','europa','blue-tree','alchemist','horse','gaze'];
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); scene.fog = new THREE.Fog('#0c0b0f', 18, 34);
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, .05, 60);
+camera.position.set(0, 1.65, ROOM.d / 2 - 2); camera.rotation.order = 'YXZ';
+let yaw = 0, pitch = 0;
+
+// light: soft overall + warm from above
+scene.add(new THREE.HemisphereLight('#fff7ea', '#3a3028', .9));
+const sun = new THREE.DirectionalLight('#ffffff', .35); sun.position.set(3, 8, 4); scene.add(sun);
+
+// textures drawn on canvases (floor boards, wall plaster, light pools, labels)
+function canvasTex(w, h, draw, repeat) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...repeat); }
+  return t;
+}
+const floorTex = canvasTex(1024, 1024, (g, w, h) => {
+  for (let i = 0; i < 8; i++) { const y = i * h / 8; g.fillStyle = `hsl(28,${30 + (i * 7) % 10}%,${26 + (i * 13) % 8}%)`; g.fillRect(0, y, w, h / 8);
+    for (let k = 0; k < 60; k++) { g.strokeStyle = `rgba(0,0,0,${Math.random() * .12})`; g.beginPath(); const yy = y + Math.random() * h / 8; g.moveTo(0, yy); g.bezierCurveTo(w / 3, yy + 4, w * 2 / 3, yy - 4, w, yy); g.stroke(); }
+    g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, y, w, 2); g.fillRect((i % 2) * w / 2, y, 2, h / 8); }
+}, [ROOM.w / 4, ROOM.d / 4]);
+const wallTex = canvasTex(512, 512, (g, w, h) => { g.fillStyle = '#ece6dc'; g.fillRect(0, 0, w, h); for (let k = 0; k < 4000; k++) { g.fillStyle = `rgba(${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},.025)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } }, [6, 2]);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.w, ROOM.d), new THREE.MeshStandardMaterial({map: floorTex, roughness: .55, metalness: .05}));
+floor.rotation.x = -Math.PI / 2; scene.add(floor);
+const ceil = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.w, ROOM.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'}));
+ceil.rotation.x = Math.PI / 2; ceil.position.y = ROOM.h; scene.add(ceil);
+const wallMat = new THREE.MeshLambertMaterial({map: wallTex});
+const walls = [
+  {pos: [0, ROOM.h / 2, -ROOM.d / 2], rot: 0, len: ROOM.w},
+  {pos: [ROOM.w / 2, ROOM.h / 2, 0], rot: -Math.PI / 2, len: ROOM.d},
+  {pos: [0, ROOM.h / 2, ROOM.d / 2], rot: Math.PI, len: ROOM.w},
+  {pos: [-ROOM.w / 2, ROOM.h / 2, 0], rot: Math.PI / 2, len: ROOM.d}
+];
+for (const w of walls) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, ROOM.h), wallMat); m.position.set(...w.pos); m.rotation.y = w.rot; scene.add(m);
+  const base = new THREE.Mesh(new THREE.BoxGeometry(w.len, .12, .04), new THREE.MeshLambertMaterial({color: '#2b2622'})); base.position.set(w.pos[0], .06, w.pos[2]); base.rotation.y = w.rot; base.translateZ(.02); scene.add(base); }
+// ceiling light strips
+for (let x = -8; x <= 8; x += 8) { const l = new THREE.Mesh(new THREE.BoxGeometry(.25, .05, ROOM.d - 3), new THREE.MeshBasicMaterial({color: '#fffaf0'})); l.position.set(x, ROOM.h - .03, 0); scene.add(l); }
+// bench in the middle
+const wood = new THREE.MeshStandardMaterial({color: '#6b4a32', roughness: .6});
+const seat = new THREE.Mesh(new THREE.BoxGeometry(3.2, .1, .8), wood); seat.position.set(0, .48, 0); scene.add(seat);
+for (const sx of [-1.4, 1.4]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .7), new THREE.MeshStandardMaterial({color: '#222'})); leg.position.set(sx, .22, 0); scene.add(leg); }
+
+// the artist's name on the entrance wall
+const nameTex = canvasTex(2048, 512, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = '#2a2420'; g.direction = 'rtl'; g.textAlign = 'center'; g.font = '700 260px "Amatic SC"'; g.fillText('סנדרה לייפר', w / 2, 300); g.font = '300 64px Fredoka'; g.fillStyle = '#7a6a5a'; g.fillText('ציור · נוירוגרפיקה · עולמות נסתרים', w / 2, 430); });
+const pool = canvasTex(256, 256, (g, w, h) => { const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, 'rgba(255,236,200,.55)'); r.addColorStop(1, 'rgba(255,236,200,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+
+// hang the works
+const loader = new THREE.TextureLoader(), hung = [];
+const slots = []; // [wall index, offset along wall]
+[[0, [-8, -4, 0, 4, 8]], [1, [-4.5, 0, 4.5]], [2, [-8, -4, 4, 8]], [3, [-4.5, 0, 4.5]]].forEach(([wi, offs]) => offs.forEach(o => slots.push([wi, o])));
+const items = works.filter(id => C.IMG[id]).slice(0, slots.length);
+let loaded = 0;
+await document.fonts.load('700 40px "Amatic SC"').catch(() => {}); await document.fonts.load('300 20px Fredoka').catch(() => {});
+{ const nm = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), new THREE.MeshBasicMaterial({map: nameTex, transparent: true})); nm.position.set(0, 3.1, ROOM.d / 2 - .02); nm.rotation.y = Math.PI; scene.add(nm); }
+items.forEach((id, i) => {
+  const [wi, off] = slots[i], w = walls[wi], r = C.ratio(id);
+  const maxH = 2.4, maxW = wi % 2 ? 3.2 : 3.4; let ph = maxH, pw = ph * r; if (pw > maxW) { pw = maxW; ph = pw / r; }
+  const g = new THREE.Group(); g.position.set(...w.pos); g.rotation.y = w.rot; g.translateX(off); g.position.y = 1.75; g.translateZ(.06);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(pw + .12, ph + .12, .06), new THREE.MeshStandardMaterial({color: '#1b1714', roughness: .4})); g.add(frame);
+  const mat = new THREE.MeshBasicMaterial({color: '#222'});
+  const pic = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), mat); pic.position.z = .032; g.add(pic);
+  loader.load(C.src(id, 1600), t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; mat.map = t; mat.color.set('#ffffff'); mat.needsUpdate = true; loaded++; progress(); });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(pw * 2.2, ph * 2.2), new THREE.MeshBasicMaterial({map: pool, transparent: true, depthWrite: false})); glow.position.set(0, .35, -.04); g.add(glow);
+  const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.05, .08, .25, 12), new THREE.MeshStandardMaterial({color: '#111'})); lamp.position.set(0, ph / 2 + .55, .25); lamp.rotation.x = .6; g.add(lamp);
+  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(.5, .16), new THREE.MeshBasicMaterial({map: canvasTex(500, 160, (c, cw, chh) => { c.fillStyle = '#f7f3ec'; c.fillRect(0, 0, cw, chh); c.fillStyle = '#222'; c.direction = 'rtl'; c.textAlign = 'right'; c.font = '700 64px "Amatic SC"'; c.fillText(C.title(id), cw - 20, 70); c.font = '300 26px Fredoka'; c.fillStyle = '#666'; c.fillText(C.meta(id), cw - 20, 125); })}));
+  plaque.position.set(pw / 2 + .45, -ph / 2 + .2, .01); if (pw / 2 + .7 > (wi % 2 ? 2 : 1.9)) plaque.position.set(0, -ph / 2 - .2, .01); g.add(plaque);
+  scene.add(g); pic.userData.index = i;
+  const n = new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion);
+  hung.push({id, pic, center: g.position.clone(), normal: n, h: ph});
+});
+function progress() { document.getElementById('bar').style.width = (loaded / items.length * 100) + '%'; if (loaded >= Math.min(6, items.length)) document.getElementById('enter').hidden = false; }
+document.getElementById('enter').onclick = () => { const l = document.getElementById('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); };
+
+// moving around
+const keys = {}, bounds = {x: ROOM.w / 2 - .8, z: ROOM.d / 2 - .8};
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow')) e.preventDefault(); stopTour(); });
+addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+let held = 0; const hold = (id, v) => { const b = document.getElementById(id); b.addEventListener('pointerdown', e => { held = v; stopTour(); e.preventDefault(); }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => held = 0)); };
+hold('fwd', 1); hold('back', -1);
+const cv = renderer.domElement; let drag = null, moved = 0;
+cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY}; moved = 0; cv.classList.add('drag'); cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; stopTour(); } });
+cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null; if (moved < 6) pick(e); });
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (hit) { stopTour(); goTo(hit.object.userData.index); } }
+
+// gliding to a work
+let glide = null, current = -1;
+function goTo(i) {
+  current = (i + hung.length) % hung.length; const h = hung[current];
+  const dist = Math.max(3, h.h * 1.75), target = h.center.clone().addScaledVector(h.normal, dist); target.y = 1.65;
+  const look = Math.atan2(h.normal.x, h.normal.z);
+  glide = {from: camera.position.clone(), to: target, yaw0: yaw, yaw1: yaw + ((look - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI), p0: pitch, t: 0};
+  document.getElementById('lt').textContent = C.title(h.id); document.getElementById('lm').textContent = C.meta(h.id);
+  document.getElementById('label').classList.add('show');
+}
+document.getElementById('next').onclick = () => { stopTour(); goTo(current + 1); };
+document.getElementById('prev').onclick = () => { stopTour(); goTo(current - 1); };
+let tourTimer = 0;
+function stopTour() { if (tourTimer) { clearInterval(tourTimer); tourTimer = 0; document.getElementById('tour').classList.remove('on'); document.getElementById('tour').textContent = 'סיור מודרך ▶'; } }
+document.getElementById('tour').onclick = () => { if (tourTimer) return stopTour(); goTo(current + 1); tourTimer = setInterval(() => goTo(current + 1), 6000); const b = document.getElementById('tour'); b.classList.add('on'); b.textContent = 'עצירה ❚❚'; };
+
+const clock = new THREE.Clock(), fwd = new THREE.Vector3(), side = new THREE.Vector3();
+function tick() {
+  const dt = Math.min(.05, clock.getDelta());
+  let mv = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) + held, st = (keys.d ? 1 : 0) - (keys.a ? 1 : 0);
+  if (keys.arrowleft) yaw += 1.8 * dt; if (keys.arrowright) yaw -= 1.8 * dt;
+  if (mv || st) { glide = null; document.getElementById('label').classList.remove('show'); }
+  fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw)); side.set(Math.cos(yaw), 0, -Math.sin(yaw));
+  camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
+  if (glide) { glide.t = Math.min(1, glide.t + dt / 1.6); const e = glide.t < .5 ? 2 * glide.t * glide.t : 1 - Math.pow(-2 * glide.t + 2, 2) / 2;
+    camera.position.lerpVectors(glide.from, glide.to, e); yaw = glide.yaw0 + (glide.yaw1 - glide.yaw0) * e; pitch = glide.p0 * (1 - e); if (glide.t >= 1) glide = null; }
+  camera.position.x = Math.max(-bounds.x, Math.min(bounds.x, camera.position.x)); camera.position.z = Math.max(-bounds.z, Math.min(bounds.z, camera.position.z));
+  if (Math.abs(camera.position.x) < 2 && Math.abs(camera.position.z) < .9) camera.position.z = Math.sign(camera.position.z || 1) * .9; // the bench
+  camera.position.y = 1.65 + (mv ? Math.sin(performance.now() / 160) * .015 : 0);
+  camera.rotation.set(pitch, yaw, 0);
+  renderer.render(scene, camera); requestAnimationFrame(tick);
+}
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+tick();
+</script></body></html>

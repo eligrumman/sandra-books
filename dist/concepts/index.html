@@ -1,41 +1,74 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
-<title>כיווני עיצוב · סנדרה לייפר</title><link rel="stylesheet" href="shared.css">
+<title>כל האפשרויות · סנדרה לייפר</title><link rel="stylesheet" href="shared.css">
 <style>
-.wrap{padding:100px clamp(16px,5vw,70px) 60px;max-width:1300px;margin:0 auto}
-h1{font-family:var(--serif);font-weight:300;font-size:clamp(44px,7vw,100px);line-height:.95;margin:0 0 18px}
+.wrap{padding:100px clamp(16px,5vw,70px) 70px;max-width:1360px;margin:0 auto}
+h1{font-family:var(--serif);font-size:clamp(60px,8vw,120px);line-height:.88;margin:0 0 14px}
 h1 em{font-style:normal;color:var(--gold)}
-.lead{color:#bbb;max-width:640px;line-height:1.7;margin:0 0 50px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:22px}
-.card{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/3.2;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;isolation:isolate;border:1px solid rgba(255,255,255,.08);transition:transform .5s cubic-bezier(.2,.7,.1,1)}
+.lead{color:#bbb;max-width:680px;line-height:1.7;margin:0 0 30px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 50px;font-size:13.5px}
+.legend span{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:30px;border:1px solid rgba(255,255,255,.15)}
+.group{margin:0 0 60px}
+.group h2{font-family:var(--serif);font-size:clamp(40px,4.4vw,64px);margin:0 0 6px;line-height:1}
+.group > p{color:#aaa;margin:0 0 22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:20px}
+.card{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/3.3;display:flex;flex-direction:column;justify-content:flex-end;padding:22px;isolation:isolate;border:1px solid rgba(255,255,255,.08);transition:transform .5s cubic-bezier(.2,.7,.1,1),box-shadow .4s}
 .card:hover{transform:translateY(-6px)}
 .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1.2s}
 .card:hover img{transform:scale(1.06)}
-.card::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(8,6,12,.92) 10%,rgba(8,6,12,.15) 70%)}
-.card .n{font-size:12px;letter-spacing:.2em;color:var(--gold)}
-.card h2{font-family:var(--serif);font-weight:400;font-size:30px;margin:6px 0 6px}
-.card p{margin:0;font-size:14.5px;color:#ddd;line-height:1.6}
+.card::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(8,6,12,.95) 12%,rgba(8,6,12,.2) 72%)}
+.card h3{font-family:var(--serif);font-weight:700;font-size:36px;margin:4px 0 6px;line-height:1}
+.card p{margin:0;font-size:14.5px;color:#ddd;line-height:1.55}
 .card .tag{font-size:12px;color:#aaa;margin-top:10px}
-.foot{margin-top:50px;color:#999;font-size:14px;line-height:1.8}
-.foot a{color:var(--gold)}
+.badge{position:absolute;top:16px;inset-inline-start:16px;font-size:12.5px;font-weight:500;padding:5px 12px;border-radius:30px}
+.b-chose{background:#f2c94c;color:#1a1408}
+.b-asked{background:#7ad7c1;color:#08201a}
+.b-new{background:#f4efe6;color:#1a1520}
+.card.chose{box-shadow:0 0 0 2px #f2c94c}
+.card.asked{box-shadow:0 0 0 2px #7ad7c1}
+.num{font-size:12px;letter-spacing:.18em;color:var(--gold)}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+.links a{display:block;padding:18px 20px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)}
+.links a b{display:block;font-family:var(--serif);font-size:30px;line-height:1;margin-bottom:4px}
+.links a span{font-size:13.5px;color:#aaa}
+.links a.chose{box-shadow:0 0 0 2px #f2c94c}
 </style></head><body>
 <header class="cbar"><a class="back" href="../">← לאתר הנוכחי</a><span class="name">Sandra <b>Leifer</b></span></header>
 <div class="wrap">
-<h1>שישה כיוונים.<br><em>תבחר אחד.</em></h1>
-<p class="lead">כל כיוון הוא דף עובד עם היצירות של סנדרה — לא תמונה סטטית. פתחו בנייד ובמחשב, תגללו, תגררו ותזיזו את העכבר. אחרי הבחירה אבנה את כל האתר סביב הכיוון שנבחר (אפשר גם לשלב שניים).</p>
-<div class="grid" id="grid"></div>
-<p class="foot">ובנוסף: <a href="fonts/">שבע אפשרויות לפונטים בעברית וברוסית ←</a></p>
+<h1>כל האפשרויות<br><em>במקום אחד.</em></h1>
+<p class="lead">כל אחת מהן היא דף שעובד, עם היצירות של סנדרה. פתחו במחשב ובנייד, גללו, גררו, הזיזו את העכבר. אחרי שתבחרו, אבנה את האתר סביב מה שבחרתם, ואפשר לשלב כמה.</p>
+<div class="legend"><span><i class="badge b-chose" style="position:static">בחרת</i> כיוונים שאהבת</span><span><i class="badge b-asked" style="position:static">ביקשת</i> רעיונות שביקשת להוסיף</span><span><i class="badge b-new" style="position:static">עוד</i> אפשרויות נוספות</span></div>
+
+<section class="group"><h2>הכיוונים שבחרת</h2><p>קיר אינסופי, הליכה לאורך התערוכה ומעוף בין היצירות. כולם כבר עודכנו לפי ההערות שלך.</p><div class="grid" id="chose"></div></section>
+<section class="group"><h2>מה שביקשת להוסיף</h2><p>חדר במוזיאון, תלת־ממד יצירתי, טלוויזיה כמו אצל אלכס, משחקיות בגלילה וציר זמן.</p><div class="grid" id="asked"></div></section>
+<section class="group"><h2>עוד אפשרויות</h2><p>הכיוונים הראשונים, למקרה שתרצו לשלב משהו מהם.</p><div class="grid" id="more"></div></section>
+<section class="group"><h2>פונטים, אתר וספרים</h2><p>הפונט שבחרת כבר באתר. הספרים בפורמט אחיד.</p>
+<div class="links">
+ <a class="chose" href="fonts/"><b>פונטים</b><span>בחרת אפשרות 5: Amatic SC עם Fredoka ו־Comfortaa</span></a>
+ <a href="../"><b>האתר המלא</b><span>הגרסה הנוכחית, עם כל התמונות החדשות</span></a>
+ <a href="../dragon/"><b>סיפור על הדרקון</b><span>29 עמודים, מחכה לאיורים מג׳יפיטי</span></a>
+ <a href="../book/"><b>סיפור על החד־קרן</b><span>הספר המאויר</span></a>
+</div></section>
 </div>
 <script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script>
 <script>
-const opts = [
- ['1-dive','night-faces','צלילה לתוך היצירה','גוללים — והציור מתקרב ומתקרב עד שנבלעים בתוכו, ומתוך פרט קטן נפתחת היצירה הבאה.','מסך מלא · גלילה'],
- ['2-canvas','stained','קיר אינסופי','כל העבודות פרושות על קיר ענק שאין לו סוף. גוררים לכל כיוון, לוחצים על יצירה והיא נפתחת.','גרירה · עכבר ומגע'],
- ['3-walk','horse','הליכה לאורך התערוכה','גלילה למטה מזיזה את היצירות לרוחב, כמו הליכה במסדרון של גלריה. צבע החדר משתנה לפי היצירה שמולך.','גלילה אופקית'],
- ['4-river','embrace','פזורות לאורך הדף','היצירות מפוזרות בכל הדף בגדלים ובעומקים שונים, וכל אחת זזה במהירות אחרת בגלילה. הכי קרוב למה שתיארת.','פרלקסה · קולאז׳'],
- ['5-brush','europa','לצייר את הציור','המסך חשוך, והעכבר או האצבע הם מכחול — כל תנועה ״מציירת״ את היצירה של סנדרה מתחת לידיים.','אינטראקטיבי'],
- ['6-tunnel','spiral','מעוף בין היצירות','היצירות מרחפות בחלל תלת־ממדי, והגלילה מעיפה אותך קדימה ביניהן.','תלת־ממד']
-];
-const IMG = window.IMAGES.works;
-document.getElementById('grid').innerHTML = opts.map(([dir, art, t, d, tag], i) => `<a class="card" href="${dir}/"><img src="../assets/img/works/${art}-800.webp" alt="" loading="lazy"><span class="n">אפשרות ${i + 1}</span><h2>${t}</h2><p>${d}</p><span class="tag">${tag}</span></a>`).join('');
+const card = (dir, art, t, d, tag, kind, note) => `<a class="card ${kind}" href="${dir}/"><img src="../assets/img/works/${art}-800.webp" alt="" loading="lazy"><span class="badge b-${kind}">${{chose: 'בחרת', asked: 'ביקשת', new: 'עוד'}[kind]}</span><span class="num">${note}</span><h3>${t}</h3><p>${d}</p><span class="tag">${tag}</span></a>`;
+document.getElementById('chose').innerHTML = [
+  card('2-canvas', 'stained', 'קיר אינסופי', 'כל העבודות על קיר ענק בלי סוף. עכשיו הוא זז לכיוון של העכבר: מזיזים את העכבר לקצה, והקיר נע לשם.', 'עכבר · גרירה', 'chose', 'אפשרות 2 · עודכן'),
+  card('3-walk', 'angels', 'מסלול בתערוכה', 'כמו באיקאה: הולכים בעקבות חצים צהובים על הרצפה. המסלול פונה שמאלה, למטה וימינה, ובכל פנייה מתחילה סדרה חדשה. יש גם מפה עם ״אתם נמצאים כאן״.', 'גלילה · מסלול', 'chose', 'אפשרות 3 · עודכן'),
+  card('6-tunnel', 'spiral', 'מעוף בין היצירות', 'היצירות מרחפות בחלל, והגלילה מעיפה אותך קדימה ביניהן.', 'תלת־ממד · גלילה', 'chose', 'אפשרות 6')
+].join('');
+document.getElementById('asked').innerHTML = [
+  card('7-museum', 'serpent', 'חדר במוזיאון', 'חדר תלת־ממדי עם רצפת עץ, ספוטים ושלטים. הולכים בחצים או בעכבר, לוחצים על יצירה ומגיעים מולה. יש גם סיור מודרך.', 'תלת־ממד · הליכה', 'asked', 'אפשרות 7 · חדש'),
+  card('10-studio', 'flute', 'הסטודיו של סנדרה', 'חדר מצויר בתלת־ממד, וכל חפץ בו פותח חלק אחר: כן הציור, שולחן הסדנה, מדף הספרים, הקיר והמכתב.', 'קורות חיים כעולם · לחיצה', 'asked', 'אפשרות 10 · חדש'),
+  card('11-portals', 'cosmic-face', 'להיכנס לתוך הציור', 'הציורים מרחפים בחושך. לוחצים על אחד, עפים לתוכו, ומוצאים את עצמכם בתוך הצבע מכל הכיוונים.', 'תלת־ממד · וואו', 'asked', 'אפשרות 11 · חדש'),
+  card('8-tv', 'tree-tears', 'סנדרה־וויז׳ן', 'טלוויזיה מצוירת ביד, כמו אצל אלכס. כל ערוץ הוא עולם אחר, עם שלג בין ערוצים, כפתורים ושלט.', 'משחקי · ערוצים', 'asked', 'אפשרות 8 · חדש'),
+  card('12-timeline', 'embrace', 'ציר הזמן', 'גוללים ורואים איך סנדרה התפתחה משנה לשנה, דרך הציורים.', 'גלילה · שנים', 'asked', 'אפשרות 12 · חדש'),
+  card('9-puzzle', 'night-faces', 'פאזל בגלילה', 'היצירה מפורקת לחתיכות שעפות בחלל, ובגלילה הן מתחברות. אחר כך מתפרקות שוב, ונבנית היצירה הבאה.', 'משחקי · גלילה', 'asked', 'אפשרות 9 · חדש')
+].join('');
+document.getElementById('more').innerHTML = [
+  card('1-dive', 'two-profiles', 'צלילה לתוך היצירה', 'גוללים, והציור מתקרב עד שנבלעים בו. מתוך פרט קטן נפתחת היצירה הבאה.', 'מסך מלא', 'new', 'אפשרות 1'),
+  card('4-river', 'red-forest', 'פזורות לאורך הדף', 'יצירות בגדלים ובעומקים שונים, וכל אחת זזה במהירות אחרת בגלילה.', 'פרלקסה', 'new', 'אפשרות 4'),
+  card('5-brush', 'europa', 'לצייר את הציור', 'העכבר או האצבע הם מכחול, וכל תנועה חושפת את היצירה.', 'אינטראקטיבי', 'new', 'אפשרות 5')
+].join('');
 </script></body></html>

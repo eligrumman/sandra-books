@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 12 · ציר הזמן של סנדרה</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{background:#100d14;transition:background-color 1.2s}
+.intro{height:100vh;height:100svh;display:grid;place-items:center;text-align:center;padding:20px}
+.intro h1{font-family:var(--serif);font-size:clamp(64px,11vw,180px);line-height:.85;margin:0}
+.intro h1 em{font-style:normal;color:var(--gold)}
+.intro p{color:#bbb;font-size:18px}
+.line{position:fixed;top:0;bottom:0;inset-inline-start:50%;width:2px;background:rgba(255,255,255,.08);z-index:0}
+.line i{position:absolute;top:0;inset-inline:0;background:linear-gradient(var(--gold),#ff8a5b);height:0}
+.year-big{position:fixed;z-index:1;top:50%;inset-inline-start:50%;transform:translate(50%,-50%);font-family:var(--serif);font-weight:700;font-size:clamp(140px,26vw,420px);line-height:1;color:rgba(255,255,255,.05);pointer-events:none;direction:ltr;transition:opacity .4s}
+.year{position:relative;z-index:2;padding:12vh 0 4vh}
+.marker{position:sticky;top:76px;z-index:5;display:flex;justify-content:center;pointer-events:none}
+.marker span{background:var(--gold);color:#1a1408;font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;padding:8px 26px 4px;border-radius:40px;box-shadow:0 10px 30px rgba(0,0,0,.4);direction:ltr}
+.chapter{max-width:520px;margin:40px auto 60px;text-align:center;padding:0 20px}
+.chapter h2{font-family:var(--serif);font-size:clamp(44px,5vw,72px);line-height:.95;margin:0 0 10px}
+.chapter p{color:#cfc6bd;margin:0}
+.work{position:relative;width:min(40vw,520px);margin:0 0 14vh;opacity:0;transform:translateY(80px) rotate(var(--r));transition:opacity 1s,transform 1.2s cubic-bezier(.2,.7,.1,1)}
+.work.in{opacity:1;transform:translateY(0) rotate(var(--r))}
+.work.l{margin-inline-start:4vw}.work.r{margin-inline-start:auto;margin-inline-end:4vw}
+.work img{width:100%;height:auto;display:block;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.work figcaption{margin-top:12px}
+.work b{display:block;font-family:var(--serif);font-size:30px;line-height:1}
+.work span{font-size:13px;color:#aaa}
+.work::before{content:'';position:absolute;top:30%;width:4vw;height:2px;background:rgba(216,178,122,.5)}
+.work.l::before{inset-inline-end:-4vw}.work.r::before{inset-inline-start:-4vw}
+.dot{position:absolute;top:30%;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 6px rgba(216,178,122,.2)}
+.work.l .dot{inset-inline-end:calc(-4vw - (50vw - 4vw - min(40vw,520px)) - 7px)}
+.end{height:80vh;display:grid;place-items:center;text-align:center;position:relative;z-index:2}
+.end h2{font-family:var(--serif);font-size:clamp(50px,7vw,110px);line-height:.9;margin:0}
+.end h2 em{font-style:normal;color:var(--gold)}
+@media(max-width:760px){.line,.year-big{inset-inline-start:24px}.work{width:auto;margin-inline-start:52px!important;margin-inline-end:16px!important}.work::before{display:none}.work{--r:0deg!important}}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="line"><i id="fill"></i></div>
+<div class="year-big" id="big"></div>
+<section class="intro"><div><h1>ציר הזמן<br><em>של סנדרה.</em></h1><p>גללו, ותראו איך הצבע, הקו והנושאים משתנים משנה לשנה.</p></div></section>
+<main id="main"></main>
+<section class="end"><div><h2>וזו רק<br><em>ההתחלה.</em></h2></div></section>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+// Chapters per year. Works without a year in data.js are placed by estimate until Sandra dates them.
+const years = [
+  {y: 'לפני', tint: '#141018', t: 'מאיפה הכול התחיל', p: 'סנדרה למדה אמנות בירוסלבל שברוסיה: רישום, ריאליזם ואיפור לבמה.', ids: ['drawing', 'gaze', 'smoke']},
+  {y: '2023', tint: '#1c1220', t: 'צבעי מים וסיפורים', p: 'צבע שקוף, ים, אסטרונאוטים ונסיכות. הציורים מתחילים לספר אגדות.', ids: ['star-voyage', 'mermaid', 'winter', 'alchemist']},
+  {y: '2024', tint: '#111a2a', t: 'הקוסמוס', p: 'פנים שמביטות אל הכוכבים. הכחול הופך לצבע של סנדרה.', ids: ['cosmic-face', 'horse', 'blue-tree']},
+  {y: '2025', tint: '#1d1712', t: 'הקו', p: 'נוירוגרפיקה: קווים שמתפצלים ומתחברים, ופנים שנולדות מתוך עצים.', ids: ['tree-tears', 'spiral', 'stargaze', 'embrace', 'serpent', 'red-forest', 'mosaic']},
+  {y: '2026', tint: '#1e1220', t: 'עולמות נסתרים', p: 'טקסטורות עבות, טפטופים, מלאכים ומנגנים. דמויות שמתגלות מתוך הכתם.', ids: ['angels', 'flute', 'skull', 'night-faces', 'two-profiles', 'night-light', 'europa', 'lilac-dance']}
+];
+const main = document.getElementById('main');
+let side = 0;
+years.forEach((Y, k) => {
+  const sec = document.createElement('section'); sec.className = 'year'; sec.dataset.k = k;
+  sec.innerHTML = `<div class="marker"><span>${Y.y}</span></div><div class="chapter"><h2>${Y.t}</h2><p>${Y.p}</p></div>`;
+  Y.ids.filter(id => C.IMG[id]).forEach(id => {
+    const f = document.createElement('figure'); f.className = 'work ' + (side++ % 2 ? 'r' : 'l'); f.style.setProperty('--r', ((side * 37) % 5 - 2) * .8 + 'deg');
+    f.innerHTML = `<img src="${C.src(id, 1600)}" alt="${C.title(id)}" loading="lazy"><figcaption><b>${C.title(id)}</b><span>${C.meta(id)}</span></figcaption>`;
+    sec.append(f);
+  });
+  main.append(sec);
+});
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }), {rootMargin: '0px 0px -12% 0px'});
+document.querySelectorAll('.work').forEach(w => io.observe(w));
+const secs = [...document.querySelectorAll('.year')];
+function frame() {
+  const h = document.documentElement, p = h.scrollTop / Math.max(1, h.scrollHeight - innerHeight);
+  document.getElementById('fill').style.height = p * 100 + '%';
+  let cur = -1; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * .5) cur = i; });
+  const big = document.getElementById('big');
+  if (cur >= 0) { big.textContent = years[cur].y; big.style.opacity = 1; document.body.style.backgroundColor = years[cur].tint; } else { big.style.opacity = 0; document.body.style.backgroundColor = ''; }
+}
+addEventListener('scroll', () => requestAnimationFrame(frame), {passive: true}); frame();
+</script></body></html>
