@@ -2,16 +2,25 @@
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
 <title>אפשרות 2 · קיר אינסופי</title><link rel="stylesheet" href="../shared.css">
 <style>
-html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-.world{position:fixed;inset:0;cursor:grab;touch-action:none;background:#0b0a0f}
+html{scroll-behavior:smooth}
+body{overscroll-behavior:none}
+.wall{position:relative;height:100vh;height:100svh;overflow:hidden}
+.world{position:absolute;inset:0;cursor:grab;touch-action:none;background:#0b0a0f}
 .world.drag{cursor:grabbing}
 .tile{position:absolute;top:0;left:0;will-change:transform;border-radius:4px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);transition:filter .4s}
 .tile img{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none}
 .world:hover .tile{filter:saturate(.85) brightness(.8)}
 .world .tile:hover{filter:none}
-.title{position:fixed;z-index:20;inset:0;display:grid;place-items:center;pointer-events:none;mix-blend-mode:difference;text-align:center}
-.title h1{font-family:var(--serif);font-weight:300;font-size:clamp(60px,11vw,190px);line-height:.88;margin:0;letter-spacing:-.03em;color:#fff}
-.title p{color:#fff;margin:14px 0 0;font-size:15px;letter-spacing:.06em}
+.down{position:absolute;z-index:30;bottom:calc(22px + env(safe-area-inset-bottom));inset-inline-start:22px;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#f4efe6;color:#14111a;font-size:24px;box-shadow:0 10px 30px rgba(0,0,0,.45);animation:bob 2.4s ease-in-out infinite}
+.down:hover{background:var(--gold)}
+@keyframes bob{50%{transform:translateY(6px)}}
+.more{min-height:100vh;padding:110px clamp(16px,6vw,90px) 70px;background:#f4efe6;color:#1a1520}
+.more h2{font-family:var(--serif);font-size:clamp(56px,8vw,120px);line-height:.88;margin:0 0 30px}
+.more .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:16px}
+.more a{display:block;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.more a img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.more a b{display:block;font-family:var(--serif);font-size:34px;padding:12px 16px 0}
+.more a span{display:block;padding:0 16px 16px;color:#6b605a;font-size:14px}
 .view{position:fixed;z-index:50;inset:0;background:rgba(8,7,10,.96);display:grid;grid-template-rows:1fr auto;opacity:0;pointer-events:none;transition:opacity .35s}
 .view.open{opacity:1;pointer-events:auto}
 .view img{max-width:92vw;max-height:80vh;margin:auto;align-self:center;object-fit:contain;box-shadow:0 30px 90px #000;transform:scale(.94);transition:transform .5s cubic-bezier(.2,.7,.1,1)}
@@ -21,8 +30,13 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .view p{margin:4px 0 0;color:#aaa;font-size:14px}
 </style></head><body>
 <header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
-<div class="world" id="world"></div>
-<div class="title"><div><h1>סנדרה<br>לייפר</h1><p>הזיזו את העכבר לכיוון שתרצו · או גררו · הקיר לא נגמר</p></div></div>
+<section class="wall" id="wall"><div class="world" id="world"></div><a class="down" href="#more" aria-label="להמשיך באתר">↓</a></section>
+<section class="more" id="more"><h2>ועוד<br>מסנדרה.</h2><div class="cards">
+<a href="../../#studio"><img src="../../assets/img/studio/ws-8.webp" alt=""><b>סדנאות</b><span>נוירוגרפיקה וצבע, לילדים ולמבוגרים</span></a>
+<a href="../../#exhibition"><img src="../../assets/img/studio/hall-1.webp" alt=""><b>התערוכה</b><span>העבודות על הקירות של הגלריה</span></a>
+<a href="../../#stories"><img src="../../assets/img/dragon-cover-900.webp" alt=""><b>אגדות</b><span>החד־קרן והדרקון</span></a>
+<a href="../../#about"><img src="../../assets/img/portrait-900.webp" alt=""><b>סנדרה</b><span>נעים להכיר</span></a>
+</div></section>
 <div class="view" id="view"><img id="vimg" alt=""><div class="cap"><h2 id="vt"></h2><p id="vm"></p></div></div>
 <script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
 <script>
@@ -69,7 +83,7 @@ function loop() {
     } else { vx *= .94; vy *= .94; if (mx === null && Math.abs(vx) + Math.abs(vy) < .02 && !C.reduced) ox -= .25; }
     ox += vx; oy += vy;
   }
-  render(); requestAnimationFrame(loop);
+  if (visible) render(); requestAnimationFrame(loop);
 }
 world.addEventListener('pointerdown', e => { down = true; moved = 0; lx = e.clientX; ly = e.clientY; vx = vy = 0; world.classList.add('drag'); world.setPointerCapture(e.pointerId); });
 world.addEventListener('pointermove', e => { if (!down) return; const dx = e.clientX - lx, dy = e.clientY - ly; ox += dx; oy += dy; vx = dx; vy = dy; moved += Math.abs(dx) + Math.abs(dy); lx = e.clientX; ly = e.clientY; });
@@ -77,9 +91,10 @@ world.addEventListener('pointerup', e => {
   down = false; world.classList.remove('drag');
   if (moved < 6) { const t = document.elementsFromPoint(e.clientX, e.clientY).find(n => n.classList?.contains('tile')); if (t) open(t.dataset.id); }
 });
-addEventListener('wheel', e => { e.preventDefault(); vx -= e.deltaX * .08; vy -= e.deltaY * .08; }, {passive: false});
+world.addEventListener('wheel', e => { if (scrollY > 10) return; e.preventDefault(); vx -= e.deltaX * .08; vy -= e.deltaY * .08; }, {passive: false});
 function open(id) { document.getElementById('vimg').src = C.src(id, 2400); document.getElementById('vt').textContent = C.title(id); document.getElementById('vm').textContent = C.meta(id); view.classList.add('open'); }
 view.addEventListener('click', () => view.classList.remove('open'));
 addEventListener('keydown', e => { if (e.key === 'Escape') view.classList.remove('open'); });
+let visible = true; new IntersectionObserver(([en]) => visible = en.isIntersecting).observe(document.getElementById('wall'));
 loop();
 </script></body></html>
