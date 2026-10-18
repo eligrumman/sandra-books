@@ -24,6 +24,15 @@ canvas.drag{cursor:grabbing}
 .pad{position:fixed;z-index:21;bottom:calc(76px + env(safe-area-inset-bottom));inset-inline-end:18px;display:none;flex-direction:column;gap:8px}
 .pad button{width:54px;height:54px;border-radius:50%;font-size:22px;color:#fff;background:rgba(20,18,26,.7);border:1px solid rgba(255,255,255,.3);touch-action:none}
 @media (pointer:coarse){.pad{display:flex}.help{display:none}}
+
+/* readable over light walls */
+.cbar{mix-blend-mode:normal}
+.cbar .name,.cbar .back{background:rgba(14,12,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:6px 16px;border:1px solid rgba(255,255,255,.2)}
+.help{background:rgba(14,12,18,.85);color:#f1ece4;font-size:13px;border:1px solid rgba(255,255,255,.15)}
+.label{background:rgba(14,12,18,.88);border-color:rgba(255,255,255,.2)}
+.label span{color:#e4ddd3}
+.ui button{background:rgba(14,12,18,.88);border-color:rgba(255,255,255,.4)}
+.pad button{background:rgba(14,12,18,.88);border-color:rgba(255,255,255,.5)}
 </style>
 <script type="importmap">{"imports":{"three":"../../assets/vendor/three.module.min.js"}}</script>
 </head><body>
@@ -106,8 +115,8 @@ items.forEach((id, i) => {
   loader.load(C.src(id, 1600), t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; mat.map = t; mat.color.set('#ffffff'); mat.needsUpdate = true; loaded++; progress(); });
   const glow = new THREE.Mesh(new THREE.PlaneGeometry(pw * 2.2, ph * 2.2), new THREE.MeshBasicMaterial({map: pool, transparent: true, depthWrite: false})); glow.position.set(0, .35, -.04); g.add(glow);
   const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.05, .08, .25, 12), new THREE.MeshStandardMaterial({color: '#111'})); lamp.position.set(0, ph / 2 + .55, .25); lamp.rotation.x = .6; g.add(lamp);
-  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(.5, .16), new THREE.MeshBasicMaterial({map: canvasTex(500, 160, (c, cw, chh) => { c.fillStyle = '#f7f3ec'; c.fillRect(0, 0, cw, chh); c.fillStyle = '#222'; c.direction = 'rtl'; c.textAlign = 'right'; c.font = '700 64px "Amatic SC"'; c.fillText(C.title(id), cw - 20, 70); c.font = '300 26px Fredoka'; c.fillStyle = '#666'; c.fillText(C.meta(id), cw - 20, 125); })}));
-  plaque.position.set(pw / 2 + .45, -ph / 2 + .2, .01); if (pw / 2 + .7 > (wi % 2 ? 2 : 1.9)) plaque.position.set(0, -ph / 2 - .2, .01); g.add(plaque);
+  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(.75, .24), new THREE.MeshBasicMaterial({map: canvasTex(500, 160, (c, cw, chh) => { c.fillStyle = '#f7f3ec'; c.fillRect(0, 0, cw, chh); c.fillStyle = '#222'; c.direction = 'rtl'; c.textAlign = 'right'; c.font = '700 64px "Amatic SC"'; c.fillText(C.title(id), cw - 20, 70); c.font = '300 26px Fredoka'; c.fillStyle = '#666'; c.fillText(C.meta(id), cw - 20, 125); })}));
+  plaque.position.set(pw / 2 + .55, -ph / 2 + .25, .01); if (pw / 2 + .7 > (wi % 2 ? 2 : 1.9)) plaque.position.set(0, -ph / 2 - .2, .01); g.add(plaque);
   scene.add(g); pic.userData.index = i;
   const n = new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion);
   hung.push({id, pic, center: g.position.clone(), normal: n, h: ph});
