@@ -19,7 +19,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:cr
 <div class="controls"><button id="next">יצירה אחרת ↻</button><button id="all">לחשוף הכול</button><span id="cap"></span></div>
 <script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
 <script>
-const seq = ['night-faces','embrace','star-voyage','stargaze','spiral','mosaic','blue-tree','red-forest','europa','stained'];
+const seq = ['night-faces','serpent','embrace','tree-tears','star-voyage','stargaze','spiral','mosaic','blue-tree','red-forest','europa','stained'];
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const mask = document.createElement('canvas'), mctx = mask.getContext('2d');
 let art = new Image(), idx = 0, W, H, dpr = Math.min(2, devicePixelRatio || 1), px = -1, py = -1, idle = 0, revealAll = 0;

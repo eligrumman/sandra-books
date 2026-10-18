@@ -32,6 +32,9 @@ WORKS = {
     'horse': 'art:horse.webp', 'alchemist': 'art:alchemist.webp', 'mermaid': 'raw:ALX_0134.JPG',
     'blue-tree': 'raw:ALX_0139.JPG', 'blue-horses': 'raw:ALX_0147.jpg', 'star-voyage': 'raw:ALX_0122.jpg',
     'embrace': 'raw:ALX_0129.jpg', 'winter': 'art:winter.webp', 'drawing': 'art:drawing.webp',
+    # Canvases sent in chat (about 1500px; replace with the originals when available)
+    'tree-tears': 'art:tree-tears.jpg', 'serpent': 'art:serpent.jpg', 'night-light': 'art:night-light.jpg',
+    'two-profiles': 'art:two-profiles.jpg', 'blue-current': 'art:blue-current.jpg',
     # Body art
     'gaze': 'art:gaze.webp', 'smoke': 'art:smoke.webp', 'petals': 'art:petals.webp',
 }
@@ -45,7 +48,7 @@ CROP = {
     'ALX_0119.jpg': (.03, .035, .97, .945), 'ALX_0135.jpg': (.07, .06, .93, .945),
     'ALX_0117.jpg': (.04, .02, .965, .975), 'ALX_0137.jpg': (.015, .01, .985, .99),
 }
-LARGE = {'night-faces', 'embrace', 'star-voyage', 'stargaze', 'spiral', 'mosaic', 'blue-tree', 'red-forest', 'europa', 'stained', 'mermaid', 'lilac-dance'}
+LARGE = {'serpent', 'tree-tears', 'night-light', 'two-profiles', 'night-faces', 'embrace', 'star-voyage', 'stargaze', 'spiral', 'mosaic', 'blue-tree', 'red-forest', 'europa', 'stained', 'mermaid', 'lilac-dance'}
 
 
 def load(src):
