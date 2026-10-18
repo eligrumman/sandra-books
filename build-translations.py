@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
 root=Path(__file__).resolve().parent
-b=json.loads((root/'dist/book.json').read_text())
+b=json.loads((root/'dist/book/book.json').read_text())
 parts=(root/'story-ru.txt').read_text().strip().split('===PAGE===')
 assert len(parts)==29
 b[0]['title']='Обложка'
 for p,s in zip(b[1:],parts):
  title,text=s.strip().split('\n',1);p.update(title=title,text=text)
-(root/'dist/book-ru.json').write_text(json.dumps(b,ensure_ascii=False,indent=2)+'\n')
-a=json.loads((root/'dist/audit.json').read_text())
+(root/'dist/book/book-ru.json').write_text(json.dumps(b,ensure_ascii=False,indent=2)+'\n')
+a=json.loads((root/'dist/book/audit.json').read_text())
 notes=[
 ('Кто освободил единорога?', 'Сандра, на странице 7 старик рассказывает, что единорога освободил его прадед. Но на странице 13 девочка говорит, что его спас сам дедушка Варун. Кто из них освободил единорога?'),
 ('Сколько времени длится путешествие?', 'Путь девочки выглядит как путешествие длиной в день и ночь. Однако на странице 17 женщина говорит, что воду привозят уже несколько дней, а на странице 23 поиски единорога идут уже целые сутки. Сколько дней проходит между отравлением колодцев и возвращением девочки?'),
@@ -16,4 +16,4 @@ notes=[
 ('Нужно ли произносить волшебные слова?', 'На странице 14 единорог просит произнести волшебные слова, выливая воду. На странице 25 Варун выливает воду, но о словах ничего не сказано. Он произносит их или вода действует и без них?'),
 ('Единство иллюстраций', 'На отдельных иллюстрациях немного различается одежда колдуна и стражей. Какой вариант их одежды закрепим для окончательной версии книги?')]
 for n,(title,detail) in zip(a['notes'],notes):n.update(title=title,detail=detail)
-(root/'dist/audit-ru.json').write_text(json.dumps(a,ensure_ascii=False,indent=2)+'\n')
+(root/'dist/book/audit-ru.json').write_text(json.dumps(a,ensure_ascii=False,indent=2)+'\n')

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1022">
+<title>סיפור על הדרקון · סנדרה לייפר</title>
+<meta name="description" content="סיפור על הדרקון — אגדה מאת סנדרה לייפר על הדרקון האחרון בעמק, על רוח הצפון ועל נדיה המרפאה.">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Rubik:wght@300;400&display=swap">
+<style>
+:root{--bg:#0c1022;--bg2:#131a33;--text:#ece6da;--muted:#a3a2b5;--gold:#e0b87a;--line:rgba(255,255,255,.12);--serif:'Frank Ruhl Libre','Cormorant Garamond',Georgia,serif;--sans:'Rubik',system-ui,Arial,sans-serif;--scale:1;color-scheme:dark}
+:lang(ru){--serif:'Cormorant Garamond','Frank Ruhl Libre',Georgia,serif}
+body.paper{--bg:#f3ede1;--bg2:#e9e1d1;--text:#2a2420;--muted:#776c62;--gold:#9a6a3c;--line:rgba(0,0,0,.12);color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.bar{position:fixed;z-index:10;top:0;inset-inline:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px clamp(16px,4vw,40px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar .home{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);white-space:nowrap}
+.bar .home:hover{color:var(--text)}
+.tools{display:flex;gap:6px;align-items:center}
+.tool{min-width:40px;height:38px;padding:0 10px;border:1px solid var(--line);border-radius:30px;font-size:13px}
+.tool[aria-pressed=true]{background:var(--text);color:var(--bg)}
+.progress{position:fixed;z-index:11;top:0;inset-inline:0;height:2px;direction:ltr}
+.progress i{display:block;height:100%;width:0;background:var(--gold)}
+[dir=rtl] .progress i{margin-left:auto}
+.cover{min-height:100svh;display:grid;place-items:end center;position:relative;overflow:hidden;isolation:isolate;text-align:center;padding:120px 20px 12vh}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;animation:drift 30s ease-in-out infinite alternate}
+.cover::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,var(--bg) 4%,rgba(12,16,34,.55) 50%,rgba(12,16,34,.25))}
+body.paper .cover::after{background:linear-gradient(0deg,var(--bg) 4%,rgba(12,16,34,.55) 50%,rgba(12,16,34,.25))}
+@keyframes drift{from{transform:scale(1.05)}to{transform:scale(1.18) translateY(-2%)}}
+.cover .kicker{font-size:13px;letter-spacing:.14em;color:#f0cf9d}
+.cover h1{font-family:var(--serif);font-weight:300;font-size:clamp(56px,10vw,140px);line-height:.95;margin:18px 0;color:#fff;letter-spacing:-.02em}
+.cover .sub{font-size:clamp(17px,2vw,22px);max-width:560px;margin:0 auto 34px;color:#e6e0f0}
+.cover .by{font-size:14px;color:#cfc8de;margin-bottom:30px}
+.start{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 30px;border-radius:40px;background:#f3ede1;color:#151225;font-size:16px}
+.toc{max-width:760px;margin:0 auto;padding:70px 22px 10px}
+.toc h2{font-size:13px;letter-spacing:.12em;color:var(--gold);font-weight:400;margin:0 0 16px}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:c;columns:2 260px;column-gap:40px}
+.toc li{counter-increment:c;break-inside:avoid;border-bottom:1px solid var(--line)}
+.toc a{display:flex;gap:14px;padding:12px 0;font-family:var(--serif);font-size:20px}
+.toc a::before{content:counter(c,decimal-leading-zero);font-family:var(--sans);font-size:12px;color:var(--gold);padding-top:6px}
+.toc a:hover{color:var(--gold)}
+article{max-width:680px;margin:0 auto;padding:30px 22px 60px}
+.chapter{padding-top:70px}
+.chapter header{text-align:center;margin-bottom:34px}
+.chapter .num{font-size:12px;letter-spacing:.18em;color:var(--gold)}
+.chapter h2{font-family:var(--serif);font-weight:300;font-size:clamp(34px,5vw,52px);line-height:1.1;margin:10px 0 0}
+.chapter .orn{display:block;color:var(--gold);margin-top:18px;font-size:14px;letter-spacing:.6em}
+.chapter p{font-family:var(--serif);font-size:calc(21px*var(--scale));line-height:1.85;margin:0 0 1.05em;font-weight:300}
+:lang(ru) .chapter p{font-size:calc(22px*var(--scale));line-height:1.7}
+.chapter p:first-of-type::first-letter{font-size:3.1em;float:inline-start;line-height:.9;padding-inline-end:.08em;color:var(--gold);margin-top:.06em}
+.end{text-align:center;padding:40px 22px 90px}
+.end .orn{color:var(--gold);font-size:22px}
+.end h2{font-family:var(--serif);font-weight:300;font-size:34px;margin:12px 0 26px}
+.end .links{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.end .links a{border:1px solid var(--line);border-radius:30px;padding:12px 22px;font-size:15px}
+.end .links a:hover{border-color:var(--gold);color:var(--gold)}
+.note{max-width:680px;margin:0 auto 60px;padding:0 22px;font-size:13px;color:var(--muted);text-align:center}
+@media(max-width:600px){.bar .home span{display:none}.chapter p{font-size:calc(19px*var(--scale))}:lang(ru) .chapter p{font-size:calc(20px*var(--scale))}}
+@media(prefers-reduced-motion:reduce){.cover img{animation:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><i id="progress"></i></div>
+<header class="bar">
+  <a class="home" id="home" href="../"><span aria-hidden="true" id="homeArrow">→</span> <span id="homeText">לאתר של סנדרה</span></a>
+  <div class="tools">
+    <button class="tool" id="smaller" aria-label="הקטנת טקסט">א−</button>
+    <button class="tool" id="larger" aria-label="הגדלת טקסט">א+</button>
+    <button class="tool" id="paper" aria-pressed="false" aria-label="רקע בהיר">☀</button>
+    <button class="tool" data-lang="he" aria-pressed="true">עב</button>
+    <button class="tool" data-lang="ru" aria-pressed="false" lang="ru">RU</button>
+  </div>
+</header>
+<main>
+  <section class="cover">
+    <img src="../assets/img/works/winter-1600.webp" alt="" fetchpriority="high">
+    <div>
+      <div class="kicker" id="kicker">אגדה חדשה</div>
+      <h1 id="title">סיפור על הדרקון</h1>
+      <p class="sub" id="subtitle"></p>
+      <div class="by" id="by">מאת סנדרה לייפר</div>
+      <a class="start" href="#ch-1" id="startBtn">להתחיל לקרוא</a>
+    </div>
+  </section>
+  <nav class="toc" aria-labelledby="tocTitle"><h2 id="tocTitle">פרקים</h2><ol id="toc"></ol></nav>
+  <article id="story"></article>
+  <section class="end">
+    <div class="orn">✳</div>
+    <h2 id="endText">וזה כל הסיפור.</h2>
+    <div class="links"><a href="../book/" id="toUnicorn">לסיפור על החד־קרן</a><a href="../#works" id="toWorks">לעבודות של סנדרה</a></div>
+  </section>
+  <p class="note" id="note">טיוטת קריאה: הנוסח נערך מתוך הקלטה של סנדרה ומחכה לאישורה.</p>
+</main>
+<noscript><p style="text-align:center">כדי לקרוא את האגדה יש להפעיל JavaScript.</p></noscript>
+<script src="story.js"></script>
+<script>
+'use strict';
+(() => {
+const $ = id => document.getElementById(id);
+const store = {get(k){try{return localStorage.getItem(k)}catch{return null}}, set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+const UI = {
+  he: {kicker:'אגדה חדשה', by:'מאת סנדרה לייפר', start:'להתחיל לקרוא', toc:'פרקים', chapter:'פרק', home:'לאתר של סנדרה', arrow:'→', unicorn:'לסיפור על החד־קרן', works:'לעבודות של סנדרה', note:'טיוטת קריאה: הנוסח נערך מתוך הקלטה של סנדרה ומחכה לאישורה.', smaller:'הקטנת טקסט', larger:'הגדלת טקסט', paper:'רקע בהיר'},
+  ru: {kicker:'Новая сказка', by:'Сандра Лейфер', start:'Начать читать', toc:'Главы', chapter:'Глава', home:'На сайт Сандры', arrow:'←', unicorn:'Сказка о единороге', works:'Работы Сандры', note:'Черновик для чтения: текст отредактирован по аудиозаписи Сандры и ждёт её одобрения.', smaller:'Уменьшить текст', larger:'Увеличить текст', paper:'Светлый фон'}
+};
+const q = new URLSearchParams(location.search).get('lang');
+let lang = (q || store.get('sl-lang')) === 'ru' ? 'ru' : 'he';
+let scale = Number(store.get('dragon-scale')) || 1;
+let paper = store.get('dragon-paper') === '1';
+function render() {
+  const d = window.STORY[lang], u = UI[lang], root = document.documentElement;
+  root.lang = lang; root.dir = lang === 'he' ? 'rtl' : 'ltr';
+  document.title = `${d.title} · ${lang === 'he' ? 'סנדרה לייפר' : 'Сандра Лейфер'}`;
+  $('title').textContent = d.title; $('subtitle').textContent = d.subtitle;
+  $('kicker').textContent = u.kicker; $('by').textContent = u.by; $('startBtn').textContent = u.start; $('tocTitle').textContent = u.toc;
+  $('homeText').textContent = u.home; $('homeArrow').textContent = u.arrow; $('home').href = '../?lang=' + lang;
+  $('toUnicorn').textContent = u.unicorn; $('toUnicorn').href = '../book/?lang=' + lang;
+  $('toWorks').textContent = u.works; $('toWorks').href = '../?lang=' + lang + '#works';
+  $('note').textContent = u.note;
+  $('smaller').setAttribute('aria-label', u.smaller); $('larger').setAttribute('aria-label', u.larger); $('paper').setAttribute('aria-label', u.paper);
+  const last = d.chapters[d.chapters.length - 1].paragraphs;
+  $('endText').textContent = last[last.length - 1];
+  $('toc').replaceChildren(...d.chapters.map((c, i) => { const li = document.createElement('li'), a = document.createElement('a'); a.href = '#ch-' + (i + 1); a.textContent = c.title; li.append(a); return li; }));
+  $('story').replaceChildren(...d.chapters.map((c, i) => {
+    const s = document.createElement('section'); s.className = 'chapter'; s.id = 'ch-' + (i + 1);
+    const h = document.createElement('header'), n = document.createElement('div'), t = document.createElement('h2'), o = document.createElement('span');
+    n.className = 'num'; n.textContent = `${u.chapter} ${i + 1}`; t.textContent = c.title; o.className = 'orn'; o.textContent = '✦ ✦ ✦'; o.setAttribute('aria-hidden', 'true');
+    h.append(n, t, o); s.append(h);
+    const paras = i === d.chapters.length - 1 ? c.paragraphs.slice(0, -1) : c.paragraphs;
+    paras.forEach(p => { const e = document.createElement('p'); e.textContent = p; s.append(e); });
+    return s;
+  }));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
+  store.set('sl-lang', lang);
+}
+function settings() {
+  scale = Math.min(1.4, Math.max(.85, Math.round(scale * 100) / 100));
+  document.documentElement.style.setProperty('--scale', scale);
+  document.body.classList.toggle('paper', paper); $('paper').setAttribute('aria-pressed', String(paper));
+  $('smaller').disabled = scale <= .85; $('larger').disabled = scale >= 1.4;
+  store.set('dragon-scale', scale); store.set('dragon-paper', paper ? '1' : '0');
+}
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { lang = b.dataset.lang; render(); }));
+$('smaller').addEventListener('click', () => { scale -= .1; settings(); });
+$('larger').addEventListener('click', () => { scale += .1; settings(); });
+$('paper').addEventListener('click', () => { paper = !paper; settings(); });
+let tick = false;
+addEventListener('scroll', () => { if (tick) return; tick = true; requestAnimationFrame(() => { tick = false; const h = document.documentElement; $('progress').style.width = (h.scrollTop / Math.max(1, h.scrollHeight - innerHeight) * 100) + '%'; }); }, {passive: true});
+render(); settings();
+if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+})();
+</script>
+</body>
+</html>
