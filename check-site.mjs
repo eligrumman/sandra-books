@@ -27,7 +27,7 @@ for (const s of SITE.series) {
   assert.ok(ids.includes(s.cover), `series cover ${s.cover}`);
 }
 for (const id of [...SITE.hero, ...SITE.journey.map(j => j.id)]) assert.ok(ids.includes(id), `hero/journey ${id}`);
-for (const s of SITE.studio) assert.ok(exists(`assets/img/studio/${s.id}.webp`) && s.he && s.ru, `studio ${s.id}`);
+for (const s of [...SITE.studio, ...SITE.exhibition]) assert.ok(exists(`assets/img/studio/${s.id}.webp`) && s.he && s.ru, `studio ${s.id}`);
 
 // Translations: same keys in both languages and every data-t key defined.
 const he = Object.keys(SITE.text.he), ru = Object.keys(SITE.text.ru);
