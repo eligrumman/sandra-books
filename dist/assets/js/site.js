@@ -9,7 +9,8 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const query = new URLSearchParams(location.search).get('lang');
 let lang = (query || store.get('sl-lang') || (navigator.language || '').slice(0, 2)) === 'ru' ? 'ru' : 'he';
-let filter = 'all', visible = [], current = 0;
+let filter = 'all', visible = [], current = 0, showAll = false;
+const PREVIEW = 12;
 const t = k => S.text[lang][k] ?? k;
 const L = arr => arr[lang === 'he' ? 0 : 1];
 const work = id => S.works.find(w => w.id === id);
@@ -47,9 +48,10 @@ function applyLang() {
   $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
   store.set('sl-lang', lang);
-  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio(); journeyText(-1, true);
+  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio();
   if ($('lightbox').open) show(current);
 }
+$('moreWorks').addEventListener('click', () => { showAll = !showAll; renderGallery(); if (!showAll) $('works').scrollIntoView({behavior: 'smooth'}); });
 $$('[data-lang]').forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) { lang = b.dataset.lang; applyLang(); } }));
 
 /* ---------- header ---------- */
@@ -83,53 +85,6 @@ window.EndlessWall($('hero'), S.works.map(w => w.id), {
   onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
 });
 
-/* ---------- journey ---------- */
-const journey = $('journey'), layers = $('journeyLayers'), scenes = S.journey;
-journey.style.setProperty('--scenes', scenes.length + 0.6);
-scenes.forEach((s, i) => { const im = img(s.id, {sizes: '100vw', lazy: i > 0}); im.style.objectPosition = s.pos; im.alt = ''; layers.append(im); });
-const staticBox = el('div', 'journey-static');
-journey.querySelector('.journey-stage').append(staticBox);
-let journeyIndex = -1;
-function journeyText(i, force) {
-  if (i === -1) i = Math.max(0, journeyIndex);
-  if (i === journeyIndex && !force) return;
-  const s = scenes[i], w = work(s.id), copy = document.querySelector('.journey-copy');
-  const write = () => {
-    $('journeyCount').textContent = String(i + 1).padStart(2, '0') + ' / ' + String(scenes.length).padStart(2, '0');
-    $('journeyKind').textContent = L(S.series.find(x => x.id === w.kind)[lang]);
-    $('journeyTitle').innerHTML = s[lang][0];
-    $('journeySub').textContent = s[lang][1];
-    $('journeyCredit').textContent = `${L(w.t)} · ${t(w.m)}`;
-    copy.classList.remove('swap');
-  };
-  if (force || journeyIndex === -1) write(); else { copy.classList.add('swap'); setTimeout(write, 260); }
-  journeyIndex = i;
-  staticBox.replaceChildren(...scenes.map(sc => {
-    const f = el('figure'), cap = el('figcaption'); f.append(img(sc.id, {sizes: '(max-width:840px) 100vw, 50vw', max: 1600}));
-    cap.append(el('h2', '', sc[lang][0]), el('p', '', sc[lang][1])); f.append(cap); return f;
-  }));
-}
-function staticJourney() { return reduced.matches; }
-function updateJourney() {
-  document.body.classList.toggle('static-journey', staticJourney());
-  if (staticJourney()) return;
-  const r = journey.getBoundingClientRect(), vh = window.innerHeight;
-  if (r.bottom < 0 || r.top > vh) return;
-  const total = Math.max(1, journey.offsetHeight - vh), p = Math.min(1, Math.max(0, -r.top / total));
-  const pos = p * (scenes.length - 1), i = Math.min(scenes.length - 1, Math.floor(pos + 0.0001)), local = pos - i;
-  const imgs = layers.children;
-  for (let k = 0; k < imgs.length; k++) {
-    const im = imgs[k];
-    if (k === 0) { im.style.transform = `scale(${1.15 - Math.min(1, pos) * 0.15})`; continue; }
-    const reveal = Math.min(1, Math.max(0, (pos - (k - 1) - 0.35) / 0.6));
-    im.style.clipPath = reveal >= 1 ? 'none' : `circle(${reveal * 75}% at 50% 55%)`;
-    im.style.transform = `scale(${1.18 - reveal * 0.18})`;
-    im.style.visibility = reveal > 0 ? 'visible' : 'hidden';
-  }
-  journeyText(local > 0.6 && i < scenes.length - 1 ? i + 1 : i);
-  $('journeyBar').style.width = (p * 100) + '%';
-}
-
 /* ---------- series ---------- */
 function renderSeries() {
   $('seriesRail').replaceChildren(...S.series.map((s, i) => {
@@ -157,12 +112,14 @@ function renderFilters() {
 function columnsFor() { const w = $('grid').clientWidth || window.innerWidth; return w < 700 ? 2 : w < 1100 ? 3 : 4; }
 let galleryCols = 0;
 function layoutGallery(items) {
+  if (!showAll) items = items.slice(0, PREVIEW);
   const n = columnsFor(), cols = Array.from({length: n}, () => el('div', 'mcol')), h = new Array(n).fill(0);
   items.forEach((b, i) => { const m = IMG.works[visible[i].id], k = h.indexOf(Math.min(...h)); cols[k].append(b); h[k] += m ? m.h / m.w : 1.2; });
   galleryCols = n; $('grid').replaceChildren(...cols);
 }
 function renderGallery() {
   visible = S.works.filter(w => filter === 'all' || w.kind === filter);
+  const btn = $('moreWorks'); btn.hidden = visible.length <= PREVIEW; btn.textContent = showAll ? t('showLess') : `${t('showAll')} (${visible.length})`;
   layoutGallery(visible.map((w, i) => {
     const b = el('button', 'work'); b.type = 'button'; b.style.animationDelay = Math.min(i, 8) * 45 + 'ms';
     b.setAttribute('aria-label', `${t('open')}: ${L(w.t)}`);
@@ -277,7 +234,7 @@ $$('.reveal').forEach(e => revealer ? revealer.observe(e) : e.classList.add('in'
 
 /* ---------- loop ---------- */
 let ticking = false;
-function frame() { ticking = false; onScrollHeader(); updateJourney(); }
+function frame() { ticking = false; onScrollHeader(); }
 window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, {passive: true});
 window.addEventListener('resize', () => { requestAnimationFrame(frame); if (columnsFor() !== galleryCols) renderGallery(); });
 reduced.addEventListener?.('change', () => frame());
@@ -285,5 +242,5 @@ reduced.addEventListener?.('change', () => frame());
 $('year').textContent = new Date().getFullYear();
 applyLang();
 frame();
-window.__site = {get lang() { return lang; }, get visible() { return visible; }, openArt, show, updateJourney};
+window.__site = {get lang() { return lang; }, get visible() { return visible; }, openArt, show};
 })();
