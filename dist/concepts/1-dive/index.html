@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 1 · צלילה לתוך היצירה</title><link rel="stylesheet" href="../shared.css">
+<style>
+.track{height:calc(var(--n) * 160vh)}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#000}
+.layer{position:absolute;inset:0;will-change:transform,clip-path}
+.layer img{width:100%;height:100%;object-fit:cover}
+.layer::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.55))}
+.copy{position:absolute;z-index:5;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;padding:20px}
+.copy h1{font-family:var(--serif);font-weight:300;font-size:clamp(64px,13vw,220px);line-height:.9;margin:0;letter-spacing:-.03em;text-shadow:0 6px 80px rgba(0,0,0,.6)}
+.copy h1 em{font-style:normal;color:var(--gold)}
+.copy p{font-size:clamp(16px,1.6vw,21px);margin:20px 0 0;text-shadow:0 2px 20px #000}
+.label{position:absolute;z-index:5;bottom:clamp(24px,6vh,60px);inset-inline-start:clamp(16px,5vw,64px);font-family:var(--serif);font-size:clamp(26px,3.6vw,52px);font-weight:300;line-height:1.05;text-shadow:0 2px 30px rgba(0,0,0,.7);transition:opacity .4s}
+.label small{display:block;font-family:var(--sans);font-size:13px;color:#eee;margin-top:8px;letter-spacing:.04em}
+.count{position:absolute;z-index:5;bottom:clamp(24px,6vh,60px);inset-inline-end:clamp(16px,5vw,64px);direction:ltr;font-size:13px;letter-spacing:.2em}
+.after{min-height:60vh;display:grid;place-items:center;text-align:center;padding:80px 20px}
+.after h2{font-family:var(--serif);font-weight:300;font-size:clamp(40px,6vw,90px);margin:0}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<main><section class="track" id="track"><div class="stage" id="stage">
+<div class="copy" id="intro"><div><h1>סנדרה <em>לייפר</em></h1><p>גללו — וצללו לתוך הציור.</p></div></div>
+<div class="label" id="label"></div><div class="count" id="count"></div>
+</div></section>
+<section class="after"><div><h2>…והמסע ממשיך בגלריה</h2></div></section></main>
+<div class="chint" id="hint">גלילה = צלילה פנימה</div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+// Each work zooms toward a focal point; the next work opens out of that point.
+const seq = [['night-faces',.42,.62],['horse',.55,.32],['embrace',.5,.42],['europa',.25,.35],['red-forest',.55,.3],['spiral',.47,.48],['mermaid',.65,.55],['stargaze',.55,.4]];
+const stage = document.getElementById('stage'), track = document.getElementById('track');
+track.style.setProperty('--n', seq.length);
+const layers = seq.map(([id, fx, fy], i) => {
+  const d = document.createElement('div'); d.className = 'layer'; d.style.zIndex = seq.length - i;
+  const im = new Image(); im.src = C.src(id, 2400); im.alt = C.title(id); im.decoding = 'async'; im.style.objectPosition = `${fx * 100}% ${fy * 100}%`;
+  d.append(im); stage.append(d); return d;
+});
+// draw order: later works sit on top, revealed through a growing circle at the previous focal point
+layers.forEach((d, i) => d.style.zIndex = i + 1);
+const ease = t => t * t * (3 - 2 * t);
+let last = -1;
+function frame() {
+  const r = track.getBoundingClientRect(), total = track.offsetHeight - innerHeight;
+  const p = Math.min(1, Math.max(0, -r.top / total)) * (seq.length - 1);
+  const i = Math.min(seq.length - 1, Math.floor(p)), t = p - i;
+  layers.forEach((d, k) => {
+    const [, fx, fy] = seq[k];
+    d.style.transformOrigin = `${fx * 100}% ${fy * 100}%`;
+    if (k < i) { d.style.visibility = 'hidden'; return; }
+    d.style.visibility = 'visible';
+    if (k === i) { d.style.transform = `scale(${1 + Math.pow(t, 2.2) * 7})`; d.style.clipPath = 'none'; d.style.opacity = 1 - Math.max(0, (t - .85) / .15); }
+    else if (k === i + 1) {
+      const [, px, py] = seq[i], e = ease(Math.min(1, Math.max(0, (t - .25) / .75)));
+      d.style.clipPath = e >= 1 ? 'none' : `circle(${e * 110}% at ${px * 100}% ${py * 100}%)`;
+      d.style.transform = `scale(${1.5 - e * .5})`; d.style.transformOrigin = `${px * 100}% ${py * 100}%`; d.style.opacity = 1;
+    } else d.style.visibility = 'hidden';
+  });
+  document.getElementById('intro').style.opacity = String(Math.max(0, 1 - p * 3));
+  const cur = t > .6 ? Math.min(i + 1, seq.length - 1) : i;
+  if (cur !== last) { last = cur; const id = seq[cur][0]; document.getElementById('label').innerHTML = `${C.title(id)}<small>${C.meta(id)}</small>`; document.getElementById('count').textContent = String(cur + 1).padStart(2, '0') + ' / ' + String(seq.length).padStart(2, '0'); }
+  document.getElementById('hint').style.opacity = p > .3 ? 0 : 1;
+  for (const id of ['label','count']) document.getElementById(id).style.opacity = p < .15 ? 0 : 1;
+}
+addEventListener('scroll', () => requestAnimationFrame(frame), {passive: true}); addEventListener('resize', frame); frame();
+</script></body></html>

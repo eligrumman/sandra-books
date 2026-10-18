@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 6 · מעוף בין היצירות</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{background:radial-gradient(ellipse at center,#1a1630 0%,#07060b 70%) fixed}
+.track{height:calc(var(--n) * 55vh + 100vh)}
+.scene{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;perspective:900px;perspective-origin:50% 50%}
+.space{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.card{position:absolute;left:50%;top:50%;transform-style:preserve-3d;cursor:pointer}
+.card img{width:100%;height:100%;object-fit:cover;box-shadow:0 30px 90px rgba(0,0,0,.7);border-radius:3px}
+.card figcaption{position:absolute;top:100%;margin-top:12px;font-size:13px;white-space:nowrap;color:#ddd}
+.card figcaption b{display:block;font-family:var(--serif);font-weight:300;font-size:22px;color:#fff}
+.intro{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;z-index:2}
+.intro h1{font-family:var(--serif);font-weight:300;font-size:clamp(60px,12vw,200px);line-height:.9;margin:0;letter-spacing:-.03em}
+.intro h1 em{font-style:normal;color:var(--gold)}
+.intro p{opacity:.8;font-size:17px}
+.dust{position:absolute;inset:-50%;background-image:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),radial-gradient(1px 1px at 70% 60%,#fff6,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff5,transparent),radial-gradient(1px 1px at 85% 15%,#fff7,transparent);background-size:300px 300px;opacity:.5;pointer-events:none}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<section class="track" id="track"><div class="scene" id="scene"><div class="dust" id="dust"></div><div class="space" id="space"></div>
+<div class="intro" id="intro"><div><h1>לעוף<br><em>בתוך הצבע.</em></h1><p>גללו קדימה — היצירות מחכות במרחב.</p></div></div></div></section>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+const ids = C.best.slice(0, 18), gapZ = 900, space = document.getElementById('space'), track = document.getElementById('track');
+track.style.setProperty('--n', ids.length);
+const mobile = innerWidth < 700;
+const cards = ids.map((id, i) => {
+  const ang = i * 2.39996, rad = (mobile ? .22 : .3) * innerWidth;
+  const x = Math.cos(ang) * rad, y = Math.sin(ang) * rad * .55, z = -(i + 1) * gapZ;
+  const h = (mobile ? .32 : .48) * innerHeight, w = h * C.ratio(id);
+  const f = document.createElement('figure'); f.className = 'card'; f.style.margin = 0;
+  f.style.width = w + 'px'; f.style.height = h + 'px';
+  f.style.transform = `translate3d(${x - w / 2}px,${y - h / 2}px,${z}px)`;
+  f.innerHTML = `<img src="${C.src(id, 1600)}" alt="${C.title(id)}" loading="${i < 4 ? 'eager' : 'lazy'}"><figcaption><b>${C.title(id)}</b>${C.meta(id)}</figcaption>`;
+  f.onclick = () => scrollTo({top: track.offsetTop + i * (track.offsetHeight - innerHeight) / ids.length + 1, behavior: 'smooth'});
+  space.append(f); return {f, z};
+});
+let mx = 0, my = 0;
+addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+function frame() {
+  const total = track.offsetHeight - innerHeight, p = Math.min(1, Math.max(0, -track.getBoundingClientRect().top / total));
+  const cam = p * (ids.length + .3) * gapZ;
+  space.style.transform = `translateZ(${cam}px) rotateY(${mx * 6}deg) rotateX(${-my * 6}deg)`;
+  for (const c of cards) { const d = c.z + cam; c.f.style.opacity = d > 300 ? Math.max(0, 1 - (d - 300) / 400) : Math.max(0, Math.min(1, 1 + d / 4500)); c.f.style.visibility = c.f.style.opacity > 0 ? 'visible' : 'hidden'; }
+  document.getElementById('intro').style.opacity = Math.max(0, 1 - p * 12);
+  document.getElementById('dust').style.transform = `scale(${1 + p * 2})`;
+  requestAnimationFrame(frame);
+}
+frame();
+</script></body></html>

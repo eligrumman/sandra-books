@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 4 · יצירות פזורות לאורך הדף</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{background:#f1ebe0;color:#1a1520;overflow-x:hidden}
+.cbar{mix-blend-mode:difference}
+.river{position:relative;height:var(--h)}
+.art{position:absolute;will-change:transform;cursor:zoom-in}
+.art img{width:100%;height:auto;box-shadow:0 24px 60px rgba(40,25,20,.28);border-radius:2px}
+.art figcaption{font-size:12px;margin-top:8px;color:#6b5f57;opacity:0;transition:opacity .3s}
+.art:hover figcaption{opacity:1}
+.txt{position:absolute;inset-inline:0;text-align:center;pointer-events:none;z-index:30;text-shadow:0 0 40px #f1ebe0,0 0 18px #f1ebe0;padding:0 20px}
+.txt h1{font-family:var(--serif);font-weight:300;font-size:clamp(70px,14vw,240px);line-height:.85;letter-spacing:-.04em;margin:0}
+.txt h1 em,.txt h2 em{font-style:normal;color:#9a6a45}
+.txt h2{font-family:var(--serif);font-weight:300;font-size:clamp(40px,6vw,96px);line-height:1;margin:0;letter-spacing:-.02em}
+.txt p{font-size:clamp(16px,1.4vw,20px);max-width:520px;margin:18px auto 0;color:#4d433d;background:rgba(241,235,224,.75);border-radius:20px;padding:6px 14px}
+.view{position:fixed;z-index:60;inset:0;background:rgba(241,235,224,.97);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .35s;cursor:zoom-out}
+.view.open{opacity:1;pointer-events:auto}
+.view img{max-width:90vw;max-height:84vh;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<main class="river" id="river"></main>
+<div class="view" id="view"><img id="vimg" alt=""></div>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+// Works scattered along the page at three depths: near ones are big and move fast, far ones small and slow.
+const river = document.getElementById('river'), mobile = innerWidth < 700;
+const texts = [
+  [0.02, '<h1>סנדרה<br><em>לייפר</em></h1><p>אמנית. צבע, קו ודמיון — פרושים לאורך כל הדרך.</p>'],
+  [0.27, '<h2>מתוך הכתם<br><em>מגיחות פנים.</em></h2>'],
+  [0.52, '<h2>קו אחד.<br><em>עולם שלם.</em></h2>'],
+  [0.78, '<h2>לפעמים על בד,<br><em>לפעמים על העור.</em></h2>']
+];
+const ids = C.best.slice(0, mobile ? 18 : 26);
+const H = innerHeight * (mobile ? 9 : 7.5); river.style.setProperty('--h', H + 'px');
+const slots = mobile ? [[4, 46], [54, 40], [28, 36]] : [[3, 22], [70, 24], [36, 18], [16, 14], [58, 16], [84, 12]];
+const els = [];
+ids.forEach((id, i) => {
+  const depth = [1, .6, .35][i % 3], [lx, w] = slots[i % slots.length];
+  const width = w * (0.7 + depth * .5);
+  const y = (i + 0.4) / ids.length * H * .95 + ((i * 53) % 7) * 18;
+  const f = document.createElement('figure'); f.className = 'art'; f.style.margin = 0;
+  f.style.cssText += `inset-inline-start:${lx}vw;top:${y}px;width:${width}vw;z-index:${Math.round(depth * 10)};filter:${depth < .5 ? 'saturate(.85)' : 'none'}`;
+  f.innerHTML = `<img src="${C.src(id, depth > .5 ? 1600 : 800)}" alt="${C.title(id)}" loading="lazy" decoding="async"><figcaption>${C.title(id)} · ${C.meta(id)}</figcaption>`;
+  f.onclick = () => { document.getElementById('vimg').src = C.src(id, 2400); document.getElementById('view').classList.add('open'); };
+  river.append(f); els.push({f, depth, rot: ((i * 29) % 7 - 3) * .6});
+});
+texts.forEach(([at, html]) => { const t = document.createElement('div'); t.className = 'txt'; t.style.top = (at * H + innerHeight * .28) + 'px'; t.innerHTML = html; river.append(t); });
+document.getElementById('view').onclick = e => e.currentTarget.classList.remove('open');
+function frame() {
+  const y = scrollY;
+  for (const e of els) e.f.style.transform = `translate3d(0,${-y * (e.depth - .6) * .55}px,0) rotate(${e.rot}deg)`;
+  const hue = (y / H) * 60;
+  document.body.style.background = `hsl(${36 - hue * .4} ${28 - hue * .1}% ${92 - hue * .05}%)`;
+}
+addEventListener('scroll', () => requestAnimationFrame(frame), {passive: true}); frame();
+</script></body></html>

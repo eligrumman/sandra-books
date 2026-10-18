@@ -47,7 +47,7 @@ function applyLang() {
   $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
   store.set('sl-lang', lang);
-  renderMarquee(); renderSeries(); renderFilters(); renderGallery(); renderStudio(); renderHeroCaption(); journeyText(-1, true);
+  renderSeries(); renderFilters(); renderGallery(); renderStudio(); renderHeroCaption(); journeyText(-1, true);
   if ($('lightbox').open) show(current);
 }
 $$('[data-lang]').forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) { lang = b.dataset.lang; applyLang(); } }));
@@ -101,13 +101,6 @@ function heroPlay() { clearInterval(heroTimer); if (!reduced.matches) heroTimer 
 $('heroArt').addEventListener('click', () => { const i = S.works.findIndex(w => w.id === heroIds[heroIndex]); filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === S.works[i].id)); });
 $('heroArt').style.cursor = 'zoom-in';
 heroPlay();
-
-/* ---------- marquee ---------- */
-function renderMarquee() {
-  const words = S.marquee[lang], track = $('marquee'), frag = [];
-  for (let r = 0; r < 4; r++) words.forEach(w => { frag.push(el('span', '', w)); frag.push(el('span', 'star', '✳')); });
-  track.replaceChildren(...frag);
-}
 
 /* ---------- journey ---------- */
 const journey = $('journey'), layers = $('journeyLayers'), scenes = S.journey;

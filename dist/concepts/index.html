@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>כיווני עיצוב · סנדרה לייפר</title><link rel="stylesheet" href="shared.css">
+<style>
+.wrap{padding:100px clamp(16px,5vw,70px) 60px;max-width:1300px;margin:0 auto}
+h1{font-family:var(--serif);font-weight:300;font-size:clamp(44px,7vw,100px);line-height:.95;margin:0 0 18px}
+h1 em{font-style:normal;color:var(--gold)}
+.lead{color:#bbb;max-width:640px;line-height:1.7;margin:0 0 50px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:22px}
+.card{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/3.2;display:flex;flex-direction:column;justify-content:flex-end;padding:24px;isolation:isolate;border:1px solid rgba(255,255,255,.08);transition:transform .5s cubic-bezier(.2,.7,.1,1)}
+.card:hover{transform:translateY(-6px)}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform 1.2s}
+.card:hover img{transform:scale(1.06)}
+.card::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(8,6,12,.92) 10%,rgba(8,6,12,.15) 70%)}
+.card .n{font-size:12px;letter-spacing:.2em;color:var(--gold)}
+.card h2{font-family:var(--serif);font-weight:400;font-size:30px;margin:6px 0 6px}
+.card p{margin:0;font-size:14.5px;color:#ddd;line-height:1.6}
+.card .tag{font-size:12px;color:#aaa;margin-top:10px}
+.foot{margin-top:50px;color:#999;font-size:14px;line-height:1.8}
+.foot a{color:var(--gold)}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← לאתר הנוכחי</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="wrap">
+<h1>שישה כיוונים.<br><em>תבחר אחד.</em></h1>
+<p class="lead">כל כיוון הוא דף עובד עם היצירות של סנדרה — לא תמונה סטטית. פתחו בנייד ובמחשב, תגללו, תגררו ותזיזו את העכבר. אחרי הבחירה אבנה את כל האתר סביב הכיוון שנבחר (אפשר גם לשלב שניים).</p>
+<div class="grid" id="grid"></div>
+<p class="foot">ובנוסף: <a href="fonts/">שבע אפשרויות לפונטים בעברית וברוסית ←</a></p>
+</div>
+<script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script>
+<script>
+const opts = [
+ ['1-dive','night-faces','צלילה לתוך היצירה','גוללים — והציור מתקרב ומתקרב עד שנבלעים בתוכו, ומתוך פרט קטן נפתחת היצירה הבאה.','מסך מלא · גלילה'],
+ ['2-canvas','stained','קיר אינסופי','כל העבודות פרושות על קיר ענק שאין לו סוף. גוררים לכל כיוון, לוחצים על יצירה והיא נפתחת.','גרירה · עכבר ומגע'],
+ ['3-walk','horse','הליכה לאורך התערוכה','גלילה למטה מזיזה את היצירות לרוחב, כמו הליכה במסדרון של גלריה. צבע החדר משתנה לפי היצירה שמולך.','גלילה אופקית'],
+ ['4-river','embrace','פזורות לאורך הדף','היצירות מפוזרות בכל הדף בגדלים ובעומקים שונים, וכל אחת זזה במהירות אחרת בגלילה. הכי קרוב למה שתיארת.','פרלקסה · קולאז׳'],
+ ['5-brush','europa','לצייר את הציור','המסך חשוך, והעכבר או האצבע הם מכחול — כל תנועה ״מציירת״ את היצירה של סנדרה מתחת לידיים.','אינטראקטיבי'],
+ ['6-tunnel','spiral','מעוף בין היצירות','היצירות מרחפות בחלל תלת־ממדי, והגלילה מעיפה אותך קדימה ביניהן.','תלת־ממד']
+];
+const IMG = window.IMAGES.works;
+document.getElementById('grid').innerHTML = opts.map(([dir, art, t, d, tag], i) => `<a class="card" href="${dir}/"><img src="../assets/img/works/${art}-800.webp" alt="" loading="lazy"><span class="n">אפשרות ${i + 1}</span><h2>${t}</h2><p>${d}</p><span class="tag">${tag}</span></a>`).join('');
+</script></body></html>

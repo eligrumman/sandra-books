@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>אפשרות 3 · הליכה לאורך הקיר</title><link rel="stylesheet" href="../shared.css">
+<style>
+body{transition:background-color .8s}
+.intro{height:100vh;height:100svh;display:grid;place-items:center;text-align:center;padding:20px}
+.intro h1{font-family:var(--serif);font-weight:300;font-size:clamp(60px,12vw,200px);line-height:.9;margin:0;letter-spacing:-.03em}
+.intro h1 em{font-style:normal;color:var(--gold)}
+.intro p{font-size:18px;opacity:.8}
+.walk{position:relative}
+.pin{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:flex;align-items:center}
+.rail{display:flex;align-items:center;gap:clamp(60px,9vw,160px);padding:0 30vw;will-change:transform;flex-shrink:0}
+.piece{flex:0 0 auto;position:relative;direction:rtl}
+.piece .frame{box-shadow:0 30px 80px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.06);overflow:hidden;background:#222}
+.piece img{height:100%;width:100%;object-fit:cover;transition:transform 1.2s}
+.piece:hover img{transform:scale(1.04)}
+.piece .cap{margin-top:16px}
+.piece h3{font-family:var(--serif);font-weight:300;font-size:clamp(22px,2.2vw,32px);margin:0}
+.piece p{margin:2px 0 0;font-size:13px;opacity:.7}
+.piece .num{position:absolute;top:-34px;inset-inline-start:0;font-size:12px;letter-spacing:.2em;opacity:.6;direction:ltr}
+.word{flex:0 0 auto;font-family:var(--serif);font-weight:300;font-size:clamp(70px,11vw,180px);line-height:.95;white-space:nowrap;opacity:.9;direction:rtl}
+.word em{font-style:normal;color:var(--gold)}
+.light{position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 50% at 50% 40%,rgba(255,255,255,.07),transparent 70%)}
+.outro{height:70vh;display:grid;place-items:center;font-family:var(--serif);font-size:clamp(36px,5vw,70px);font-weight:300}
+</style></head><body>
+<header class="cbar"><a class="back" href="../">← כל האפשרויות</a><span class="name">Sandra <b>Leifer</b></span></header>
+<div class="light"></div>
+<section class="intro"><div><h1>תערוכה<br><em>אחת ארוכה.</em></h1><p>גללו — ותלכו לאורך הקיר. הצבע של החדר משתנה לפי היצירה.</p></div></section>
+<section class="walk" id="walk"><div class="pin"><div class="rail" id="rail"></div></div></section>
+<section class="outro">סוף המסדרון. תחילת הגלריה.</section>
+<script src="../../assets/js/images.js"></script><script src="../../assets/js/data.js"></script><script src="../shared.js"></script>
+<script>
+const seq = ['horse','night-faces','embrace','spiral','europa','gaze','red-forest','mermaid','alchemist','stained','lilac-dance','winter'];
+const words = {3: 'קו אחד.<br><em>עולם שלם.</em>', 6: 'מתוך הכתם<br><em>מגיחות פנים.</em>', 9: 'לפעמים<br><em>על העור.</em>'};
+const rail = document.getElementById('rail'), walk = document.getElementById('walk');
+const vh = () => innerHeight;
+const pieces = [];
+seq.forEach((id, i) => {
+  if (words[i]) { const w = document.createElement('div'); w.className = 'word'; w.innerHTML = words[i]; rail.append(w); }
+  const h = vh() * (i % 3 === 0 ? .66 : i % 3 === 1 ? .5 : .58), wdt = h * C.ratio(id);
+  const p = document.createElement('figure'); p.className = 'piece'; p.style.margin = 0; p.style.transform = `translateY(${(i % 2 ? 1 : -1) * vh() * .05}px)`;
+  p.innerHTML = `<span class="num">${String(i + 1).padStart(2, '0')}</span><div class="frame" style="height:${h}px;width:${wdt}px"><img src="${C.src(id, 1600)}" alt="${C.title(id)}" loading="lazy"></div><figcaption class="cap"><h3>${C.title(id)}</h3><p>${C.meta(id)}</p></figcaption>`;
+  rail.append(p); pieces.push({p, id});
+});
+function size() { walk.style.height = (rail.scrollWidth - innerWidth + innerHeight) + 'px'; }
+const tint = c => { const n = parseInt(c.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return `rgb(${Math.round(r * .28 + 10)},${Math.round(g * .28 + 9)},${Math.round(b * .28 + 14)})`; };
+function frame() {
+  const top = walk.getBoundingClientRect().top, max = rail.scrollWidth - innerWidth;
+  const x = Math.min(max, Math.max(0, -top));
+  rail.style.transform = `translate3d(${x}px,0,0)`;
+  // colour the room after the work nearest the centre
+  let best = null, bd = 1e9;
+  for (const o of pieces) { const r = o.p.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - innerWidth / 2); if (d < bd) { bd = d; best = o; } }
+  if (best && top < innerHeight * .5) document.body.style.backgroundColor = tint(C.color(best.id)); else document.body.style.backgroundColor = '';
+}
+addEventListener('scroll', () => requestAnimationFrame(frame), {passive: true});
+addEventListener('resize', () => { size(); frame(); });
+addEventListener('load', () => { size(); frame(); }); size(); frame();
+</script></body></html>
