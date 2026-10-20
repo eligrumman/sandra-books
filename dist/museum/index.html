@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>המוזיאון של סנדרה לייפר</title><link rel="stylesheet" href="../concepts/shared.css">
+<title>התערוכה של סנדרה לייפר</title><link rel="stylesheet" href="../concepts/shared.css">
 <style>
 html,body{height:100%;overflow:hidden;background:#0c0b0f}
+html[lang=ru] body{font-family:'Comfortaa',system-ui,sans-serif}
 canvas{display:block;touch-action:none;cursor:grab}
 canvas.drag{cursor:grabbing}
 .loading{position:fixed;inset:0;display:grid;place-items:center;z-index:50;background:#0c0b0f;transition:opacity .8s}
@@ -12,27 +13,44 @@ canvas.drag{cursor:grabbing}
 .loading .bar{width:220px;height:3px;background:#333;margin:18px auto 0;border-radius:3px;overflow:hidden}
 .loading .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
 .loading button{margin-top:22px;font:inherit;font-size:16px;padding:12px 28px;border-radius:40px;border:0;background:var(--paper);color:var(--ink);cursor:pointer}
-.ui{position:fixed;z-index:20;bottom:calc(18px + env(safe-area-inset-bottom));inset-inline:0;display:flex;justify-content:center;gap:10px;pointer-events:none}
-.ui button{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;font:inherit;font-size:14px;color:#fff;background:rgba(20,18,26,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:10px 18px;cursor:pointer}
+.ui{position:fixed;z-index:20;bottom:calc(18px + env(safe-area-inset-bottom));inset-inline:0;display:flex;justify-content:center;gap:10px;pointer-events:none;direction:ltr}
+.ui button{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;min-height:42px;font:inherit;font-size:14px;color:#fff;background:rgba(14,12,18,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.4);border-radius:30px;padding:10px 18px;cursor:pointer}
 .ui button.on{background:var(--gold);color:#1a1408;border-color:var(--gold)}
-.label{position:fixed;z-index:20;top:76px;inset-inline-start:50%;transform:translateX(50%);text-align:center;background:rgba(20,18,26,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 22px;opacity:0;transition:opacity .4s;pointer-events:none;min-width:240px}
-[dir=rtl] .label{transform:translateX(50%)}
-.label.show{opacity:1}
-.label b{display:block;font-family:var(--serif);font-size:34px;font-weight:700;line-height:1}
-.label span{font-size:13px;color:#ccc}
-.help{position:fixed;z-index:20;top:76px;inset-inline-end:18px;font-size:12px;color:#aaa;background:rgba(20,18,26,.6);padding:8px 12px;border-radius:10px;max-width:220px;line-height:1.6}
+
+/* the card that says what you are looking at: beside the work on wide screens, above it on phones */
+.label{position:fixed;z-index:20;top:76px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));text-align:center;background:rgba(14,12,18,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 22px;opacity:0;transition:opacity .4s;pointer-events:none}
+.label.show{opacity:1;pointer-events:auto}
+.label .room{display:block;font-size:12px;letter-spacing:.14em;color:var(--gold);margin-bottom:4px}
+.label b{display:block;font-family:var(--serif);font-size:36px;font-weight:700;line-height:1}
+.label .lm{display:block;margin-top:4px;font-size:13.5px;color:#e4ddd3}
+.label .lp{display:block;margin-top:6px;font-size:17px;color:var(--gold)}
+.label .lp.muted{color:#cfc6ba;font-size:14px}
+.lrow{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lrow button,.lrow a{font:inherit;font-size:14px;padding:8px 16px;border-radius:30px;cursor:pointer;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);color:#fff}
+.lrow a{background:var(--gold);border-color:var(--gold);color:#1a1408;font-weight:500}
+.ldesc{margin-top:12px;max-height:min(36vh,300px);overflow:auto;overscroll-behavior:contain;text-align:start;font-size:15px;line-height:1.7;color:#eee6da;-webkit-user-select:text;user-select:text}
+.ldesc p{margin:0 0 .7em}
+@media (min-width:900px){
+  .label{top:50%;left:clamp(16px,3vw,40px);transform:translateY(-50%);width:clamp(320px,28vw,400px);text-align:start;padding:22px 26px}
+  .label b{font-size:46px}
+  .lrow{justify-content:flex-start}
+  .ldesc{max-height:min(44vh,420px)}
+}
+.help{position:fixed;z-index:20;top:76px;inset-inline-end:18px;font-size:13px;color:#f1ece4;background:rgba(14,12,18,.85);border:1px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;max-width:230px;line-height:1.6;transition:opacity .4s}
+.help.hide{opacity:0}
 @media (pointer:coarse){.help{display:none}}
 
 /* readable over light walls */
 .cbar{mix-blend-mode:normal}
 .cbar .name,.cbar .back{background:rgba(14,12,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:6px 16px;border:1px solid rgba(255,255,255,.2)}
-.help{background:rgba(14,12,18,.85);color:#f1ece4;font-size:13px;border:1px solid rgba(255,255,255,.15)}
-.label{background:rgba(14,12,18,.88);border-color:rgba(255,255,255,.2)}
-.label span{color:#e4ddd3}
-.ui button{background:rgba(14,12,18,.88);border-color:rgba(255,255,255,.4)}
+.cbar .right{display:flex;gap:10px;align-items:center}
+.langs{display:flex;background:rgba(14,12,18,.82);border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:3px}
+.langs button{font:inherit;font-size:12.5px;color:#ddd;background:none;border:0;border-radius:30px;padding:5px 10px;cursor:pointer}
+.langs button[aria-pressed=true]{background:var(--paper);color:var(--ink)}
+@media (max-width:520px){.cbar .name{display:none}}
 
 /* no text selection or blue highlight on taps (iPhone) */
-body,.ui,.joy,.label,.help,button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+body,.ui,.joy,.help,button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .joy{position:fixed;z-index:21;bottom:calc(78px + env(safe-area-inset-bottom));right:22px;width:118px;height:118px;border-radius:50%;background:rgba(14,12,18,.55);border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);touch-action:none;display:none}
 .joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(0,0,0,.4);transition:transform .15s}
 .joy.active i{transition:none}
@@ -40,105 +58,225 @@ body,.ui,.joy,.label,.help,button{-webkit-user-select:none;user-select:none;-web
 </style>
 <script type="importmap">{"imports":{"three":"../assets/vendor/three.module.min.js"}}</script>
 </head><body>
-<header class="cbar"><a class="back" href="../">← חזרה לאתר</a><span class="name">Sandra <b>Leifer</b></span></header>
-<div class="loading" id="loading"><div><h1>החדר של<br>סנדרה</h1><p>תלים את היצירות על הקירות…</p><div class="bar"><i id="bar"></i></div><button id="enter" hidden>להיכנס לחדר</button></div></div>
-<div class="label" id="label"><b id="lt"></b><span id="lm"></span></div>
-<div class="help">גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה</div>
-<div class="joy" id="joy" aria-label="ג׳ויסטיק להליכה"><i id="knob"></i></div>
-<div class="ui"><button id="prev" aria-label="הקודמת"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><button id="tour">סיור מודרך</button><button id="next" aria-label="הבאה"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+<header class="cbar"><a class="back" id="back" href="../"></a><span class="right"><span class="langs"><button type="button" data-lang="he">עב</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="en">EN</button></span><span class="name">Sandra <b>Leifer</b></span></span></header>
+<div class="loading" id="loading"><div><h1 id="ltitle"></h1><p id="lsub"></p><div class="bar"><i id="bar"></i></div><button id="enter" hidden></button></div></div>
+<div class="label" id="label" aria-live="polite"><span class="room" id="lr"></span><b id="lt"></b><span class="lm" id="lm"></span><span class="lp" id="lp"></span><div class="lrow"><button type="button" id="lmore" aria-expanded="false" aria-controls="ld"></button><a id="lask" href="../#contact"></a></div><div class="ldesc" id="ld" hidden></div></div>
+<div class="help" id="help"></div>
+<div class="joy" id="joy"><i id="knob"></i></div>
+<div class="ui"><button id="left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button id="tour"></button><button id="right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
 <script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script><script src="../assets/js/catalog.js"></script><script>window.C_BASE = "../";</script><script src="../concepts/shared.js"></script>
 <script type="module">
 import * as THREE from 'three';
-const ROOM = {w: 22, d: 14, h: 4.6};
-const works = ['angels','flute','serpent','skull','embrace','tree-tears','night-faces','star-voyage','cosmic-face','night-light','two-profiles','red-forest','stargaze','spiral','mosaic','europa','blue-tree','alchemist','horse','gaze'];
+
+/* ---------- language ---------- */
+const T = {
+  he: {back: '← חזרה לאתר', title: 'התערוכה של<br>סנדרה', loading: 'תולים את היצירות על הקירות…', enter: 'להיכנס לתערוכה', tour: 'סיור מודרך', stop: 'עצירה',
+    help: 'גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה', about: 'על היצירה', ask: 'לפרטים ולרכישה',
+    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר'},
+  ru: {back: '← На сайт', title: 'Выставка<br>Сандры', loading: 'Развешиваем работы…', enter: 'Войти на выставку', tour: 'Экскурсия', stop: 'Стоп',
+    help: 'Тяните, чтобы осмотреться · стрелки или W A S D, чтобы идти · нажмите на работу, чтобы подойти к ней', about: 'О работе', ask: 'Узнать о покупке',
+    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', cm: 'см', name: 'Сандра Лейфер', room: 'Зал'},
+  en: {back: '← Back to the site', title: 'Sandra’s<br>exhibition', loading: 'Hanging the works…', enter: 'Enter the exhibition', tour: 'Guided tour', stop: 'Stop',
+    help: 'Drag to look around · arrows or W A S D to walk · click a work to go to it', about: 'About the work', ask: 'Details and purchase',
+    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', cm: 'cm', name: 'Sandra Leifer', room: 'Room'}
+};
+const LANGS = ['he', 'ru', 'en'];
+const store = {get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }};
+let lang = new URLSearchParams(location.search).get('lang') || store.get('sl-lang') || 'he'; if (!LANGS.includes(lang)) lang = 'he';
+const L = arr => arr[LANGS.indexOf(lang)] ?? arr[0];
+const t = k => T[lang][k];
+const $ = id => document.getElementById(id);
+
+/* ---------- the works: Sandra's catalog at real size, a room per series ---------- */
+const work = id => SITE.works.find(w => w.id === id);
+const seriesText = (kind, k) => { const s = SITE.series.find(x => x.id === kind); return L([s.he[k], s.ru[k], s.en[k]]); };
+const ltr = x => '⁦' + x + '⁩';
+function info(id) {
+  const w = work(id);
+  return {title: L(w.t), medium: L(w.med), size: [ltr(w.s) + ' ' + t('cm'), ltr(String(w.y))].join(' · '),
+    price: w.status ? L(w.status) : (w.price || ''), sold: !!w.status, desc: L(w.d)};
+}
+const onCanvas = id => /холст/i.test(CATALOG[id].med[1]);
+const size = id => work(id).s.split('×').map(n => parseFloat(n) / 100); // catalog "W × H" in cm
+const MAT = .08, BORDER = .025, LABEL = {w: .3, h: .15, gap: .08}, SPACE = .7;
+const frameOf = id => { const [w, h] = size(id), k = onCanvas(id) ? .025 : MAT + BORDER; return {w, h, fw: w + 2 * k, fh: h + 2 * k, canvas: onCanvas(id)}; };
+const unit = id => frameOf(id).fw + LABEL.gap + LABEL.w;
+// rooms in visiting order; each has its own wall colour and light
+const ROOMS = [
+  {kind: 'paint', wall: '#ece6dc', ink: '#2a2420', sub: '#7a6a5a', light: '#fff4e2'},
+  {kind: 'hidden', wall: '#27294a', ink: '#f1e9dc', sub: '#b9b3d6', light: '#e6e2ff'},
+  {kind: 'neuro', wall: '#f4f3ef', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff'}
+];
+const W = 12, H = 4.6, DOOR = {w: 2.2, h: 3}, WALL = .2, EDGE = .8;
+const all = Object.keys(CATALOG).sort((a, b) => CATALOG[a].no - CATALOG[b].no).filter(id => C.IMG[id]);
+let z = 0;
+ROOMS.forEach((r, i) => {
+  // canvases first, so the big works face you as you come in
+  r.works = all.filter(id => work(id).kind === r.kind).sort((a, b) => onCanvas(b) - onCanvas(a));
+  const last = i === ROOMS.length - 1, side = W / 2 - EDGE - DOOR.w / 2 - .5;
+  const backFront = (last ? W - 2 * EDGE : 2 * side) + 2 * side;
+  const need = r.works.reduce((a, id) => a + unit(id) + SPACE, 0);
+  r.d = Math.max(7, Math.ceil((need - backFront) / 2 + 2 * EDGE));
+  r.front = z; r.back = z - r.d; r.zc = z - r.d / 2; r.last = last; z = r.back;
+});
+
+/* ---------- scene ---------- */
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
 document.body.prepend(renderer.domElement);
-const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); scene.fog = new THREE.Fog('#0c0b0f', 18, 34);
-const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, .05, 60);
-camera.position.set(0, 1.65, ROOM.d / 2 - 2); camera.rotation.order = 'YXZ';
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); scene.fog = new THREE.Fog('#0c0b0f', 22, 40);
+const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, .05, 80);
+camera.rotation.order = 'YXZ';
 let yaw = 0, pitch = 0;
-
-// light: soft overall + warm from above
+camera.position.set(0, 1.65, ROOMS[0].front - 2);
 scene.add(new THREE.HemisphereLight('#fff7ea', '#3a3028', .9));
 const sun = new THREE.DirectionalLight('#ffffff', .35); sun.position.set(3, 8, 4); scene.add(sun);
 
-// textures drawn on canvases (floor boards, wall plaster, light pools, labels)
+// textures drawn on canvases; the ones with words are redrawn when the language changes
+const live = [];
 function canvasTex(w, h, draw, repeat) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-  if (repeat) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...repeat); }
-  return t;
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+  if (repeat) { tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(...repeat); }
+  return tx;
 }
+function textTex(w, h, draw) { const tx = canvasTex(w, h, () => {}); live.push(() => { const g = tx.image.getContext('2d'); g.clearRect(0, 0, w, h); draw(g, w, h); tx.needsUpdate = true; }); return tx; }
+const fontOf = () => lang === 'ru' ? 'Comfortaa' : 'Fredoka';
+function fit(c, text, weight, size, family, max, min) { do { c.font = `${weight} ${size}px ${family}`; } while (c.measureText(text).width > max && --size > min); }
+
+const length = -z;
 const floorTex = canvasTex(1024, 1024, (g, w, h) => {
   for (let i = 0; i < 8; i++) { const y = i * h / 8; g.fillStyle = `hsl(28,${30 + (i * 7) % 10}%,${26 + (i * 13) % 8}%)`; g.fillRect(0, y, w, h / 8);
     for (let k = 0; k < 60; k++) { g.strokeStyle = `rgba(0,0,0,${Math.random() * .12})`; g.beginPath(); const yy = y + Math.random() * h / 8; g.moveTo(0, yy); g.bezierCurveTo(w / 3, yy + 4, w * 2 / 3, yy - 4, w, yy); g.stroke(); }
     g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, y, w, 2); g.fillRect((i % 2) * w / 2, y, 2, h / 8); }
-}, [ROOM.w / 4, ROOM.d / 4]);
-const wallTex = canvasTex(512, 512, (g, w, h) => { g.fillStyle = '#ece6dc'; g.fillRect(0, 0, w, h); for (let k = 0; k < 4000; k++) { g.fillStyle = `rgba(${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},.025)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } }, [6, 2]);
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.w, ROOM.d), new THREE.MeshStandardMaterial({map: floorTex, roughness: .55, metalness: .05}));
-floor.rotation.x = -Math.PI / 2; scene.add(floor);
-const ceil = new THREE.Mesh(new THREE.PlaneGeometry(ROOM.w, ROOM.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'}));
-ceil.rotation.x = Math.PI / 2; ceil.position.y = ROOM.h; scene.add(ceil);
-const wallMat = new THREE.MeshLambertMaterial({map: wallTex});
-const walls = [
-  {pos: [0, ROOM.h / 2, -ROOM.d / 2], rot: 0, len: ROOM.w},
-  {pos: [ROOM.w / 2, ROOM.h / 2, 0], rot: -Math.PI / 2, len: ROOM.d},
-  {pos: [0, ROOM.h / 2, ROOM.d / 2], rot: Math.PI, len: ROOM.w},
-  {pos: [-ROOM.w / 2, ROOM.h / 2, 0], rot: Math.PI / 2, len: ROOM.d}
-];
-for (const w of walls) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w.len, ROOM.h), wallMat); m.position.set(...w.pos); m.rotation.y = w.rot; scene.add(m);
-  const base = new THREE.Mesh(new THREE.BoxGeometry(w.len, .12, .04), new THREE.MeshLambertMaterial({color: '#2b2622'})); base.position.set(w.pos[0], .06, w.pos[2]); base.rotation.y = w.rot; base.translateZ(.02); scene.add(base); }
-// ceiling light strips
-for (let x = -8; x <= 8; x += 8) { const l = new THREE.Mesh(new THREE.BoxGeometry(.25, .05, ROOM.d - 3), new THREE.MeshBasicMaterial({color: '#fffaf0'})); l.position.set(x, ROOM.h - .03, 0); scene.add(l); }
-// bench in the middle
-const wood = new THREE.MeshStandardMaterial({color: '#6b4a32', roughness: .6});
-const seat = new THREE.Mesh(new THREE.BoxGeometry(3.2, .1, .8), wood); seat.position.set(0, .48, 0); scene.add(seat);
-for (const sx of [-1.4, 1.4]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(.1, .45, .7), new THREE.MeshStandardMaterial({color: '#222'})); leg.position.set(sx, .22, 0); scene.add(leg); }
+}, [W / 4, length / 4]);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, length), new THREE.MeshStandardMaterial({map: floorTex, roughness: .55, metalness: .05}));
+floor.rotation.x = -Math.PI / 2; floor.position.z = z / 2; scene.add(floor);
+const plaster = hex => canvasTex(512, 512, (g, w, h) => { g.fillStyle = hex; g.fillRect(0, 0, w, h); for (let k = 0; k < 4000; k++) { g.fillStyle = `rgba(${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},.03)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } }, [4, 2]);
+const pool = hex => canvasTex(256, 256, (g, w, h) => { const c = new THREE.Color(hex), rgb = `${c.r * 255 | 0},${c.g * 255 | 0},${c.b * 255 | 0}`; const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, `rgba(${rgb},.55)`); r.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+const trim = new THREE.MeshLambertMaterial({color: '#2b2622'});
 
-// the artist's name on the entrance wall
-const nameTex = canvasTex(2048, 512, (g, w, h) => { g.clearRect(0, 0, w, h); g.fillStyle = '#2a2420'; g.direction = 'rtl'; g.textAlign = 'center'; g.font = '700 260px "Amatic SC"'; g.fillText('סנדרה לייפר', w / 2, 300); g.font = '300 64px Fredoka'; g.fillStyle = '#7a6a5a'; g.fillText('ציור · נוירוגרפיקה · עולמות נסתרים', w / 2, 430); });
-const pool = canvasTex(256, 256, (g, w, h) => { const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, 'rgba(255,236,200,.55)'); r.addColorStop(1, 'rgba(255,236,200,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h); });
+// one face of a wall, with an optional doorway in the middle
+function face(mat, pos, rot, len, door) {
+  const add = (w, h, x, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(...pos); m.rotation.y = rot; m.translateX(x); m.position.y = y; scene.add(m); };
+  const base = (w, x) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, .12, .04), trim); b.position.set(...pos); b.rotation.y = rot; b.translateX(x); b.position.y = .06; b.translateZ(.02); scene.add(b); };
+  if (!door) { add(len, H, 0, H / 2); base(len, 0); return; }
+  const s = (len - DOOR.w) / 2, x = (DOOR.w + s) / 2;
+  add(s, H, -x, H / 2); add(s, H, x, H / 2); add(DOOR.w, H - DOOR.h, 0, (H + DOOR.h) / 2); base(s, -x); base(s, x);
+}
+for (const [i, r] of ROOMS.entries()) {
+  const mat = new THREE.MeshLambertMaterial({map: plaster(r.wall)});
+  // local x of a face runs to the right of a visitor facing it
+  r.faces = {
+    back: {pos: [0, 0, r.back + (r.last ? 0 : WALL / 2)], rot: 0, len: W, door: !r.last},
+    right: {pos: [W / 2, 0, r.zc], rot: -Math.PI / 2, len: r.d},
+    front: {pos: [0, 0, r.front - (i ? WALL / 2 : 0)], rot: Math.PI, len: W, door: true},
+    left: {pos: [-W / 2, 0, r.zc], rot: Math.PI / 2, len: r.d}
+  };
+  for (const f of Object.values(r.faces)) face(mat, f.pos, f.rot, f.len, f.door);
+  if (!r.last) for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.PlaneGeometry(WALL, DOOR.h), trim); j.position.set(sx * DOOR.w / 2, DOOR.h / 2, r.back); j.rotation.y = -sx * Math.PI / 2; scene.add(j); }
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, r.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'})); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, r.zc); scene.add(ceil);
+  for (const x of [-3.5, 3.5]) { const l = new THREE.Mesh(new THREE.BoxGeometry(.2, .05, r.d - 2), new THREE.MeshBasicMaterial({color: r.light})); l.position.set(x, H - .03, r.zc); scene.add(l); }
+  r.pool = pool(r.light);
+  // the room's name over the doorway ahead of you (in the last room, on the end wall)
+  const title = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
+    g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
+    const top = `${t('room')} ${i + 1}`, name = seriesText(r.kind, 0), line = seriesText(r.kind, 1);
+    g.fillStyle = r.sub; fit(g, top, 400, 54, fontOf(), w - 80, 20); g.fillText(top, w / 2, 70);
+    g.fillStyle = r.ink; fit(g, name, 700, 190, '"Amatic SC"', w - 80, 60); g.fillText(name, w / 2, 250);
+    g.fillStyle = r.sub; fit(g, line, 400, 46, fontOf(), w - 80, 18); g.fillText(line, w / 2, 345);
+  })}));
+  title.scale.setScalar(r.last ? 1 : .78); title.position.set(0, r.last ? 3.45 : 3.82, r.faces.back.pos[2] + .01); scene.add(title);
+}
+// the artist's name over the entrance, seen when you turn around in the first room
+{ const r = ROOMS[0], nm = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
+    g.textAlign = 'center'; g.fillStyle = r.ink; fit(g, t('name'), 700, 230, '"Amatic SC"', w - 80, 80); g.fillText(t('name'), w / 2, 260);
+  })})); nm.scale.setScalar(.78); nm.position.set(0, 3.82, r.front - .01); nm.rotation.y = Math.PI; scene.add(nm); }
 
-// hang the works
-const loader = new THREE.TextureLoader(), hung = [];
-const slots = []; // [wall index, offset along wall]
-[[0, [-8, -4, 0, 4, 8]], [1, [-4.5, 0, 4.5]], [2, [-8, -4, 4, 8]], [3, [-4.5, 0, 4.5]]].forEach(([wi, offs]) => offs.forEach(o => slots.push([wi, o])));
-const items = works.filter(id => C.IMG[id]).slice(0, slots.length);
+/* ---------- hang every work ---------- */
+function drawLabel(c, cw, chh, id) {
+  const f = info(id), rtl = lang === 'he', x = rtl ? cw - 34 : 34, max = cw - 68, font = fontOf();
+  c.direction = rtl ? 'rtl' : 'ltr'; c.textAlign = rtl ? 'right' : 'left';
+  c.fillStyle = '#f7f3ec'; c.fillRect(0, 0, cw, chh); c.strokeStyle = '#d9cfc0'; c.lineWidth = 3; c.strokeRect(1.5, 1.5, cw - 3, chh - 3);
+  c.fillStyle = '#1e1a17'; fit(c, f.title, 700, 76, '"Amatic SC"', max, 30); c.fillText(f.title, x, 92);
+  c.fillStyle = '#4a433d'; fit(c, f.medium, 400, 30, font, max, 14); c.fillText(f.medium, x, 160);
+  fit(c, f.size, 400, 30, font, max, 14); c.fillText(f.size, x, 208);
+  if (f.price) { c.fillStyle = f.sold ? '#7a7068' : '#8a5a12'; fit(c, f.price, f.sold ? 400 : 500, 32, font, max, 14); c.fillText(f.price, x, 270); }
+}
+const loader = new THREE.TextureLoader(), hung = [], hiRes = !matchMedia('(pointer:coarse)').matches;
 let loaded = 0;
-await document.fonts.load('700 40px "Amatic SC"').catch(() => {}); await document.fonts.load('300 20px Fredoka').catch(() => {});
-{ const nm = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), new THREE.MeshBasicMaterial({map: nameTex, transparent: true})); nm.position.set(0, 3.1, ROOM.d / 2 - .02); nm.rotation.y = Math.PI; scene.add(nm); }
-items.forEach((id, i) => {
-  const [wi, off] = slots[i], w = walls[wi], r = C.ratio(id);
-  const maxH = 2.4, maxW = wi % 2 ? 3.2 : 3.4; let ph = maxH, pw = ph * r; if (pw > maxW) { pw = maxW; ph = pw / r; }
-  const g = new THREE.Group(); g.position.set(...w.pos); g.rotation.y = w.rot; g.translateX(off); g.position.y = 1.75; g.translateZ(.06);
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(pw + .12, ph + .12, .06), new THREE.MeshStandardMaterial({color: '#1b1714', roughness: .4})); g.add(frame);
+// load every script the labels use (fonts arrive per alphabet)
+const fonts = () => Promise.all(['700 40px "Amatic SC"', '400 20px Fredoka', '500 20px Fredoka', '400 20px Comfortaa'].map(f => document.fonts.load(f, 'Aa אב Жж ₪').catch(() => {})));
+await fonts();
+function hang(id, ri, fc, x) {
+  const r = ROOMS[ri], f = frameOf(id), cy = f.canvas ? 1.55 : 1.5, i = hung.length;
+  const g = new THREE.Group(); g.position.set(...fc.pos); g.rotation.y = fc.rot; g.translateX(x + f.fw / 2); g.position.y = cy; g.translateZ(.04);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(f.fw, f.fh, f.canvas ? .045 : .03), new THREE.MeshStandardMaterial({color: f.canvas ? '#1b1714' : '#2a2420', roughness: .45})));
+  if (!f.canvas) { const m = new THREE.Mesh(new THREE.PlaneGeometry(f.w + 2 * MAT, f.h + 2 * MAT), new THREE.MeshBasicMaterial({color: '#efebe3'})); m.position.z = .016; g.add(m); }
   const mat = new THREE.MeshBasicMaterial({color: '#222'});
-  const pic = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), mat); pic.position.z = .032; g.add(pic);
-  loader.load(C.src(id, 1600), t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; mat.map = t; mat.color.set('#ffffff'); mat.needsUpdate = true; loaded++; progress(); });
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(pw * 2.2, ph * 2.2), new THREE.MeshBasicMaterial({map: pool, transparent: true, depthWrite: false})); glow.position.set(0, .35, -.04); g.add(glow);
-  const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.05, .08, .25, 12), new THREE.MeshStandardMaterial({color: '#111'})); lamp.position.set(0, ph / 2 + .55, .25); lamp.rotation.x = .6; g.add(lamp);
-  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(.75, .24), new THREE.MeshBasicMaterial({map: canvasTex(500, 160, (c, cw, chh) => { c.fillStyle = '#f7f3ec'; c.fillRect(0, 0, cw, chh); c.fillStyle = '#222'; c.direction = 'rtl'; c.textAlign = 'right'; const tt = C.title(id); let ts = 64; do { c.font = `700 ${ts}px "Amatic SC"`; } while (c.measureText(tt).width > cw - 40 && --ts > 30); c.fillText(tt, cw - 20, 70); c.fillStyle = '#666'; const m = C.meta(id); let fs = 26; do { c.font = `300 ${fs}px Fredoka`; } while (c.measureText(m).width > cw - 40 && --fs > 14); c.fillText(m, cw - 20, 125); })}));
-  plaque.position.set(pw / 2 + .55, -ph / 2 + .25, .01); if (pw / 2 + .7 > (wi % 2 ? 2 : 1.9)) plaque.position.set(0, -ph / 2 - .2, .01); g.add(plaque);
+  const pic = new THREE.Mesh(new THREE.PlaneGeometry(f.w, f.h), mat); pic.position.z = f.canvas ? .024 : .018; g.add(pic);
+  // real proportions: crop the photo a little rather than stretch it when it is not cut exactly like the work
+  loader.load(C.src(id, f.canvas && hiRes ? 1600 : 800), tx => {
+    const ir = tx.image.width / tx.image.height, ar = f.w / f.h;
+    if (ir > ar) { tx.repeat.x = ar / ir; tx.offset.x = (1 - tx.repeat.x) / 2; } else { tx.repeat.y = ir / ar; tx.offset.y = (1 - tx.repeat.y) / 2; }
+    tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8; mat.map = tx; mat.color.set('#ffffff'); mat.needsUpdate = true; loaded++; progress();
+  });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(f.fw * 2.4 + .6, f.fh * 2.2 + .6), new THREE.MeshBasicMaterial({map: r.pool, transparent: true, depthWrite: false})); glow.position.set(0, .25, -.03); g.add(glow);
+  const lamp = new THREE.Mesh(new THREE.CylinderGeometry(.04, .07, .22, 12), new THREE.MeshStandardMaterial({color: '#111'})); lamp.position.set(0, H - .35 - cy, .9); lamp.rotation.x = .9; g.add(lamp);
+  // the wall label, level with the bottom of the frame, to the right of the work
+  const off = f.fw / 2 + LABEL.gap + LABEL.w / 2;
+  const plaque = new THREE.Mesh(new THREE.PlaneGeometry(LABEL.w, LABEL.h), new THREE.MeshBasicMaterial({map: textTex(640, 320, (c, cw, chh) => drawLabel(c, cw, chh, id))}));
+  plaque.position.set(off, -f.fh / 2 + LABEL.h / 2, .005); g.add(plaque);
   scene.add(g); pic.userData.index = i;
-  const n = new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion);
-  hung.push({id, pic, center: g.position.clone(), normal: n, h: ph});
-});
-function progress() { document.getElementById('bar').style.width = (loaded / items.length * 100) + '%'; if (loaded >= Math.min(6, items.length)) document.getElementById('enter').hidden = false; }
-document.getElementById('enter').onclick = () => { const l = document.getElementById('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); };
+  hung.push({id, room: ri, pic, center: g.position.clone(), normal: new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion), right: new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion), h: f.fh, fw: f.fw, off});
+}
+for (const [ri, r] of ROOMS.entries()) {
+  // stretches of wall in the order a visitor meets them turning right: back, right, front, left
+  const s = W / 2 - EDGE, d = r.d / 2 - EDGE, gap = DOOR.w / 2 + .5;
+  const segs = [...(r.last ? [['back', -s, s]] : [['back', -s, -gap], ['back', gap, s]]), ['right', -d, d], ['front', -s, -gap], ['front', gap, s], ['left', -d, d]];
+  const len = segs.reduce((a, [, a0, a1]) => a + a1 - a0, 0), need = r.works.reduce((a, id) => a + unit(id), 0);
+  let k = 0, acc = 0, share = 0;
+  segs.forEach(([wall, a0, a1], si) => {
+    share += (a1 - a0) / len * need; const part = [];
+    while (k < r.works.length && (si === segs.length - 1 || acc + unit(r.works[k]) / 2 <= share)) { acc += unit(r.works[k]); part.push(r.works[k++]); }
+    const free = (a1 - a0 - part.reduce((a, id) => a + unit(id), 0)) / Math.max(1, part.length);
+    let x = a0 + free / 2;
+    for (const id of part) { hang(id, ri, r.faces[wall], x); x += unit(id) + free; }
+  });
+}
+function progress() { $('bar').style.width = (loaded / hung.length * 100) + '%'; if (loaded >= Math.min(6, hung.length)) $('enter').hidden = false; }
+$('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); };
 
-// moving around
-const keys = {}, bounds = {x: ROOM.w / 2 - .8, z: ROOM.d / 2 - .8};
+/* ---------- the card ---------- */
+const label = $('label'), more = $('lmore'), desc = $('ld');
+let shown = -1;
+function showLabel(i, keep) {
+  if (i === shown && !keep) return; shown = i;
+  if (i < 0) { label.classList.remove('show'); more.setAttribute('aria-expanded', 'false'); desc.hidden = true; return; }
+  const h = hung[i], f = info(h.id);
+  $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
+  $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
+  const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
+  $('lask').hidden = f.sold || !f.price;
+  more.hidden = !f.desc.length;
+  desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
+  label.classList.add('show');
+}
+more.onclick = () => { const open = more.getAttribute('aria-expanded') !== 'true'; more.setAttribute('aria-expanded', String(open)); desc.hidden = !open; if (open) stopTour(); };
+
+/* ---------- moving around ---------- */
+const roomAt = zz => Math.max(0, ROOMS.findIndex(r => zz <= r.front && zz >= r.back));
+const keys = {};
 addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow')) e.preventDefault(); stopTour(); });
 addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 // joystick for touch screens: up = forward, sideways = step aside
-let held = 0, joyX = 0; const joy = document.getElementById('joy'), knob = document.getElementById('knob');
+let held = 0, joyX = 0; const joy = $('joy'), knob = $('knob');
 function joyMove(e) { const r = joy.getBoundingClientRect(), R = r.width / 2; let dx = e.clientX - r.left - R, dy = e.clientY - r.top - R; const d = Math.hypot(dx, dy); if (d > R * .7) { dx *= R * .7 / d; dy *= R * .7 / d; }
   knob.style.transform = `translate(${dx}px,${dy}px)`; held = -dy / (R * .7); joyX = dx / (R * .7); }
 joy.addEventListener('pointerdown', e => { e.preventDefault(); joy.setPointerCapture(e.pointerId); joy.classList.add('active'); stopTour(); joyMove(e); });
 joy.addEventListener('pointermove', e => { if (joy.classList.contains('active')) joyMove(e); });
-['pointerup', 'pointercancel'].forEach(t => joy.addEventListener(t, () => { joy.classList.remove('active'); knob.style.transform = ''; held = 0; joyX = 0; }));
+['pointerup', 'pointercancel'].forEach(ev => joy.addEventListener(ev, () => { joy.classList.remove('active'); knob.style.transform = ''; held = 0; joyX = 0; }));
 const cv = renderer.domElement; let drag = null, moved = 0;
 cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY}; moved = 0; cv.classList.add('drag'); cv.setPointerCapture(e.pointerId); });
 cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; stopTour(); } });
@@ -146,38 +284,97 @@ cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (hit) { stopTour(); goTo(hit.object.userData.index); } }
 
-// gliding to a work
+// going to a work: show its card first, then frame the work and its label in the part of the screen the card leaves free
 let glide = null, current = -1;
 function goTo(i) {
   current = (i + hung.length) % hung.length; const h = hung[current];
-  const dist = Math.max(3, h.h * 1.75), target = h.center.clone().addScaledVector(h.normal, dist); target.y = 1.65;
+  showLabel(current, true);
+  const rc = label.getBoundingClientRect(), wide = innerWidth >= 900;
+  const free = {x0: wide ? rc.right + 16 : 12, y0: wide ? 76 : rc.bottom + 10, x1: innerWidth - 12, y1: innerHeight - 76};
+  const cx = (free.x0 + free.x1) / innerWidth - 1, cy = 1 - (free.y0 + free.y1) / innerHeight;
+  const fwN = (free.x1 - free.x0) / innerWidth * 2, fhN = Math.max(.3, (free.y1 - free.y0) / innerHeight * 2);
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * camera.aspect;
+  const spanW = h.fw + LABEL.gap + LABEL.w + .25, spanH = h.h + .25, mid = (h.off + LABEL.w / 2 - h.fw / 2) / 2;
+  const dist = Math.min(ROOMS[h.room].d - 1, W - 1.2, Math.max(1.1, spanW / (fwN * tanH), spanH / (fhN * tanV)));
+  const target = h.center.clone().addScaledVector(h.normal, dist).addScaledVector(h.right, mid - cx * dist * tanH);
+  target.y = Math.max(.9, Math.min(2.6, h.center.y - cy * dist * tanV));
   const look = Math.atan2(h.normal.x, h.normal.z);
-  glide = {from: camera.position.clone(), to: target, yaw0: yaw, yaw1: yaw + ((look - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI), p0: pitch, t: 0};
-  document.getElementById('lt').textContent = C.title(h.id); document.getElementById('lm').textContent = C.meta(h.id);
-  document.getElementById('label').classList.add('show');
+  // through the doorways when the work is in another room
+  const pts = [camera.position.clone()], from = roomAt(camera.position.z), to = h.room;
+  for (let k = from; k !== to; k += Math.sign(to - from)) { const zz = to > from ? ROOMS[k].back : ROOMS[k].front, dir = to > from ? -1 : 1; pts.push(new THREE.Vector3(0, 1.65, zz - dir * 1.2), new THREE.Vector3(0, 1.65, zz + dir * 1.2)); }
+  pts.push(target);
+  const lens = pts.slice(1).map((p, k) => p.distanceTo(pts[k])), len = lens.reduce((a, b) => a + b, 0);
+  glide = {pts, lens, len, yaw0: yaw, yaw1: yaw + ((look - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI), p0: pitch, t: 0, dur: 1.4 + len / 5, walk: pts.length > 2};
+  if (glide.walk) glide.yawWalk = yaw + (((to > from ? 0 : Math.PI) - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI);
+  $('help').classList.add('hide');
 }
-document.getElementById('next').onclick = () => { stopTour(); goTo(current + 1); };
-document.getElementById('prev').onclick = () => { stopTour(); goTo(current - 1); };
+function along(gl, e) { let d = e * gl.len; for (let k = 0; k < gl.lens.length; k++) { if (d <= gl.lens[k] || k === gl.lens.length - 1) return gl.pts[k].clone().lerp(gl.pts[k + 1], gl.lens[k] ? Math.min(1, d / gl.lens[k]) : 1); d -= gl.lens[k]; } }
+// the arrows follow the hanging order, which runs to the right along the walls
+$('right').onclick = () => { stopTour(); goTo(current + 1); };
+$('left').onclick = () => { stopTour(); goTo(current - 1); };
 let tourTimer = 0;
-function stopTour() { if (tourTimer) { clearInterval(tourTimer); tourTimer = 0; document.getElementById('tour').classList.remove('on'); document.getElementById('tour').textContent = 'סיור מודרך'; } }
-document.getElementById('tour').onclick = () => { if (tourTimer) return stopTour(); goTo(current + 1); tourTimer = setInterval(() => goTo(current + 1), 6000); const b = document.getElementById('tour'); b.classList.add('on'); b.textContent = 'עצירה'; };
+function stopTour() { if (tourTimer) { clearInterval(tourTimer); tourTimer = 0; $('tour').classList.remove('on'); $('tour').textContent = t('tour'); } }
+$('tour').onclick = () => { if (tourTimer) return stopTour(); goTo(current + 1); tourTimer = setInterval(() => goTo(current + 1), 7000); $('tour').classList.add('on'); $('tour').textContent = t('stop'); };
 
-const clock = new THREE.Clock(), fwd = new THREE.Vector3(), side = new THREE.Vector3();
+// the card follows the work you walk up to
+const fwd = new THREE.Vector3(), side = new THREE.Vector3(), toCam = new THREE.Vector3();
+function facing() {
+  let best = -1, bd = .9;
+  hung.forEach((h, i) => { toCam.subVectors(h.center, camera.position); toCam.y = 0; const d = toCam.length(), dot = toCam.normalize().dot(fwd); if (d < 4.2 && dot > bd && h.normal.dot(fwd) < -.5) { best = i; bd = dot; } });
+  return best;
+}
+// stay inside the rooms and pass between them only through the doorways
+function collide(p, prevZ) {
+  p.x = Math.max(-W / 2 + .5, Math.min(W / 2 - .5, p.x));
+  p.z = Math.min(ROOMS[0].front - .5, Math.max(ROOMS[ROOMS.length - 1].back + .5, p.z));
+  for (const r of ROOMS.slice(0, -1)) {
+    const wz = r.back, reach = WALL / 2 + .45;
+    if (Math.abs(p.x) > DOOR.w / 2 - .35 && Math.abs(p.z - wz) < reach) p.z = prevZ > wz ? wz + reach : wz - reach;
+  }
+}
+const clock = new THREE.Clock();
+function turn(a, b, e) { return a + (b - a) * e; }
 function tick() {
   const dt = Math.min(.05, clock.getDelta());
-  let mv = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) + held, st = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + joyX;
+  const mv = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) + held, st = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + joyX;
   if (keys.arrowleft) yaw += 1.8 * dt; if (keys.arrowright) yaw -= 1.8 * dt;
-  if (Math.abs(mv) > .05 || Math.abs(st) > .05) { glide = null; document.getElementById('label').classList.remove('show'); }
+  if (Math.abs(mv) > .05 || Math.abs(st) > .05) glide = null;
   fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw)); side.set(Math.cos(yaw), 0, -Math.sin(yaw));
-  camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
-  if (glide) { glide.t = Math.min(1, glide.t + dt / 1.6); const e = glide.t < .5 ? 2 * glide.t * glide.t : 1 - Math.pow(-2 * glide.t + 2, 2) / 2;
-    camera.position.lerpVectors(glide.from, glide.to, e); yaw = glide.yaw0 + (glide.yaw1 - glide.yaw0) * e; pitch = glide.p0 * (1 - e); if (glide.t >= 1) glide = null; }
-  camera.position.x = Math.max(-bounds.x, Math.min(bounds.x, camera.position.x)); camera.position.z = Math.max(-bounds.z, Math.min(bounds.z, camera.position.z));
-  if (Math.abs(camera.position.x) < 2 && Math.abs(camera.position.z) < .9) camera.position.z = Math.sign(camera.position.z || 1) * .9; // the bench
-  camera.position.y = 1.65 + (mv ? Math.sin(performance.now() / 160) * .015 : 0);
+  const prevZ = camera.position.z;
+  if (glide) {
+    glide.t = Math.min(1, glide.t + dt / glide.dur); const g = glide, e = g.t < .5 ? 2 * g.t * g.t : 1 - Math.pow(-2 * g.t + 2, 2) / 2;
+    camera.position.copy(along(g, e));
+    // walking through rooms: face the way you go, then turn to the work
+    if (g.walk) yaw = e < .25 ? turn(g.yaw0, g.yawWalk, e / .25) : e < .75 ? g.yawWalk : turn(g.yawWalk, g.yawWalk + ((g.yaw1 - g.yawWalk + Math.PI * 3) % (Math.PI * 2) - Math.PI), (e - .75) / .25);
+    else yaw = turn(g.yaw0, g.yaw1, e);
+    pitch = g.p0 * (1 - e); if (g.t >= 1) glide = null;
+  } else {
+    camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
+    collide(camera.position, prevZ);
+    camera.position.y += (1.65 - camera.position.y) * Math.min(1, dt * 3);
+    const f = facing(); if (f !== shown && !(f < 0 && !desc.hidden)) { showLabel(f); if (f >= 0) current = f; }
+  }
   camera.rotation.set(pitch, yaw, 0);
   renderer.render(scene, camera); requestAnimationFrame(tick);
 }
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+/* ---------- language switch ---------- */
+function applyLang() {
+  document.documentElement.lang = lang; document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+  document.title = {he: 'התערוכה של סנדרה לייפר', ru: 'Выставка Сандры Лейфер', en: 'Sandra Leifer · Exhibition'}[lang];
+  $('back').textContent = t('back'); $('back').href = '../?lang=' + lang;
+  if ($('loading')) { $('ltitle').innerHTML = t('title'); $('lsub').textContent = t('loading'); $('enter').textContent = t('enter'); }
+  $('help').textContent = t('help'); $('tour').textContent = tourTimer ? t('stop') : t('tour');
+  $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));
+  more.textContent = t('about'); $('lask').textContent = t('ask'); $('lask').href = '../?lang=' + lang + '#contact';
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+  live.forEach(f => f()); fonts().then(() => live.forEach(f => f()));
+  if (shown >= 0) { const open = !desc.hidden; showLabel(shown, true); desc.hidden = !open; }
+  store.set('sl-lang', lang);
+  const u = new URL(location.href); u.searchParams.set('lang', lang); history.replaceState(null, '', u);
+}
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { lang = b.dataset.lang; applyLang(); }));
+applyLang();
 tick();
 </script></body></html>

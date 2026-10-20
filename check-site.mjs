@@ -16,8 +16,8 @@ assert.equal(new Set(ids).size, ids.length, 'duplicate work id');
 const series = new Set(SITE.series.map(s => s.id));
 for (const w of SITE.works) {
   assert.ok(series.has(w.kind), `${w.id}: unknown series ${w.kind}`);
-  assert.ok(w.t[0] && w.t[1], `${w.id}: title in both languages`);
-  assert.ok(w.med ? w.med[0] && w.med[1] : SITE.text.he[w.m] && SITE.text.ru[w.m], `${w.id}: medium`);
+  assert.ok(w.t[0] && w.t[1] && w.t[2], `${w.id}: title in three languages`);
+  assert.ok(w.med ? w.med[0] && w.med[1] && w.med[2] : SITE.text.he[w.m] && SITE.text.ru[w.m], `${w.id}: medium`);
   const m = IMAGES.works[w.id];
   assert.ok(m, `${w.id}: no image metadata`);
   for (const size of m.s) assert.ok(fs.statSync(new URL(`assets/img/works/${w.id}-${size}.webp`, root)).size > 5000, `${w.id}-${size}`);
@@ -29,18 +29,20 @@ for (const [id, c] of Object.entries(CATALOG)) {
   assert.match(c.s, /^\d+ × \d+$/, `${id}: size`);
   assert.match(c.y, /^20\d\d(–20\d\d)?$/, `${id}: year`);
   assert.ok(c.price ? /^₪[\d,]+$/.test(c.price) : c.status, `${id}: price or status`);
-  assert.ok(c.d[0].length && c.d[1].length, `${id}: description`);
+  assert.ok(c.d[0].length && c.d[1].length && c.d[2].length, `${id}: description in three languages`);
 }
 for (const s of SITE.series) {
   assert.ok(SITE.works.some(w => w.kind === s.id), `empty series ${s.id}`);
   assert.ok(ids.includes(s.cover), `series cover ${s.cover}`);
 }
 for (const id of [...SITE.hero, ...SITE.journey.map(j => j.id)]) assert.ok(ids.includes(id), `hero/journey ${id}`);
-for (const s of [...SITE.studio, ...SITE.exhibition]) assert.ok(exists(`assets/img/studio/${s.id}.webp`) && s.he && s.ru, `studio ${s.id}`);
+for (const s of [...SITE.studio, ...SITE.exhibition]) assert.ok(exists(`assets/img/studio/${s.id}.webp`) && s.he && s.ru && s.en, `studio ${s.id}`);
+for (const s of SITE.series) assert.ok(s.he && s.ru && s.en, `series ${s.id} in three languages`);
 
-// Translations: same keys in both languages and every data-t key defined.
-const he = Object.keys(SITE.text.he), ru = Object.keys(SITE.text.ru);
+// Translations: same keys in Hebrew, Russian and English, and every data-t key defined.
+const he = Object.keys(SITE.text.he), ru = Object.keys(SITE.text.ru), en = Object.keys(SITE.text.en);
 assert.deepEqual([...he].sort(), [...ru].sort(), 'Hebrew and Russian keys differ');
+assert.deepEqual([...he].sort(), [...en].sort(), 'Hebrew and English keys differ');
 const html = read('index.html');
 for (const [, key] of html.matchAll(/data-t(?:-label|-alt)?="([^"]+)"/g)) assert.ok(key in SITE.text.he, `missing text key ${key}`);
 for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
@@ -53,7 +55,10 @@ for (const page of ['index.html', 'dragon/index.html', 'book/index.html']) {
     assert.ok(exists(dir + ref), `${page}: missing ${ref}`);
   }
 }
-for (const dir of ['book/', 'dragon/']) assert.ok(exists(dir + 'index.html'), dir);
+for (const dir of ['book/', 'dragon/', 'museum/']) assert.ok(exists(dir + 'index.html'), dir);
+const museum = read('museum/index.html');
+assert.ok(museum.includes('catalog.js') && /Object\.keys\(CATALOG\)/.test(museum), 'museum hangs the whole catalog');
+for (const r of museum.matchAll(/kind: '(\w+)', wall:/g)) assert.ok(series.has(r[1]), `museum room ${r[1]}`);
 
 // Dragon tale: same reader format as the unicorn, 29 pages in both languages.
 const dragon = ['book.json', 'book-ru.json'].map(f => JSON.parse(read('dragon/' + f)));
@@ -64,4 +69,4 @@ for (const b of dragon) {
 dragon[0].forEach((p, n) => assert.equal(p.chapter, dragon[1][n].chapter, `dragon chapter on page ${n}`));
 assert.ok(!html.includes('mailto:') && !html.includes('tel:'), 'no invented contact details');
 
-console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew and Russian, local references, dragon tale 29 pages per language.`);
+console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, local references, dragon tale 29 pages per language.`);

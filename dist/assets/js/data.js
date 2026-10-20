@@ -5,10 +5,10 @@ window.SITE = {
   galleryUrl: 'https://www.under1000.com/he-IL/artists/%D7%A1%D7%A0%D7%93%D7%A8%D7%94-%D7%9C%D7%99%D7%99%D7%A4%D7%A8-9ea352ad',
 
   series: [
-    {id: 'neuro', cover: 'spiral', he: ["נוירוגרפיקה","קווים חופשיים שמתחברים לרשת, ואז מתמלאים בצבע."], ru: ["Нейрографика","Свободные линии сплетаются в сеть, а потом наполняются цветом."]},
-    {id: 'hidden', cover: 'night-faces', he: ["עולמות נסתרים","כתמי צבע שקופים, ובתוכם מסתתרות דמויות. צריך להסתכל רגע כדי למצוא אותן."], ru: ["Скрытые миры","Прозрачные пятна цвета, а в них прячутся фигуры. Нужно присмотреться, чтобы их найти."]},
-    {id: 'paint', cover: 'angels', he: ["ציור ורישום","אקריליק, צבעי מים ופסטל: סוס, אלכימאי, בת־ים, כפר בשלג."], ru: ["Живопись и рисунок","Акрил, акварель и пастель: конь, алхимик, русалка, деревня в снегу."]},
-    {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."]}
+    {id: 'neuro', cover: 'spiral', he: ["נוירוגרפיקה","קווים חופשיים שמתחברים לרשת, ואז מתמלאים בצבע."], ru: ["Нейрографика","Свободные линии сплетаются в сеть, а потом наполняются цветом."], en: ["Neurographics","Free lines weave into a net, then fill with colour."]},
+    {id: 'hidden', cover: 'night-faces', he: ["עולמות נסתרים","כתמי צבע שקופים, ובתוכם מסתתרות דמויות. צריך להסתכל רגע כדי למצוא אותן."], ru: ["Скрытые миры","Прозрачные пятна цвета, а в них прячутся фигуры. Нужно присмотреться, чтобы их найти."], en: ["Hidden worlds","Transparent stains of colour with figures hiding inside. Look for a moment and you will find them."]},
+    {id: 'paint', cover: 'angels', he: ["ציור ורישום","אקריליק, צבעי מים ופסטל: סוס, אלכימאי, בת־ים, כפר בשלג."], ru: ["Живопись и рисунок","Акрил, акварель и пастель: конь, алхимик, русалка, деревня в снегу."], en: ["Painting and drawing","Acrylic, watercolour and pastel: a horse, an alchemist, a mermaid, a village in the snow."]},
+    {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."], en: ["Body art","Artistic make-up on face and body, for photo shoots and performances."]}
   ],
 
   /* kind = series id; m = medium key; t = [he, ru]; p = Under 1000 product slug */
@@ -25,7 +25,7 @@ window.SITE = {
     {id: 'two-profiles', kind: 'hidden', m: 'acrylic', y: 2026, t: ['שני פרופילים', 'Два профиля']},
     {id: 'cosmic-face', kind: 'paint', m: 'canvas', y: 2024, t: ['פנים של קוסמוס', 'Космос']},
     {id: 'stargaze', kind: 'neuro', m: 'ink', y: 2025, t: ['מבט אל הכוכבים', 'Взгляд к звёздам']},
-    {id: 'spiral', kind: 'neuro', m: 'ink', y: 2025, t: ['ספירלה', 'Спираль']},
+    {id: 'spiral', kind: 'neuro', m: 'ink', y: 2025, t: ['ספירלה', 'Спираль', 'Spiral']},
     {id: 'mosaic', kind: 'neuro', m: 'ink', y: 2025, t: ['פסיפס של אור', 'Мозаика света']},
     {id: 'blue-tree', kind: 'paint', m: 'paper', t: ['עץ כחול', 'Синее дерево']},
     {id: 'blue-current', kind: 'paint', m: 'acrylic', y: 2026, t: ['זרם כחול', 'Синий поток']},
@@ -33,23 +33,23 @@ window.SITE = {
     {id: 'horse', kind: 'paint', m: 'acrylic', s: '50 × 50', t: ['דהרת סוס חשמלית', 'Электрический галоп'], p: 'electric-equine-drift-76bedf08'},
     {id: 'alchemist', kind: 'paint', m: 'acrylic', s: '50 × 70', t: ['אלכימאי', 'Алхимик'], p: 'alchemist-3c76163f'},
     {id: 'europa', kind: 'hidden', m: 'paper', y: 2026, t: ['אירופה והשור', 'Европа и бык']},
-    {id: 'stained', kind: 'neuro', m: 'ink', y: 2025, t: ['ויטראז׳', 'Витраж']},
-    {id: 'gaze', kind: 'body', m: 'body', t: ['מבט קשור בצבע', 'Взгляд, сплетённый с цветом'], p: 'entwined-painted-gaze-31096ec1'},
+    {id: 'stained', kind: 'neuro', m: 'ink', y: 2025, t: ['ויטראז׳', 'Витраж', 'Stained glass']},
+    {id: 'gaze', kind: 'body', m: 'body', t: ['מבט קשור בצבע', 'Взгляд, сплетённый с цветом', 'Entwined painted gaze'], p: 'entwined-painted-gaze-31096ec1'},
     {id: 'lilac-dance', kind: 'hidden', m: 'paper', y: 2026, t: ['ריקוד בסגול', 'Танец в лиловом']},
     {id: 'mermaid', kind: 'paint', m: 'paper', y: 2023, t: ['בת־ים', 'Русалка']},
     {id: 'winter', kind: 'paint', m: 'water', s: '30 × 42', t: ['חלום כפרי חורפי', 'Зимняя деревня во сне']},
     {id: 'lilac-gazes', kind: 'hidden', m: 'paper', y: 2025, t: ['מבטים בסגול', 'Взгляды в лиловом']},
     {id: 'forest-giants', kind: 'hidden', m: 'paper', t: ['ענקי היער', 'Лесные великаны']},
-    {id: 'smoke', kind: 'body', m: 'body', t: ['טקס עשן', 'Ритуал дыма']},
-    {id: 'petals', kind: 'body', m: 'body', t: ['עלי כותרת של התהוות', 'Лепестки становления']},
+    {id: 'smoke', kind: 'body', m: 'body', t: ['טקס עשן', 'Ритуал дыма', 'Smoke ritual']},
+    {id: 'petals', kind: 'body', m: 'body', t: ['עלי כותרת של התהוות', 'Лепестки становления', 'Petals of becoming']},
     {id: 'water-whisper', kind: 'hidden', m: 'paper', y: 2026, t: ['לחש המים', 'Шёпот воды']},
     {id: 'earth-profile', kind: 'hidden', m: 'paper', t: ['פרופיל בצבעי אדמה', 'Профиль цвета земли']},
-    {id: 'tree', kind: 'neuro', m: 'marker', s: '33 × 81', t: ['עץ של אור ופסיפס', 'Дерево света']},
+    {id: 'tree', kind: 'neuro', m: 'marker', s: '33 × 81', t: ['עץ של אור ופסיפס', 'Дерево света', 'Tree of light']},
     {id: 'threads', kind: 'neuro', m: 'ink', t: ['חוטי אור', 'Нити света']},
     {id: 'forest-moon', kind: 'hidden', m: 'paper', y: 2026, t: ['ירח ביער', 'Луна в лесу']},
-    {id: 'vortex', kind: 'neuro', m: 'ink', y: 2025, t: ['מערבולת', 'Вихрь']},
-    {id: 'neuro', kind: 'neuro', m: 'marker', s: '30 × 21', t: ['רשת צבעונית', 'Цветная сеть']},
-    {id: 'drawing', kind: 'paint', m: 'pastel', s: '42 × 30', t: ['מנוחה שכובה', 'Отдых']},
+    {id: 'vortex', kind: 'neuro', m: 'ink', y: 2025, t: ['מערבולת', 'Вихрь', 'Vortex']},
+    {id: 'neuro', kind: 'neuro', m: 'marker', s: '30 × 21', t: ['רשת צבעונית', 'Цветная сеть', 'Colour web']},
+    {id: 'drawing', kind: 'paint', m: 'pastel', s: '42 × 30', t: ['מנוחה שכובה', 'Отдых', 'Reclining rest']},
     {id: 'old-bridge', kind: 'hidden', m: 'paper', y: 2026, t: ['הגשר הישן', 'Старый мост']},
     {id: 'stone-dream', kind: 'hidden', m: 'paper', y: 2026, t: ['חלום של סלע', 'Сон камня']},
     {id: 'blue-horses', kind: 'paint', m: 'paper', t: ['סוסים כחולים', 'Синие кони']}
@@ -70,22 +70,22 @@ window.SITE = {
   ],
 
   exhibition: [
-    {id: 'hall-1', he: 'קיר העבודות הגדולות', ru: 'Стена больших работ'},
-    {id: 'hall-3', he: 'צבע לכל אורך הקיר', ru: 'Цвет вдоль всей стены'},
-    {id: 'hall-2', he: 'בין הקירות', ru: 'Между стенами'},
-    {id: 'hall-4', he: 'אור על הבד', ru: 'Свет на холсте'}
+    {id: 'hall-1', he: 'קיר העבודות הגדולות', ru: 'Стена больших работ', en: 'The wall of large works'},
+    {id: 'hall-3', he: 'צבע לכל אורך הקיר', ru: 'Цвет вдоль всей стены', en: 'Colour along the whole wall'},
+    {id: 'hall-2', he: 'בין הקירות', ru: 'Между стенами', en: 'Between the walls'},
+    {id: 'hall-4', he: 'אור על הבד', ru: 'Свет на холсте', en: 'Light on canvas'}
   ],
 
   studio: [
-    {id: 'ws-8', he: 'סנדרה מסבירה על הטכניקה', ru: 'Сандра рассказывает о технике'},
-    {id: 'ws-0', he: 'פותחים בקערה טיבטית', ru: 'Начинаем с поющей чаши'},
-    {id: 'ws-1', he: 'סנדרה מנחה את הסדנה', ru: 'Сандра ведёт мастер-класс'},
-    {id: 'ws-2', he: 'רגע לפני שמתחילים', ru: 'Перед началом'},
-    {id: 'ws-6', he: 'מה שיצא למשתתפים', ru: 'Что получилось у участников'},
-    {id: 'ws-4', he: 'מכירים את החומרים', ru: 'Знакомство с материалами'},
-    {id: 'ws-3', he: 'מקשיבים לקו', ru: 'Слушая линию'},
-    {id: 'ws-7', he: 'השולחן מוכן', ru: 'Стол готов'},
-    {id: 'ws-5', he: 'יוצרים יחד', ru: 'Творим вместе'}
+    {id: 'ws-8', he: 'סנדרה מסבירה על הטכניקה', ru: 'Сандра рассказывает о технике', en: 'Sandra explains the technique'},
+    {id: 'ws-0', he: 'פותחים בקערה טיבטית', ru: 'Начинаем с поющей чаши', en: 'We begin with a singing bowl'},
+    {id: 'ws-1', he: 'סנדרה מנחה את הסדנה', ru: 'Сандра ведёт мастер-класс', en: 'Sandra leads the workshop'},
+    {id: 'ws-2', he: 'רגע לפני שמתחילים', ru: 'Перед началом', en: 'Just before we start'},
+    {id: 'ws-6', he: 'מה שיצא למשתתפים', ru: 'Что получилось у участников', en: 'What the participants made'},
+    {id: 'ws-4', he: 'מכירים את החומרים', ru: 'Знакомство с материалами', en: 'Getting to know the materials'},
+    {id: 'ws-3', he: 'מקשיבים לקו', ru: 'Слушая линию', en: 'Listening to the line'},
+    {id: 'ws-7', he: 'השולחן מוכן', ru: 'Стол готов', en: 'The table is ready'},
+    {id: 'ws-5', he: 'יוצרים יחד', ru: 'Творим вместе', en: 'Making art together'}
   ],
 
 
@@ -157,6 +157,41 @@ window.SITE = {
       rights: 'Все права на работы принадлежат художнице', backTop: 'Наверх ↑',
       close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', toGallery: 'Страница работы в галерее ↗', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
       acrylic: 'Акрил на холсте', canvas: 'Живопись на холсте', inkcanvas: 'Тушь на холсте', water: 'Акварель на бумаге', pastel: 'Пастель на бумаге', marker: 'Маркеры на бумаге', ink: 'Тушь и маркеры на бумаге', paper: 'Смешанная техника на бумаге', body: 'Боди-арт · фотография', cm: 'см'
+    },
+    en: {
+      showLess: 'Show fewer',
+      showAll: 'All works',
+      wallLabel: 'Wall of works', museumBtn: 'Exhibition experience', continue: 'Continue', navMuseum: 'Exhibition experience',
+      exhibitionNote: 'Sandra’s works on the gallery walls.',
+      exhibitionTitle: 'The latest<br><em>exhibition.</em>',
+      exhibitionIndex: 'Exhibition',
+      navExhibition: 'Exhibition',
+      title: 'Sandra Leifer — artist', skip: 'Skip to the works', navLabel: 'Main navigation', menu: 'Menu',
+      navWorks: 'Works', navSeries: 'Series', navStudio: 'Workshops', navAbout: 'About', navStories: 'Stories', navContact: 'Contact',
+      heroEyebrow: 'Artist and art teacher', heroName1: 'Sandra', heroName2: 'Leifer',
+      heroLead: 'She paints, teaches and writes fairy tales for children.', heroCta1: 'Works', heroCta2: 'Fairy tales', scrollHint: 'Scroll',
+      journeyLabel: 'A journey between worlds', manifestoLabel: 'Manifesto', manifestoIndex: 'On the work',
+      manifesto: 'Canvas, paper,<br>and sometimes a human face.<br><em>The imagination stays the same.</em>',
+      manifestoNote: 'Sandra works in several techniques side by side: acrylic, watercolour, neurographics and artistic make-up. The same subjects keep returning: faces, forests, the sea, horses and characters from fairy tales.',
+      seriesIndex: 'Series', seriesTitle: 'The series', seriesNote: 'Click a series to see its works.', works: 'works',
+      worksIndex: 'Gallery', worksTitle: 'All<br><em>the works.</em>', worksNote: 'Click a work to open it large.', filterLabel: 'Filter by series', all: 'All', shown: 'works shown',
+      studioIndex: 'Workshops', studioTitle: 'Workshops<br><em>with Sandra.</em>',
+      studioNote: 'Sandra teaches children and adults and runs neurographics and painting workshops. This is what it looks like from the inside.', studioReelLabel: 'Photos from the exhibition and the workshop — scroll sideways',
+      studioP1t: 'Neurographics', studioP1: 'You draw lines without planning, round off the corners and colour them in. It is far more calming than it sounds.',
+      studioP2t: 'Colour and material', studioP2: 'Acrylic, watercolour, pastel and markers. No experience needed.',
+      studioP3t: 'Children and adults', studioP3: 'Lessons and workshops for children, adults and groups.',
+      aboutIndex: 'Nice to meet you', aboutTitle: 'Sandra<br><em>Leifer.</em>', portraitAlt: 'Sandra Leifer', portraitCap: 'artist · art teacher',
+      aboutLead: 'Artist and art teacher. She paints, teaches and does artistic make-up.',
+      aboutText: 'Sandra studied art in Yaroslavl, Russia. Her works are full of fantasy: an alchemist holding a bottle of light, a horse made of lightning, a tree that is all a mosaic of colour. Alongside painting she teaches children and adults, runs workshops, and writes fairy tales for children that she also illustrates.',
+      fact1t: 'Painting', fact1: 'Acrylic, watercolour and pastel', fact2t: 'Line', fact2: 'Neurographics and drawing', fact3t: 'Body', fact3: 'Theatre make-up and body art', fact4t: 'Words', fact4: 'Illustrated fairy tales for children',
+      storiesIndex: 'Fairy tales', storiesTitle: 'Fairy tales<br><em>for children.</em>', storiesNote: 'Two stories, in Hebrew and in Russian. Read them on the screen or aloud at bedtime.',
+      unicornTag: 'Illustrated book · 29 pages', unicornTitle: 'The Tale of the Unicorn', unicornText: 'In a hidden valley among high mountains, a girl sets out on a journey of courage, compassion and a wonderful friendship.', unicornCta: 'Open the book',
+      newBadge: 'New', dragonTag: 'A new tale · 8 chapters', dragonTitle: 'The Tale of the Dragon', dragonText: 'The last dragon in the valley, an angry North Wind, and Nadia the healer, who sets out alone to save everyone.', dragonCta: 'Read the tale',
+      contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, through Sandra’s page at the Under 1000 gallery.',
+      rights: 'All rights to the artworks are reserved by the artist', backTop: 'Back to top ↑',
+      close: 'Close', prev: 'Previous work', next: 'Next work', open: 'Open the work', toGallery: 'The work’s page at the gallery ↗', zoomHint: 'Click to zoom', aboutWork: 'About the work', askWork: 'Details and purchase', sold: 'Sold',
+      acrylic: 'Acrylic on canvas', canvas: 'Painting on canvas', inkcanvas: 'Ink on canvas', water: 'Watercolour on paper', pastel: 'Pastel on paper', marker: 'Markers on paper', ink: 'Ink and markers on paper', paper: 'Mixed media on paper', body: 'Body art · photograph', cm: 'cm'
     }
   }
 };
+
