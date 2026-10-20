@@ -1,5 +1,6 @@
 'use strict';
-/* Site content. Titles marked "working" in README are placeholders for Sandra to confirm. */
+/* Site content. Titles, technique, size, year, price and descriptions of the works in Sandra's
+   catalog come from catalog.js (tools/build-catalog.py), which overrides the entries below. */
 window.SITE = {
   galleryUrl: 'https://www.under1000.com/he-IL/artists/%D7%A1%D7%A0%D7%93%D7%A8%D7%94-%D7%9C%D7%99%D7%99%D7%A4%D7%A8-9ea352ad',
 
@@ -120,7 +121,7 @@ window.SITE = {
       newBadge: 'חדש', dragonTag: 'אגדה חדשה · 8 פרקים', dragonTitle: 'סיפור על הדרקון', dragonText: 'הדרקון האחרון בעמק, רוח צפון כועסת, ונדיה המרפאה שיוצאת לבד להציל את כולם.', dragonCta: 'לקרוא את האגדה',
       contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, דרך העמוד של סנדרה בגלריה ״פחות מאלף״.',
       rights: 'כל הזכויות על היצירות שמורות לאמנית', backTop: 'בחזרה למעלה ↑',
-      close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', toGallery: 'לעמוד היצירה בגלריה ↗', zoomHint: 'לחצו להגדלה',
+      close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', toGallery: 'לעמוד היצירה בגלריה ↗', zoomHint: 'לחצו להגדלה', aboutWork: 'על היצירה', askWork: 'לפרטים ולרכישה', sold: 'נמכרה',
       acrylic: 'אקריליק על בד', canvas: 'ציור על בד', inkcanvas: 'דיו על בד', water: 'צבעי מים על נייר', pastel: 'פסטל על נייר', marker: 'טושים על נייר', ink: 'דיו וטושים על נייר', paper: 'טכניקה מעורבת על נייר', body: 'בודי־ארט · צילום', cm: 'ס״מ'
     },
     ru: {
@@ -154,7 +155,7 @@ window.SITE = {
       newBadge: 'Новое', dragonTag: 'Новая сказка · 8 глав', dragonTitle: 'Сказка о драконе', dragonText: 'Последний дракон долины, сердитый Северный Ветер и целительница Надия, которая одна отправляется спасать всех.', dragonCta: 'Читать сказку',
       contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — через страницу Сандры в галерее Under 1000.',
       rights: 'Все права на работы принадлежат художнице', backTop: 'Наверх ↑',
-      close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', toGallery: 'Страница работы в галерее ↗', zoomHint: 'Нажмите, чтобы увеличить',
+      close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', toGallery: 'Страница работы в галерее ↗', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
       acrylic: 'Акрил на холсте', canvas: 'Живопись на холсте', inkcanvas: 'Тушь на холсте', water: 'Акварель на бумаге', pastel: 'Пастель на бумаге', marker: 'Маркеры на бумаге', ink: 'Тушь и маркеры на бумаге', paper: 'Смешанная техника на бумаге', body: 'Боди-арт · фотография', cm: 'см'
     }
   }

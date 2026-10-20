@@ -33,9 +33,13 @@ WORKS = {
     'blue-tree': 'raw:ALX_0139.JPG', 'blue-horses': 'raw:ALX_0147.jpg', 'star-voyage': 'raw:ALX_0122.jpg',
     'embrace': 'raw:ALX_0129.jpg', 'winter': 'art:winter.webp', 'drawing': 'art:drawing.webp',
     # Canvases sent in chat (about 1500px; replace with the originals when available)
-    'tree-tears': 'art:tree-tears.jpg', 'serpent': 'art:serpent.jpg', 'night-light': 'art:night-light.jpg',
-    'two-profiles': 'art:two-profiles.jpg', 'blue-current': 'art:blue-current.jpg',
+    'tree-tears': 'art:catalog/tree-tears.jpg', 'serpent': 'art:serpent.jpg', 'night-light': 'art:night-light.jpg',
+    'two-profiles': 'art:two-profiles.jpg', 'blue-current': 'art:catalog/blue-current.jpg',
     'angels': 'art:angels.jpg', 'flute': 'art:flute.jpg', 'skull': 'art:skull.jpg', 'cosmic-face': 'art:cosmic-face.jpg',
+    # From Sandra's catalog (tools/build-catalog.py copies them to src/art/catalog)
+    'raven': 'art:catalog/raven.jpg', 'quiet-tale': 'art:catalog/quiet-tale.jpg', 'unicorn-water': 'art:catalog/unicorn-water.jpg',
+    'star-wanderer': 'art:catalog/star-wanderer.jpg', 'shiva': 'art:catalog/shiva.jpg', 'webs': 'art:catalog/webs.jpg',
+    'flowing': 'art:catalog/flowing.jpg', 'aspiration': 'art:catalog/aspiration.jpg',
     # Body art
     'gaze': 'art:gaze.webp', 'smoke': 'art:smoke.webp', 'petals': 'art:petals.webp',
 }

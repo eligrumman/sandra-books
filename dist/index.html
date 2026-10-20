@@ -201,14 +201,20 @@
     <button type="button" class="lb-btn lb-nav lb-next" id="lbNext" data-t-label="next" aria-label="היצירה הבאה"><span aria-hidden="true">←</span></button>
   </div>
   <div class="lb-caption">
-    <div><h2 id="lbTitle"></h2><p id="lbMeta"></p></div>
-    <a id="lbLink" href="#" target="_blank" rel="noopener" hidden data-t="toGallery">לעמוד היצירה בגלריה ↗</a>
+    <div class="lb-info"><h2 id="lbTitle"></h2><p id="lbMeta"></p><p class="lb-price" id="lbPrice"></p></div>
+    <div class="lb-actions">
+      <button type="button" class="lb-about" id="lbAbout" aria-expanded="false" aria-controls="lbDesc" data-t="aboutWork">על היצירה</button>
+      <a class="lb-ask" id="lbAsk" href="#contact" data-t="askWork">לפרטים ולרכישה</a>
+      <a id="lbLink" href="#" target="_blank" rel="noopener" hidden data-t="toGallery">לעמוד היצירה בגלריה ↗</a>
+    </div>
+    <div class="lb-desc" id="lbDesc" hidden></div>
   </div>
 </dialog>
 
 <p class="sr" id="announce" aria-live="polite"></p>
 <script src="assets/js/images.js" defer></script>
 <script src="assets/js/data.js" defer></script>
+<script src="assets/js/catalog.js" defer></script>
 <script src="assets/js/wall.js" defer></script>
 <script src="assets/js/site.js" defer></script>
 </body>

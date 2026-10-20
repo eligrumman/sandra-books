@@ -6,7 +6,7 @@ window.C = (() => {
   const src = (id, want = 1600) => { const m = IMG[id]; const w = m.s.filter(x => x <= want).pop() || m.s[0]; return `${window.C_BASE || '../../'}assets/img/works/${id}-${w}.webp`; };
   const work = id => S.works.find(w => w.id === id);
   const title = id => work(id).t[0];
-  const meta = id => { const w = work(id); return [S.text.he[w.m], w.s ? w.s + ' ס״מ' : '', w.y || ''].filter(Boolean).join(' · '); };
+  const meta = id => { const w = work(id); const ltr = x => x ? '\u2066' + x + '\u2069' : ''; return [w.med ? w.med[0] : S.text.he[w.m], w.s ? ltr(w.s) + ' ס״מ' : '', ltr(String(w.y || ''))].filter(Boolean).join(' · '); };
   const ratio = id => IMG[id].w / IMG[id].h;
   const color = id => IMG[id].c;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

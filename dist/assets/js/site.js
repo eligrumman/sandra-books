@@ -33,7 +33,8 @@ function img(id, {sizes = '100vw', max, lazy = true, alt = ''} = {}) {
   return i;
 }
 const largest = id => { const m = IMG.works[id]; return `assets/img/works/${id}-${m ? m.s[m.s.length - 1] : 800}.webp`; };
-const meta = w => [t(w.m), w.s ? `${w.s} ${t('cm')}` : '', w.y || ''].filter(Boolean).join(' · ');
+const ltr = s => s ? '\u2066' + s + '\u2069' : ''; // keep '90 × 120' and '2025–2026' in reading order inside Hebrew
+const meta = w => [w.med ? L(w.med) : t(w.m), w.s ? `${ltr(w.s)} ${t('cm')}` : '', ltr(String(w.y || ''))].filter(Boolean).join(' · ');
 
 /* ---------- i18n ---------- */
 function applyLang() {
@@ -154,7 +155,13 @@ function show(i) {
   $('lbTitle').textContent = L(w.t);
   $('lbMeta').textContent = meta(w);
   $('lbCount').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(visible.length).padStart(2, '0');
-  const link = $('lbLink'); link.hidden = !w.p; if (w.p) link.href = 'https://www.under1000.com/he-IL/products/' + w.p;
+  // Price or status, Sandra's description, and a way to ask about the work
+  const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || ''); price.classList.toggle('muted', !!w.status);
+  $('lbAsk').hidden = !w.price || !!w.status;
+  const desc = $('lbDesc'), about = $('lbAbout');
+  desc.replaceChildren(...(w.d ? L(w.d) : []).map(x => { const p = el('p'); p.textContent = x; return p; }));
+  about.hidden = !w.d; desc.hidden = !w.d || about.getAttribute('aria-expanded') !== 'true'; desc.scrollTop = 0;
+  const link = $('lbLink'); link.hidden = !w.p || !!w.status; if (w.p) link.href = 'https://www.under1000.com/he-IL/products/' + w.p;
   [visible[current + 1], visible[current - 1]].forEach(n => { if (n) { const p = new Image(); p.src = largest(n.id); } });
 }
 function openArt(i) {
@@ -165,6 +172,11 @@ function openArt(i) {
 function closeArt() { lb.close(); }
 lb.addEventListener('close', () => { document.documentElement.style.overflow = ''; setZoom(false); if (lastFocus) lastFocus.focus({preventScroll: true}); });
 $('lbClose').addEventListener('click', closeArt);
+$('lbAbout').addEventListener('click', () => {
+  const open = $('lbAbout').getAttribute('aria-expanded') !== 'true';
+  $('lbAbout').setAttribute('aria-expanded', String(open)); $('lbDesc').hidden = !open;
+});
+$('lbAsk').addEventListener('click', closeArt);
 $('lbPrev').addEventListener('click', () => show(current - 1));
 $('lbNext').addEventListener('click', () => show(current + 1));
 lb.addEventListener('click', e => { if (e.target === lb || e.target === $('lbStage')) closeArt(); });
