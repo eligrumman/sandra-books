@@ -104,7 +104,7 @@ window.SITE = {
       exhibitionTitle: 'התערוכה<br><em>האחרונה.</em>',
       exhibitionIndex: 'תערוכה',
       navExhibition: 'תערוכה',
-      title: 'סנדרה לייפר — אמנית', skip: 'דלגו לעבודות', navLabel: 'ניווט ראשי', menu: 'תפריט',
+      title: 'סנדרה לייפר — אמנית | ציורים, נוירוגרפיקה וסדנאות אמנות', skip: 'דלגו לעבודות', navLabel: 'ניווט ראשי', menu: 'תפריט',
       navWorks: 'עבודות', navSeries: 'סדרות', navStudio: 'סדנאות', navAbout: 'סנדרה', navStories: 'סיפורים', navContact: 'קשר',
       heroEyebrow: 'אמנית ומורה לאמנות', heroName1: 'סנדרה', heroName2: 'לייפר',
       heroLead: 'מציירת, מלמדת וכותבת אגדות לילדים.', heroCta1: 'לעבודות', heroCta2: 'לאגדות', scrollHint: 'גללו',
@@ -127,7 +127,7 @@ window.SITE = {
       newBadge: 'חדש', dragonTag: 'אגדה חדשה · 8 פרקים', dragonTitle: 'סיפור על הדרקון', dragonText: 'הדרקון האחרון בעמק, רוח צפון כועסת, ונדיה המרפאה שיוצאת לבד להציל את כולם.', dragonCta: 'לקרוא את האגדה',
       contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, דרך העמוד של סנדרה בגלריה ״פחות מאלף״.',
       rights: 'כל הזכויות על היצירות שמורות לאמנית', backTop: 'בחזרה למעלה ↑',
-      close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', toGallery: 'לעמוד היצירה בגלריה ↗', zoomHint: 'לחצו להגדלה', aboutWork: 'על היצירה', askWork: 'לפרטים ולרכישה', sold: 'נמכרה',
+      close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', workPage: 'לעמוד היצירה', zoomHint: 'לחצו להגדלה', aboutWork: 'על היצירה', askWork: 'לפרטים ולרכישה', sold: 'נמכרה',
       acrylic: 'אקריליק על בד', canvas: 'ציור על בד', inkcanvas: 'דיו על בד', water: 'צבעי מים על נייר', pastel: 'פסטל על נייר', marker: 'טושים על נייר', ink: 'דיו וטושים על נייר', paper: 'טכניקה מעורבת על נייר', body: 'בודי־ארט · צילום', cm: 'ס״מ'
     },
     ru: {
@@ -138,7 +138,7 @@ window.SITE = {
       exhibitionTitle: 'Последняя<br><em>выставка.</em>',
       exhibitionIndex: 'Выставка',
       navExhibition: 'Выставка',
-      title: 'Сандра Лейфер — художница', skip: 'К работам', navLabel: 'Главное меню', menu: 'Меню',
+      title: 'Сандра Лейфер — художница | Картины, нейрографика и мастер-классы', skip: 'К работам', navLabel: 'Главное меню', menu: 'Меню',
       navWorks: 'Работы', navSeries: 'Серии', navStudio: 'Мастер-классы', navAbout: 'О Сандре', navStories: 'Сказки', navContact: 'Контакты',
       heroEyebrow: 'Художница и педагог', heroName1: 'Сандра', heroName2: 'Лейфер',
       heroLead: 'Пишет картины, преподаёт и сочиняет сказки для детей.', heroCta1: 'Работы', heroCta2: 'Сказки', scrollHint: 'Вниз',
@@ -161,7 +161,7 @@ window.SITE = {
       newBadge: 'Новое', dragonTag: 'Новая сказка · 8 глав', dragonTitle: 'Сказка о драконе', dragonText: 'Последний дракон долины, сердитый Северный Ветер и целительница Надия, которая одна отправляется спасать всех.', dragonCta: 'Читать сказку',
       contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — через страницу Сандры в галерее Under 1000.',
       rights: 'Все права на работы принадлежат художнице', backTop: 'Наверх ↑',
-      close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', toGallery: 'Страница работы в галерее ↗', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
+      close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', workPage: 'Страница работы', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
       acrylic: 'Акрил на холсте', canvas: 'Живопись на холсте', inkcanvas: 'Тушь на холсте', water: 'Акварель на бумаге', pastel: 'Пастель на бумаге', marker: 'Маркеры на бумаге', ink: 'Тушь и маркеры на бумаге', paper: 'Смешанная техника на бумаге', body: 'Боди-арт · фотография', cm: 'см'
     },
     en: {
@@ -172,7 +172,7 @@ window.SITE = {
       exhibitionTitle: 'The latest<br><em>exhibition.</em>',
       exhibitionIndex: 'Exhibition',
       navExhibition: 'Exhibition',
-      title: 'Sandra Leifer — artist', skip: 'Skip to the works', navLabel: 'Main navigation', menu: 'Menu',
+      title: 'Sandra Leifer — Artist | Paintings, Neurographics and Art Workshops', skip: 'Skip to the works', navLabel: 'Main navigation', menu: 'Menu',
       navWorks: 'Works', navSeries: 'Series', navStudio: 'Workshops', navAbout: 'About', navStories: 'Stories', navContact: 'Contact',
       heroEyebrow: 'Artist and art teacher', heroName1: 'Sandra', heroName2: 'Leifer',
       heroLead: 'She paints, teaches and writes fairy tales for children.', heroCta1: 'Works', heroCta2: 'Fairy tales', scrollHint: 'Scroll',
@@ -195,7 +195,7 @@ window.SITE = {
       newBadge: 'New', dragonTag: 'A new tale · 8 chapters', dragonTitle: 'The Tale of the Dragon', dragonText: 'The last dragon in the valley, an angry North Wind, and Nadia the healer, who sets out alone to save everyone.', dragonCta: 'Read the tale',
       contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, through Sandra’s page at the Under 1000 gallery.',
       rights: 'All rights to the artworks are reserved by the artist', backTop: 'Back to top ↑',
-      close: 'Close', prev: 'Previous work', next: 'Next work', open: 'Open the work', toGallery: 'The work’s page at the gallery ↗', zoomHint: 'Click to zoom', aboutWork: 'About the work', askWork: 'Details and purchase', sold: 'Sold',
+      close: 'Close', prev: 'Previous work', next: 'Next work', open: 'Open the work', workPage: 'The work’s page', zoomHint: 'Click to zoom', aboutWork: 'About the work', askWork: 'Details and purchase', sold: 'Sold',
       acrylic: 'Acrylic on canvas', canvas: 'Painting on canvas', inkcanvas: 'Ink on canvas', water: 'Watercolour on paper', pastel: 'Pastel on paper', marker: 'Markers on paper', ink: 'Ink and markers on paper', paper: 'Mixed media on paper', body: 'Body art · photograph', cm: 'cm'
     }
   }

@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>התערוכה של סנדרה לייפר</title><link rel="stylesheet" href="../concepts/shared.css">
+<title>התערוכה של סנדרה לייפר</title>
+<meta name="description" content="התערוכה הווירטואלית של סנדרה לייפר: שלושה חדרים, כל יצירה בגודלה האמיתי, עם פרטים, תיאור וקישור לרכישה. Виртуальная выставка Сандры Лейфер · Sandra Leifer’s virtual exhibition.">
+<link rel="canonical" href="https://sandraleifer.com/museum/"><link rel="stylesheet" href="../concepts/shared.css">
 <style>
 html,body{height:100%;overflow:hidden;background:#0c0b0f}
 html[lang=ru] body{font-family:'Comfortaa',system-ui,sans-serif}
@@ -258,7 +260,9 @@ for (const [ri, r] of ROOMS.entries()) {
   });
 }
 function progress() { $('bar').style.width = (loaded / hung.length * 100) + '%'; if (loaded >= Math.min(6, hung.length)) $('enter').hidden = false; }
-$('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); };
+// a work's page links here with ?work=<id>: walk straight to it
+const startAt = hung.findIndex(h => h.id === new URLSearchParams(location.search).get('work'));
+$('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); if (startAt >= 0) goTo(startAt); };
 
 /* ---------- the card ---------- */
 const label = $('label'), desc = $('ld');
@@ -271,7 +275,7 @@ function showLabel(i, keep) {
   $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
   const ask = $('lask'), buy = work(h.id).buy; ask.hidden = f.sold || !(f.price || buy);
-  ask.href = buy || '../?lang=' + lang + '#contact'; ask.target = buy ? '_blank' : ''; ask.rel = buy ? 'noopener' : '';
+  ask.href = buy || '../' + (lang === 'he' ? '' : lang + '/') + '#contact'; ask.target = buy ? '_blank' : ''; ask.rel = buy ? 'noopener' : '';
   // what the work is about, always open
   $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
@@ -412,7 +416,7 @@ addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; cam
 function applyLang() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
   document.title = {he: 'התערוכה של סנדרה לייפר', ru: 'Выставка Сандры Лейфер', en: 'Sandra Leifer · Exhibition'}[lang];
-  $('back').textContent = t('back'); $('back').href = '../?lang=' + lang;
+  $('back').textContent = t('back'); $('back').href = '../' + (lang === 'he' ? '' : lang + '/');
   if ($('loading')) { $('ltitle').innerHTML = t('title'); $('lsub').textContent = t('loading'); $('enter').textContent = t('enter'); }
   $('help').textContent = t('help'); $('tour').textContent = tourTimer ? t('stop') : t('tour');
   $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));

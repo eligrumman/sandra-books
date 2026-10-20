@@ -3,7 +3,8 @@
 Static trilingual (Hebrew / Russian / English) site for the artist Sandra Leifer, published at sandraleifer.com through GitHub Pages. No build step and no server: `dist/` is the site.
 
 ## Structure
-- `dist/index.html`: home page with hero, scroll journey, series, gallery with lightbox, exhibition and workshops, about, stories and contact.
+- `src/site/home.html`: the home page template. `tools/build-pages.mjs` writes it out as `dist/index.html` (Hebrew), `dist/ru/index.html` and `dist/en/index.html`, with the texts of each language already in the HTML, plus a page per work per language (`dist/works/<id>/`, `dist/ru/works/<id>/`, `dist/en/works/<id>/`), `dist/sitemap.xml` and `dist/robots.txt`. Edit the template or `data.js`, then run `node tools/build-pages.mjs`. Every page has its canonical address, hreflang links to the other two languages and schema.org data (Sandra as a Person under her name in all three languages; each work as a VisualArtwork with size, technique and, when on sale, its price).
+- The home page: endless wall, series, gallery with lightbox, exhibition and workshops, about, stories and contact.
 - `dist/assets/js/data.js`: all text (`text.he`, `text.ru`, `text.en`), the artworks, their series and captions. Texts given as arrays are `[he, ru, en]`.
 - `dist/museum/`: the 3D exhibition. It hangs every work of Sandra's catalog at its real size (canvases in a thin frame, works on paper behind a mat) in one room per series, with a wall label beside each work and a card with the price, the description and a purchase link. Hebrew, Russian and English.
 - `dist/assets/js/catalog.js`: generated from Sandra's catalog (`src/catalog/`, exported from https://sites.google.com/view/sandra-leifer-art). For the 39 works in it, it sets the title, technique, size, year, price or status and the description, and it adds the works that were not on the site. Do not edit by hand.
@@ -13,6 +14,9 @@ Static trilingual (Hebrew / Russian / English) site for the artist Sandra Leifer
 - `src/art/`: artwork images from the Under 1000 gallery (`sources.json` gives their origins); `src/art/catalog/` holds photos from Sandra's catalog.
 - `tools/build-catalog.py`: rebuilds `catalog.js` from `src/catalog/`. To import a new export of the catalog: `python3 tools/build-catalog.py <export folder with catalog.csv and artworks/>`, then `python3 tools/build-images.py <originals>` if it brought new photos. Each catalog number is mapped to a site work in `IDS`.
 - `tools/build-images.py`: rebuilds `dist/assets/img/` from the photographer's originals: `python3 tools/build-images.py <folder with ALX_*.jpg>`. Add new works to `WORKS` there and to `works` in `data.js`.
+
+## Search engines
+After a deployment the site is ready to submit. In Google Search Console add the domain `sandraleifer.com` (verified by a TXT record at Cloudflare) and submit `https://sandraleifer.com/sitemap.xml`; the same in Bing Webmaster Tools. Old `?lang=ru` / `?lang=en` links redirect to `/ru/` and `/en/`. The preview mirror's pages point to sandraleifer.com as their canonical address, so they do not compete with it.
 
 ## Checks
 `node check.mjs` (book) and `node check-site.mjs` (site). Both run in the Pages workflow before each deployment.
