@@ -11,7 +11,7 @@ window.SITE = {
     {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."], en: ["Body art","Artistic make-up on face and body, for photo shoots and performances."]}
   ],
 
-  /* kind = series id; m = medium key; t = [he, ru]; p = Under 1000 product slug */
+  /* kind = series id; m = medium key; t = [he, ru, en]. catalog.js adds Sandra's catalog details and the Under 1000 purchase links. */
   works: [
     {id: 'angels', kind: 'paint', m: 'canvas', y: 2026, t: ['שני מלאכים', 'Два ангела']},
     {id: 'serpent', kind: 'paint', m: 'canvas', y: 2025, t: ['הנחש והנזיר', 'Змей и отшельник']},
@@ -30,11 +30,11 @@ window.SITE = {
     {id: 'blue-tree', kind: 'paint', m: 'paper', t: ['עץ כחול', 'Синее дерево']},
     {id: 'blue-current', kind: 'paint', m: 'acrylic', y: 2026, t: ['זרם כחול', 'Синий поток']},
     {id: 'red-forest', kind: 'hidden', m: 'paper', y: 2025, t: ['היער האדום', 'Красный лес']},
-    {id: 'horse', kind: 'paint', m: 'acrylic', s: '50 × 50', t: ['דהרת סוס חשמלית', 'Электрический галоп', 'Electric Equine Drift'], p: 'electric-equine-drift-76bedf08'},
-    {id: 'alchemist', kind: 'paint', m: 'acrylic', s: '50 × 70', t: ['אלכימאי', 'Алхимик'], p: 'alchemist-3c76163f'},
+    {id: 'horse', kind: 'paint', m: 'acrylic', s: '50 × 50', t: ['דהרת סוס חשמלית', 'Электрический галоп', 'Electric Equine Drift']},
+    {id: 'alchemist', kind: 'paint', m: 'acrylic', s: '50 × 70', t: ['אלכימאי', 'Алхимик']},
     {id: 'europa', kind: 'hidden', m: 'paper', y: 2026, t: ['אירופה והשור', 'Европа и бык']},
     {id: 'stained', kind: 'neuro', m: 'ink', y: 2025, t: ['ויטראז׳', 'Витраж', 'Stained glass']},
-    {id: 'gaze', kind: 'body', m: 'body', t: ['מבט קשור בצבע', 'Взгляд, сплетённый с цветом', 'Entwined painted gaze'], p: 'entwined-painted-gaze-31096ec1'},
+    {id: 'gaze', kind: 'body', m: 'body', t: ['מבט קשור בצבע', 'Взгляд, сплетённый с цветом', 'Entwined painted gaze']},
     {id: 'lilac-dance', kind: 'hidden', m: 'paper', y: 2026, t: ['ריקוד בסגול', 'Танец в лиловом']},
     {id: 'mermaid', kind: 'paint', m: 'paper', y: 2023, t: ['בת־ים', 'Русалка']},
     {id: 'winter', kind: 'paint', m: 'water', s: '30 × 42', t: ['חלום כפרי חורפי', 'Зимняя деревня во сне']},
@@ -52,7 +52,13 @@ window.SITE = {
     {id: 'drawing', kind: 'paint', m: 'pastel', s: '42 × 30', t: ['מנוחה שכובה', 'Отдых', 'Reclining rest']},
     {id: 'old-bridge', kind: 'hidden', m: 'paper', y: 2026, t: ['הגשר הישן', 'Старый мост']},
     {id: 'stone-dream', kind: 'hidden', m: 'paper', y: 2026, t: ['חלום של סלע', 'Сон камня']},
-    {id: 'blue-horses', kind: 'paint', m: 'paper', t: ['סוסים כחולים', 'Синие кони']}
+    {id: 'blue-horses', kind: 'paint', m: 'paper', t: ['סוסים כחולים', 'Синие кони']},
+    // from the Under 1000 gallery (Russian titles translated for the site)
+    {id: 'tidal-spiral', kind: 'neuro', m: 'marker', t: ['סחרור גאות', 'Приливная спираль', 'Tidal Spiral']},
+    {id: 'chromatic-veins', kind: 'neuro', m: 'marker', t: ['עורקי צבע', 'Прожилки цвета', 'Chromatic Veins']},
+    {id: 'figure-study', kind: 'paint', m: 'pastel', t: ['לימוד דמות בהישענות', 'Этюд фигуры с опорой', 'Reclining Figure Study']},
+    {id: 'chromatic-silence', kind: 'body', m: 'body', t: ['דממת צבע', 'Тишина цвета', 'Chromatic Silence']},
+    {id: 'chromatic-reverie', kind: 'body', m: 'body', t: ['הרהור כרומטי', 'Цветная задумчивость', 'Chromatic Reverie']}
   ],
 
   hero: ['angels', 'night-faces', 'serpent', 'flute', 'embrace', 'tree-tears', 'star-voyage', 'cosmic-face'],

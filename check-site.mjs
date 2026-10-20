@@ -8,7 +8,7 @@ const read = p => fs.readFileSync(new URL(p, root), 'utf8');
 const exists = p => fs.existsSync(new URL(p, root));
 const ctx = vm.createContext({window: {}});
 vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('assets/js/catalog.js'), ctx);
-const {SITE, IMAGES, CATALOG} = ctx.window;
+const {SITE, IMAGES, CATALOG, SHOP} = ctx.window;
 
 // Works: unique, in a known series, with generated images.
 const ids = SITE.works.map(w => w.id);
@@ -30,6 +30,13 @@ for (const [id, c] of Object.entries(CATALOG)) {
   assert.match(c.y, /^20\d\d(–20\d\d)?$/, `${id}: year`);
   assert.ok(c.price ? /^₪[\d,]+$/.test(c.price) : c.status, `${id}: price or status`);
   assert.ok(c.d[0].length && c.d[1].length && c.d[2].length, `${id}: description in three languages`);
+}
+// Under 1000: every listed work is on the site and links to its product page.
+assert.equal(Object.keys(SHOP).length, 18, 'Under 1000 listings');
+for (const [id, g] of Object.entries(SHOP)) {
+  assert.ok(ids.includes(id), `shop ${id} not on the site`);
+  assert.match(g.url, /^https:\/\/www\.under1000\.com\/he-IL\/products\/[a-z0-9-]+$/, `${id}: link`);
+  assert.equal(SITE.works.find(w => w.id === id).buy, g.url, `${id}: purchase link`);
 }
 for (const s of SITE.series) {
   assert.ok(SITE.works.some(w => w.kind === s.id), `empty series ${s.id}`);

@@ -160,11 +160,12 @@ function show(i) {
   $('lbCount').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(visible.length).padStart(2, '0');
   // Price or status, Sandra's description, and a way to ask about the work
   const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || ''); price.classList.toggle('muted', !!w.status);
-  $('lbAsk').hidden = !w.price || !!w.status;
+  // straight to the work's page at the Under 1000 gallery when it is on sale there, otherwise to the contact section
+  const ask = $('lbAsk'); ask.hidden = !!w.status || !(w.price || w.buy);
+  ask.href = w.buy || '#contact'; if (w.buy) { ask.target = '_blank'; ask.rel = 'noopener'; } else { ask.removeAttribute('target'); ask.removeAttribute('rel'); }
   const desc = $('lbDesc'), about = $('lbAbout');
   desc.replaceChildren(...(w.d ? L(w.d) : []).map(x => { const p = el('p'); p.textContent = x; return p; }));
   about.hidden = !w.d; desc.hidden = !w.d || about.getAttribute('aria-expanded') !== 'true'; desc.scrollTop = 0;
-  const link = $('lbLink'); link.hidden = !w.p || !!w.status; if (w.p) link.href = 'https://www.under1000.com/he-IL/products/' + w.p;
   [visible[current + 1], visible[current - 1]].forEach(n => { if (n) { const p = new Image(); p.src = largest(n.id); } });
 }
 function openArt(i) {
@@ -179,7 +180,7 @@ $('lbAbout').addEventListener('click', () => {
   const open = $('lbAbout').getAttribute('aria-expanded') !== 'true';
   $('lbAbout').setAttribute('aria-expanded', String(open)); $('lbDesc').hidden = !open;
 });
-$('lbAsk').addEventListener('click', closeArt);
+$('lbAsk').addEventListener('click', () => { if (!$('lbAsk').target) closeArt(); });
 $('lbPrev').addEventListener('click', () => show(current - 1));
 $('lbNext').addEventListener('click', () => show(current + 1));
 lb.addEventListener('click', e => { if (e.target === lb || e.target === $('lbStage')) closeArt(); });

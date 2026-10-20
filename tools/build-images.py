@@ -40,6 +40,10 @@ WORKS = {
     'raven': 'art:catalog/raven.jpg', 'quiet-tale': 'art:catalog/quiet-tale.jpg', 'unicorn-water': 'art:catalog/unicorn-water.jpg',
     'star-wanderer': 'art:catalog/star-wanderer.jpg', 'shiva': 'art:catalog/shiva.jpg', 'webs': 'art:catalog/webs.jpg',
     'flowing': 'art:catalog/flowing.jpg', 'aspiration': 'art:catalog/aspiration.jpg',
+    # From the Under 1000 gallery
+    'tidal-spiral': 'art:under1000/tidal-spiral-2dac0fba.webp', 'chromatic-veins': 'art:under1000/chromatic-veins-80289f3f.webp',
+    'figure-study': 'art:under1000/reclining-figure-study-4d2fff76.webp', 'chromatic-silence': 'art:under1000/chromatic-silence-731c26f8.webp',
+    'chromatic-reverie': 'art:under1000/chromatic-reverie-cbbec154.webp',
     # Body art
     'gaze': 'art:gaze.webp', 'smoke': 'art:smoke.webp', 'petals': 'art:petals.webp',
 }
