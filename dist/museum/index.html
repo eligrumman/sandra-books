@@ -294,7 +294,7 @@ function openZoom(i) {
   zimg.src = C.src(id, 2400);
   if (zimg.complete && zimg.naturalWidth) zimg.onload();
 }
-$('lzoom').onclick = () => { if (shown >= 0) openZoom(shown); };
+$('lzoom').onclick = () => { if (shown < 0) return; if (shown === focused) openZoom(shown); else { zoomAfter = shown; goTo(shown); } };
 $('zclose').onclick = () => { zoom.hidden = true; pointers.clear(); };
 addEventListener('keydown', e => { if (e.key === 'Escape' && !zoom.hidden) zoom.hidden = true; });
 zoom.addEventListener('wheel', e => { e.preventDefault(); zAt(Math.exp(-e.deltaY * .0015), e.clientX, e.clientY); }, {passive: false});
@@ -325,16 +325,16 @@ joy.addEventListener('pointermove', e => { if (joy.classList.contains('active'))
 ['pointerup', 'pointercancel'].forEach(ev => joy.addEventListener(ev, () => { joy.classList.remove('active'); knob.style.transform = ''; held = 0; joyX = 0; }));
 const cv = renderer.domElement; let drag = null, moved = 0;
 cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY}; moved = 0; cv.classList.add('drag'); cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; stopTour(); } });
+cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; focused = -1; zoomAfter = -1; stopTour(); } });
 cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null; if (moved < 6) pick(e); });
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-// clicking a work takes you to it; clicking it again when you stand in front of it opens it up close
-function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (!hit) return; stopTour(); const i = hit.object.userData.index; if (i === shown && !glide) openZoom(i); else goTo(i); }
+// clicking a work brings it into focus in front of you; only a work in focus opens up close
+function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (!hit) return; stopTour(); const i = hit.object.userData.index; if (i === focused) openZoom(i); else goTo(i); }
 
 // going to a work: show its card first, then frame the work and its label in the part of the screen the card leaves free
-let glide = null, current = -1;
+let glide = null, current = -1, focused = -1, zoomAfter = -1; // focused: the work the camera has arrived in front of
 function goTo(i) {
-  current = (i + hung.length) % hung.length; const h = hung[current];
+  current = (i + hung.length) % hung.length; const h = hung[current]; focused = -1; if (zoomAfter !== current) zoomAfter = -1;
   showLabel(current, true);
   const rc = label.getBoundingClientRect(), wide = innerWidth >= 900;
   const free = {x0: wide ? rc.right + 16 : 12, y0: wide ? 76 : rc.bottom + 10, x1: innerWidth - 12, y1: innerHeight - 76};
@@ -385,7 +385,7 @@ function tick() {
   const dt = Math.min(.05, clock.getDelta());
   const mv = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) + held, st = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + joyX;
   if (keys.arrowleft) yaw += 1.8 * dt; if (keys.arrowright) yaw -= 1.8 * dt;
-  if (Math.abs(mv) > .05 || Math.abs(st) > .05) glide = null;
+  if (Math.abs(mv) > .05 || Math.abs(st) > .05 || keys.arrowleft || keys.arrowright) { glide = null; focused = -1; zoomAfter = -1; }
   fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw)); side.set(Math.cos(yaw), 0, -Math.sin(yaw));
   const prevZ = camera.position.z;
   if (glide) {
@@ -394,7 +394,8 @@ function tick() {
     // walking through rooms: face the way you go, then turn to the work
     if (g.walk) yaw = e < .25 ? turn(g.yaw0, g.yawWalk, e / .25) : e < .75 ? g.yawWalk : turn(g.yawWalk, g.yawWalk + ((g.yaw1 - g.yawWalk + Math.PI * 3) % (Math.PI * 2) - Math.PI), (e - .75) / .25);
     else yaw = turn(g.yaw0, g.yaw1, e);
-    pitch = g.p0 * (1 - e); if (g.t >= 1) glide = null;
+    pitch = g.p0 * (1 - e);
+    if (g.t >= 1) { glide = null; focused = current; if (zoomAfter === current) { zoomAfter = -1; openZoom(current); } }
   } else {
     camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
     collide(camera.position, prevZ);
