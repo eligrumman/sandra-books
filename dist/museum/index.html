@@ -270,7 +270,8 @@ function showLabel(i, keep) {
   $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
   $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
-  $('lask').hidden = f.sold || !f.price;
+  const ask = $('lask'), buy = work(h.id).buy; ask.hidden = f.sold || !(f.price || buy);
+  ask.href = buy || '../?lang=' + lang + '#contact'; ask.target = buy ? '_blank' : ''; ask.rel = buy ? 'noopener' : '';
   // what the work is about, always open
   $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
@@ -416,7 +417,7 @@ function applyLang() {
   $('help').textContent = t('help'); $('tour').textContent = tourTimer ? t('stop') : t('tour');
   $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));
   $('lzoom').textContent = t('zoom'); $('zhint').textContent = t('zoomHint'); $('zclose').setAttribute('aria-label', t('close'));
-  $('lask').textContent = t('ask'); $('lask').href = '../?lang=' + lang + '#contact';
+  $('lask').textContent = t('ask');
   document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
   live.forEach(f => f()); fonts().then(() => live.forEach(f => f()));
   if (shown >= 0) showLabel(shown, true);
