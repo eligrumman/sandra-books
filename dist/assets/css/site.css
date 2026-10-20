@@ -53,6 +53,10 @@ em{font-style:normal}
 .lang{display:flex;border:1px solid var(--line);border-radius:40px;padding:3px}
 .lang button{font-size:12.5px;letter-spacing:.04em;padding:6px 12px;border-radius:30px;color:var(--muted);transition:background .25s,color .25s;min-width:40px}
 .lang button[aria-pressed=true]{background:var(--paper);color:var(--ink)}
+.lang a{font-size:12.5px;letter-spacing:.04em;padding:6px 12px;border-radius:30px;color:var(--muted);transition:background .25s,color .25s;min-width:40px;text-align:center}
+.lang a:hover{color:var(--text)}
+.lang a[aria-current=page]{background:var(--paper);color:var(--ink)}
+.lightbox .lb-caption a.lb-page{font-size:14px;color:var(--gold-soft);border-bottom:1px solid currentColor}
 .menu-btn{display:none;width:44px;height:44px;position:relative}
 .menu-btn i{position:absolute;inset-inline:11px;height:1.5px;background:currentColor;transition:transform .35s var(--ease),top .35s var(--ease)}
 .menu-btn i:first-of-type{top:18px}.menu-btn i:last-of-type{top:25px}

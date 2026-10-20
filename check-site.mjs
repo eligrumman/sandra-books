@@ -55,7 +55,8 @@ for (const [, key] of html.matchAll(/data-t(?:-label|-alt)?="([^"]+)"/g)) assert
 for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
-for (const page of ['index.html', 'dragon/index.html', 'book/index.html']) {
+const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -63,6 +64,25 @@ for (const page of ['index.html', 'dragon/index.html', 'book/index.html']) {
   }
 }
 for (const dir of ['book/', 'dragon/', 'museum/']) assert.ok(exists(dir + 'index.html'), dir);
+// Search engines: a page per language and per work, each with its language, canonical address,
+// the three hreflang alternates and readable structured data; all of them in the sitemap.
+const SITE_URL = 'https://sandraleifer.com/';
+const sitemap = read('sitemap.xml');
+assert.ok(read('robots.txt').includes(`Sitemap: ${SITE_URL}sitemap.xml`), 'robots.txt points to the sitemap');
+for (const [i, l] of ['he', 'ru', 'en'].entries()) {
+  for (const page of [`${['', 'ru/', 'en/'][i]}index.html`, ...SITE.works.map(w => `${['', 'ru/', 'en/'][i]}works/${w.id}/index.html`)]) {
+    const h = read(page), url = SITE_URL + page.replace(/index\.html$/, '');
+    assert.ok(h.includes(`<html lang="${l}"`), `${page}: lang`);
+    assert.ok(h.includes(`<link rel="canonical" href="${url}">`), `${page}: canonical`);
+    for (const k of ['he', 'ru', 'en', 'x-default']) assert.ok(h.includes(`hreflang="${k}"`), `${page}: hreflang ${k}`);
+    assert.ok(/<title>[^<]{10,}<\/title>/.test(h) && /<meta name="description" content="[^"]{40,}">/.test(h), `${page}: title and description`);
+    for (const [, j] of h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(j);
+    assert.ok(sitemap.includes(`<loc>${url}</loc>`), `sitemap: ${url}`);
+  }
+}
+const homeHe = read('index.html');
+for (const w of SITE.works) assert.ok(homeHe.includes(`href="works/${w.id}/"`), `home links to ${w.id}`);
+for (const n of ['סנדרה לייפר', 'Сандра Лейфер', 'Sandra Leifer']) assert.ok(homeHe.includes(n), `name ${n} in the structured data`);
 const museum = read('museum/index.html');
 assert.ok(museum.includes('catalog.js') && /Object\.keys\(CATALOG\)/.test(museum), 'museum hangs the whole catalog');
 for (const r of museum.matchAll(/kind: '(\w+)', wall:/g)) assert.ok(series.has(r[1]), `museum room ${r[1]}`);
@@ -76,4 +96,4 @@ for (const b of dragon) {
 dragon[0].forEach((p, n) => assert.equal(p.chapter, dragon[1][n].chapter, `dragon chapter on page ${n}`));
 assert.ok(!html.includes('mailto:') && !html.includes('tel:'), 'no invented contact details');
 
-console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, local references, dragon tale 29 pages per language.`);
+console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);

@@ -7,10 +7,14 @@ const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls)
 const store = {get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }};
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-const query = new URLSearchParams(location.search).get('lang');
+// Each language has its own page (/, /ru/, /en/); BASE leads back to the site root from it.
 const LANGS = ['he', 'ru', 'en'];
-let lang = query || store.get('sl-lang') || ((navigator.language || '').slice(0, 2) === 'ru' ? 'ru' : 'he');
-if (!LANGS.includes(lang)) lang = 'he';
+const BASE = document.documentElement.dataset.base || '';
+const lang = LANGS.includes(document.documentElement.lang) ? document.documentElement.lang : 'he';
+const home = l => BASE + (l === 'he' ? '' : l + '/');
+const workUrl = id => home(lang) + 'works/' + id + '/';
+const query = new URLSearchParams(location.search).get('lang'); // old links: ?lang=ru
+if (LANGS.includes(query) && query !== lang) { location.replace(home(query) + location.hash); return; }
 let filter = 'all', visible = [], current = 0, showAll = false;
 const PREVIEW = 12;
 const t = k => S.text[lang][k] ?? k;
@@ -19,11 +23,11 @@ const work = id => S.works.find(w => w.id === id);
 
 /* ---------- images ---------- */
 function srcset(id, max) {
-  const m = IMG.works[id]; if (!m) return {src: `assets/img/works/${id}-800.webp`};
+  const m = IMG.works[id]; if (!m) return {src: `${BASE}assets/img/works/${id}-800.webp`};
   const widths = m.s.filter(w => !max || w <= max);
   return {
-    src: `assets/img/works/${id}-${widths.includes(1600) ? 1600 : widths[0]}.webp`,
-    srcset: widths.map(w => `assets/img/works/${id}-${w}.webp ${Math.min(w, m.w)}w`).join(', ')
+    src: `${BASE}assets/img/works/${id}-${widths.includes(1600) ? 1600 : widths[0]}.webp`,
+    srcset: widths.map(w => `${BASE}assets/img/works/${id}-${w}.webp ${Math.min(w, m.w)}w`).join(', ')
   };
 }
 function img(id, {sizes = '100vw', max, lazy = true, alt = ''} = {}) {
@@ -34,7 +38,7 @@ function img(id, {sizes = '100vw', max, lazy = true, alt = ''} = {}) {
   if (m) { i.width = m.w; i.height = m.h; }
   return i;
 }
-const largest = id => { const m = IMG.works[id]; return `assets/img/works/${id}-${m ? m.s[m.s.length - 1] : 800}.webp`; };
+const largest = id => { const m = IMG.works[id]; return `${BASE}assets/img/works/${id}-${m ? m.s[m.s.length - 1] : 800}.webp`; };
 const ltr = s => s ? '\u2066' + s + '\u2069' : ''; // keep '90 × 120' and '2025–2026' in reading order inside Hebrew
 const meta = w => [w.med ? L(w.med) : t(w.m), w.s ? `${ltr(w.s)} ${t('cm')}` : '', ltr(String(w.y || ''))].filter(Boolean).join(' · ');
 
@@ -46,17 +50,16 @@ function applyLang() {
   $$('[data-t]').forEach(e => { e.innerHTML = t(e.dataset.t); });
   $$('[data-t-label]').forEach(e => e.setAttribute('aria-label', t(e.dataset.tLabel)));
   $$('[data-t-alt]').forEach(e => e.alt = t(e.dataset.tAlt));
-  $$('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
-  $$('[data-book-link]').forEach(a => a.href = 'book/?lang=' + lang);
-  $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
-  $$('[data-museum-link]').forEach(a => a.href = 'museum/?lang=' + lang);
-  const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
+  $$('[data-book-link]').forEach(a => a.href = BASE + 'book/?lang=' + lang);
+  $$('[data-dragon-link]').forEach(a => a.href = BASE + 'dragon/?lang=' + lang);
+  $$('[data-museum-link]').forEach(a => a.href = BASE + 'museum/?lang=' + lang);
+  // switching language keeps you in the same section
+  $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));
   store.set('sl-lang', lang);
   renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio();
   if ($('lightbox').open) show(current);
 }
 $('moreWorks').addEventListener('click', () => { showAll = !showAll; renderGallery(); if (!showAll) $('works').scrollIntoView({behavior: 'smooth'}); });
-$$('[data-lang]').forEach(b => b.addEventListener('click', () => { if (b.dataset.lang !== lang) { lang = b.dataset.lang; applyLang(); } }));
 
 /* ---------- header ---------- */
 const header = $('header'), menuBtn = $('menuBtn'), nav = $('nav');
@@ -84,7 +87,7 @@ sections.forEach(s => s && spy.observe(s));
 
 /* ---------- hero: endless wall ---------- */
 window.EndlessWall($('hero'), S.works.map(w => w.id), {
-  base: '', title: id => L(work(id).t), reduced: reduced.matches,
+  base: BASE, title: id => L(work(id).t), reduced: reduced.matches,
   calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum')],
   onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
 });
@@ -125,7 +128,8 @@ function renderGallery() {
   visible = S.works.filter(w => filter === 'all' || w.kind === filter);
   const btn = $('moreWorks'); btn.hidden = visible.length <= PREVIEW; btn.textContent = showAll ? t('showLess') : `${t('showAll')} (${visible.length})`;
   layoutGallery(visible.map((w, i) => {
-    const b = el('button', 'work'); b.type = 'button'; b.style.animationDelay = Math.min(i, 8) * 45 + 'ms';
+    // a real link to the work's own page; a plain click opens it in the lightbox instead
+    const b = el('a', 'work'); b.href = workUrl(w.id); b.style.animationDelay = Math.min(i, 8) * 45 + 'ms';
     b.setAttribute('aria-label', `${t('open')}: ${L(w.t)}`);
     const frame = el('span', 'frame'), m = IMG.works[w.id];
     if (m) frame.style.setProperty('--bg', m.c);
@@ -138,7 +142,7 @@ function renderGallery() {
     const p = el('p'); p.textContent = meta(w); txt.append(p);
     cap.append(txt, el('span', 'no', String(S.works.indexOf(w) + 1).padStart(2, '0')));
     b.append(frame, cap);
-    b.addEventListener('click', () => openArt(i));
+    b.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; e.preventDefault(); openArt(i); });
     return b;
   }));
   $('gridStatus').textContent = `${visible.length} ${t('shown')}`;
@@ -162,6 +166,7 @@ function show(i) {
   const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || ''); price.classList.toggle('muted', !!w.status);
   // straight to the work's page at the Under 1000 gallery when it is on sale there, otherwise to the contact section
   const ask = $('lbAsk'); ask.hidden = !!w.status || !(w.price || w.buy);
+  $('lbPage').href = workUrl(w.id);
   ask.href = w.buy || '#contact'; if (w.buy) { ask.target = '_blank'; ask.rel = 'noopener'; } else { ask.removeAttribute('target'); ask.removeAttribute('rel'); }
   const desc = $('lbDesc'), about = $('lbAbout');
   desc.replaceChildren(...(w.d ? L(w.d) : []).map(x => { const p = el('p'); p.textContent = x; return p; }));
@@ -220,7 +225,7 @@ $('lbStage').addEventListener('pointerup', e => {
 function renderExhibition() {
   $('hallGrid').replaceChildren(...S.exhibition.map((s, i) => {
     const f = el('figure', 'hall' + (i === 0 ? ' wide' : '')), m = IMG.studio[s.id] || {w: 1400, h: 933, c: '#333'}, im = el('img');
-    im.src = `assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
+    im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
     f.style.background = m.c; f.append(im, el('figcaption', '', s[lang])); return f;
   }));
 }
@@ -229,7 +234,7 @@ function renderExhibition() {
 function renderStudio() {
   $('studioReel').replaceChildren(...S.studio.map(s => {
     const f = el('figure'), m = IMG.studio[s.id] || {w: 1400, h: 933, c: '#333'}, im = el('img');
-    im.src = `assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
+    im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
     f.style.background = m.c; f.style.aspectRatio = `${m.w} / ${m.h}`;
     f.append(im, el('figcaption', '', s[lang])); return f;
   }));
