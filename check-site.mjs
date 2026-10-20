@@ -7,8 +7,8 @@ const root = new URL('./dist/', import.meta.url);
 const read = p => fs.readFileSync(new URL(p, root), 'utf8');
 const exists = p => fs.existsSync(new URL(p, root));
 const ctx = vm.createContext({window: {}});
-vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js'), ctx);
-const {SITE, IMAGES} = ctx.window;
+vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('assets/js/catalog.js'), ctx);
+const {SITE, IMAGES, CATALOG} = ctx.window;
 
 // Works: unique, in a known series, with generated images.
 const ids = SITE.works.map(w => w.id);
@@ -17,10 +17,19 @@ const series = new Set(SITE.series.map(s => s.id));
 for (const w of SITE.works) {
   assert.ok(series.has(w.kind), `${w.id}: unknown series ${w.kind}`);
   assert.ok(w.t[0] && w.t[1], `${w.id}: title in both languages`);
-  assert.ok(SITE.text.he[w.m] && SITE.text.ru[w.m], `${w.id}: medium ${w.m}`);
+  assert.ok(w.med ? w.med[0] && w.med[1] : SITE.text.he[w.m] && SITE.text.ru[w.m], `${w.id}: medium`);
   const m = IMAGES.works[w.id];
   assert.ok(m, `${w.id}: no image metadata`);
   for (const size of m.s) assert.ok(fs.statSync(new URL(`assets/img/works/${w.id}-${size}.webp`, root)).size > 5000, `${w.id}-${size}`);
+}
+// Sandra's catalog: every entry is a work on the site with size, year, price or status and a description.
+assert.equal(Object.keys(CATALOG).length, 39, 'catalog size');
+for (const [id, c] of Object.entries(CATALOG)) {
+  assert.ok(ids.includes(id), `catalog ${id} not on the site`);
+  assert.match(c.s, /^\d+ × \d+$/, `${id}: size`);
+  assert.match(c.y, /^20\d\d(–20\d\d)?$/, `${id}: year`);
+  assert.ok(c.price ? /^₪[\d,]+$/.test(c.price) : c.status, `${id}: price or status`);
+  assert.ok(c.d[0].length && c.d[1].length, `${id}: description`);
 }
 for (const s of SITE.series) {
   assert.ok(SITE.works.some(w => w.kind === s.id), `empty series ${s.id}`);

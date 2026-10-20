@@ -50,7 +50,7 @@ h1 em{font-style:normal;color:var(--gold)}
  <a href="../book/"><b>סיפור על החד־קרן</b><span>הספר המאויר</span></a>
 </div></section>
 </div>
-<script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script>
+<script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script><script src="../assets/js/catalog.js"></script>
 <script>
 const card = (dir, art, t, d, tag, kind, note) => `<a class="card ${kind}" href="${dir}/"><img src="../assets/img/works/${art}-800.webp" alt="" loading="lazy"><span class="badge b-${kind}">${{chose: 'בחרת', asked: 'ביקשת', new: 'עוד'}[kind]}</span><span class="num">${note}</span><h3>${t}</h3><p>${d}</p><span class="tag">${tag}</span></a>`;
 document.getElementById('chose').innerHTML = [
