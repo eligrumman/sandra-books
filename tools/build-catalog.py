@@ -19,11 +19,13 @@ SRC = ROOT / 'src/catalog'
 
 # Catalog number -> site work id. Matched image to image; the ones marked "new" were
 # not on the site before and use the catalog photo.
+# None: the export has no photo of the work itself. No. 18, Fire Amid the Ice, carries the photo of
+# Electric Equine Drift (the site's 'horse'), a different painting; it waits for its own photo.
 IDS = {
     1: 'flute', 2: 'night-faces', 3: 'blue-current', 4: 'earth-profile', 5: 'two-profiles',
     6: 'blue-horses', 7: 'red-forest', 8: 'raven', 9: 'quiet-tale', 10: 'stone-dream',
     11: 'europa', 12: 'unicorn-water', 13: 'angels', 14: 'forest-giants', 15: 'alchemist',
-    16: 'lilac-gazes', 17: 'blue-tree', 18: 'horse', 19: 'mermaid', 20: 'night-light',
+    16: 'lilac-gazes', 17: 'blue-tree', 18: None, 19: 'mermaid', 20: 'night-light',
     21: 'tree-tears', 22: 'forest-moon', 23: 'lilac-dance', 24: 'water-whisper', 25: 'serpent',
     26: 'star-wanderer', 27: 'star-voyage', 28: 'embrace', 29: 'shiva', 30: 'winter',
     31: 'old-bridge', 32: 'threads', 33: 'webs', 34: 'flowing', 35: 'mosaic',
@@ -62,6 +64,8 @@ def import_export(exp):
     shutil.copy(exp / 'site-texts.md', SRC / 'site-texts.md')
     for d in sorted((exp / 'artworks').iterdir()):
         wid = IDS[int(d.name.split(' ', 1)[0])]
+        if wid is None:
+            continue
         shutil.copy(next(d.glob('*.md')), SRC / 'texts' / f'{wid}.md')
         if wid in NEW or wid in SHARPER:
             shutil.copy(next(d.glob('*.jpg')), ROOT / 'src/art/catalog' / f'{wid}.jpg')
@@ -78,6 +82,8 @@ def main():
     out = {}
     for r in rows:
         wid = IDS[int(r['#'])]
+        if wid is None:
+            continue
         md = (SRC / 'texts' / f'{wid}.md').read_text(encoding='utf-8')
         parts = dict(re.findall(r'^## (\S+)\n(.*?)(?=^## |\Z)', md, re.S | re.M))
         med = MEDIUM[r['Medium']]

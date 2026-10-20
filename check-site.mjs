@@ -23,7 +23,7 @@ for (const w of SITE.works) {
   for (const size of m.s) assert.ok(fs.statSync(new URL(`assets/img/works/${w.id}-${size}.webp`, root)).size > 5000, `${w.id}-${size}`);
 }
 // Sandra's catalog: every entry is a work on the site with size, year, price or status and a description.
-assert.equal(Object.keys(CATALOG).length, 39, 'catalog size');
+assert.equal(Object.keys(CATALOG).length, 38, 'catalog size (39 less Fire Amid the Ice, which waits for its own photo)');
 for (const [id, c] of Object.entries(CATALOG)) {
   assert.ok(ids.includes(id), `catalog ${id} not on the site`);
   assert.match(c.s, /^\d+ × \d+$/, `${id}: size`);

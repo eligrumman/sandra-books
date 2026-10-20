@@ -30,7 +30,7 @@ window.SITE = {
     {id: 'blue-tree', kind: 'paint', m: 'paper', t: ['עץ כחול', 'Синее дерево']},
     {id: 'blue-current', kind: 'paint', m: 'acrylic', y: 2026, t: ['זרם כחול', 'Синий поток']},
     {id: 'red-forest', kind: 'hidden', m: 'paper', y: 2025, t: ['היער האדום', 'Красный лес']},
-    {id: 'horse', kind: 'paint', m: 'acrylic', s: '50 × 50', t: ['דהרת סוס חשמלית', 'Электрический галоп'], p: 'electric-equine-drift-76bedf08'},
+    {id: 'horse', kind: 'paint', m: 'acrylic', s: '50 × 50', t: ['דהרת סוס חשמלית', 'Электрический галоп', 'Electric Equine Drift'], p: 'electric-equine-drift-76bedf08'},
     {id: 'alchemist', kind: 'paint', m: 'acrylic', s: '50 × 70', t: ['אלכימאי', 'Алхимик'], p: 'alchemist-3c76163f'},
     {id: 'europa', kind: 'hidden', m: 'paper', y: 2026, t: ['אירופה והשור', 'Европа и бык']},
     {id: 'stained', kind: 'neuro', m: 'ink', y: 2025, t: ['ויטראז׳', 'Витраж', 'Stained glass']},
