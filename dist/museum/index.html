@@ -290,7 +290,7 @@ function hang(id, ri, fc, x) {
   const plaque = new THREE.Mesh(new THREE.PlaneGeometry(LABEL.w, LABEL.h), new THREE.MeshBasicMaterial({map: textTex(640, 320, (c, cw, chh) => drawLabel(c, cw, chh, id))}));
   plaque.position.set(off, -f.fh / 2 + LABEL.h / 2, .005); g.add(plaque);
   scene.add(g); pic.userData.index = i;
-  hung.push({id, room: ri, pic, center: g.position.clone(), normal: new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion), right: new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion), h: f.fh, fw: f.fw, off});
+  hung.push({id, room: ri, pic, center: g.position.clone(), normal: new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion), right: new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion), h: f.fh, fw: f.fw, iw: f.w, ih: f.h, off});
 }
 for (const [ri, r] of ROOMS.entries()) {
   // stretches of wall in the order a visitor meets them turning right: back, right, front, left
@@ -401,8 +401,9 @@ function goTo(i) {
   const cx = (free.x0 + free.x1) / innerWidth - 1, cy = 1 - (free.y0 + free.y1) / innerHeight;
   const fwN = (free.x1 - free.x0) / innerWidth * 2, fhN = Math.max(.3, (free.y1 - free.y0) / innerHeight * 2);
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * camera.aspect;
-  const spanW = h.fw + LABEL.gap + LABEL.w + .25, spanH = h.h + .25, mid = (h.off + LABEL.w / 2 - h.fw / 2) / 2;
-  const dist = Math.min(ROOMS[h.room].d - 1, W - 1.2, Math.max(1.1, spanW / (fwN * tanH), spanH / (fhN * tanV)));
+  // wide screens show the work with its wall label; phones fill the space with the painting itself, past the mat and label (its details are in the bar)
+  const spanW = wide ? h.fw + LABEL.gap + LABEL.w + .25 : h.iw + .03, spanH = wide ? h.h + .25 : h.ih + .03, mid = wide ? (h.off + LABEL.w / 2 - h.fw / 2) / 2 : 0;
+  const dist = Math.min(ROOMS[h.room].d - 1, W - 1.2, Math.max(wide ? .8 : .35, spanW / (fwN * tanH), spanH / (fhN * tanV)));
   const target = h.center.clone().addScaledVector(h.normal, dist).addScaledVector(h.right, mid - cx * dist * tanH);
   target.y = Math.max(.9, Math.min(2.6, h.center.y - cy * dist * tanV));
   const look = Math.atan2(h.normal.x, h.normal.z);
@@ -460,7 +461,7 @@ function tick() {
   } else {
     camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
     collide(camera.position, prevZ);
-    camera.position.y += (1.65 - camera.position.y) * Math.min(1, dt * 3);
+    if (Math.abs(mv) > .05 || Math.abs(st) > .05) camera.position.y += (1.65 - camera.position.y) * Math.min(1, dt * 3); // back to eye height only when walking
     const f = facing(); if (f !== shown) { showLabel(f); if (f >= 0) current = f; }
   }
   camera.rotation.set(pitch, yaw, 0);
