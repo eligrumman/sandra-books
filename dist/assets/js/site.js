@@ -8,11 +8,13 @@ const store = {get(k) { try { return localStorage.getItem(k); } catch { return n
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const query = new URLSearchParams(location.search).get('lang');
-let lang = (query || store.get('sl-lang') || (navigator.language || '').slice(0, 2)) === 'ru' ? 'ru' : 'he';
+const LANGS = ['he', 'ru', 'en'];
+let lang = query || store.get('sl-lang') || ((navigator.language || '').slice(0, 2) === 'ru' ? 'ru' : 'he');
+if (!LANGS.includes(lang)) lang = 'he';
 let filter = 'all', visible = [], current = 0, showAll = false;
 const PREVIEW = 12;
 const t = k => S.text[lang][k] ?? k;
-const L = arr => arr[lang === 'he' ? 0 : 1];
+const L = arr => arr[LANGS.indexOf(lang)] ?? arr[0]; // texts are [he, ru, en]
 const work = id => S.works.find(w => w.id === id);
 
 /* ---------- images ---------- */
@@ -47,6 +49,7 @@ function applyLang() {
   $$('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
   $$('[data-book-link]').forEach(a => a.href = 'book/?lang=' + lang);
   $$('[data-dragon-link]').forEach(a => a.href = 'dragon/?lang=' + lang);
+  $$('[data-museum-link]').forEach(a => a.href = 'museum/?lang=' + lang);
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
   store.set('sl-lang', lang);
   renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio();

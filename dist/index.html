@@ -36,7 +36,7 @@
   <nav class="nav" id="nav" aria-label="ניווט ראשי" data-t-label="navLabel">
     <a href="#works" data-t="navWorks">עבודות</a>
     <a href="#series" data-t="navSeries">סדרות</a>
-    <a href="museum/" data-t="navMuseum">מוזיאון</a>
+    <a href="museum/" data-museum-link data-t="navMuseum">מוזיאון</a>
     <a href="#exhibition" data-t="navExhibition">תערוכה</a>
     <a href="#studio" data-t="navStudio">סדנאות</a>
     <a href="#about" data-t="navAbout">סנדרה</a>
@@ -44,9 +44,10 @@
     <a href="#contact" data-t="navContact">קשר</a>
   </nav>
   <div class="header-tools">
-    <div class="lang" role="group" aria-label="שפה / Язык">
+    <div class="lang" role="group" aria-label="שפה / Язык / Language">
       <button type="button" data-lang="he" aria-pressed="true">עב</button>
       <button type="button" data-lang="ru" aria-pressed="false" lang="ru">RU</button>
+      <button type="button" data-lang="en" aria-pressed="false" lang="en">EN</button>
     </div>
     <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav"><span class="sr" data-t="menu">תפריט</span><i></i><i></i></button>
   </div>
@@ -56,7 +57,7 @@
 
 <!-- HERO: endless wall -->
 <section class="wall" id="hero" aria-label="קיר העבודות" data-t-label="wallLabel">
-  <a class="wall-btn wall-museum" href="museum/" data-t="museumBtn">להיכנס למוזיאון</a>
+  <a class="wall-btn wall-museum" href="museum/" data-museum-link data-t="museumBtn">להיכנס למוזיאון</a>
   <a class="wall-btn wall-down" href="#series" data-t-label="continue" aria-label="להמשיך"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </section>
 
