@@ -28,17 +28,28 @@ canvas.drag{cursor:grabbing}
 .lrow{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px}
 .lrow button,.lrow a{font:inherit;font-size:14px;padding:8px 16px;border-radius:30px;cursor:pointer;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);color:#fff}
 .lrow a{background:var(--gold);border-color:var(--gold);color:#1a1408;font-weight:500}
-.ldesc{margin-top:12px;max-height:min(36vh,300px);overflow:auto;overscroll-behavior:contain;text-align:start;font-size:15px;line-height:1.7;color:#eee6da;-webkit-user-select:text;user-select:text}
+.label .lh{display:block;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);font-size:12px;letter-spacing:.14em;color:var(--gold)}
+.label .lh:empty{display:none}
+.ldesc{margin-top:6px;max-height:min(19vh,170px);overflow:auto;overscroll-behavior:contain;text-align:start;font-size:15px;line-height:1.7;color:#eee6da;-webkit-user-select:text;user-select:text}
 .ldesc p{margin:0 0 .7em}
+.ldesc:empty{display:none}
 @media (min-width:900px){
   .label{top:50%;left:clamp(16px,3vw,40px);transform:translateY(-50%);width:clamp(320px,28vw,400px);text-align:start;padding:22px 26px}
   .label b{font-size:46px}
   .lrow{justify-content:flex-start}
-  .ldesc{max-height:min(44vh,420px)}
+  .ldesc{max-height:min(52vh,480px)}
 }
 .help{position:fixed;z-index:20;top:76px;inset-inline-end:18px;font-size:13px;color:#f1ece4;background:rgba(14,12,18,.85);border:1px solid rgba(255,255,255,.15);padding:8px 12px;border-radius:10px;max-width:230px;line-height:1.6;transition:opacity .4s}
 .help.hide{opacity:0}
 @media (pointer:coarse){.help{display:none}}
+
+/* looking closely: the work full screen, zoom with the wheel or a pinch, drag to move */
+.zoom{position:fixed;inset:0;z-index:200;background:rgba(8,7,10,.97);overflow:hidden;touch-action:none;cursor:zoom-in}
+.zoom[hidden]{display:none}
+.zoom.zoomed{cursor:grab}
+.zoom img{position:absolute;left:50%;top:50%;max-width:92vw;max-height:88vh;transform-origin:0 0;will-change:transform;user-select:none;-webkit-user-select:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.zclose{position:absolute;top:16px;inset-inline-end:16px;width:48px;height:48px;border-radius:50%;font-size:20px;color:#fff;background:rgba(20,18,26,.8);border:1px solid rgba(255,255,255,.35);cursor:pointer}
+.zhint{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);font-size:13px;color:#ddd;background:rgba(20,18,26,.75);padding:8px 14px;border-radius:30px;white-space:nowrap;pointer-events:none}
 
 /* readable over light walls */
 .cbar{mix-blend-mode:normal}
@@ -60,7 +71,8 @@ body,.ui,.joy,.help,button{-webkit-user-select:none;user-select:none;-webkit-tou
 </head><body>
 <header class="cbar"><a class="back" id="back" href="../"></a><span class="right"><span class="langs"><button type="button" data-lang="he">עב</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="en">EN</button></span><span class="name">Sandra <b>Leifer</b></span></span></header>
 <div class="loading" id="loading"><div><h1 id="ltitle"></h1><p id="lsub"></p><div class="bar"><i id="bar"></i></div><button id="enter" hidden></button></div></div>
-<div class="label" id="label" aria-live="polite"><span class="room" id="lr"></span><b id="lt"></b><span class="lm" id="lm"></span><span class="lp" id="lp"></span><div class="lrow"><button type="button" id="lmore" aria-expanded="false" aria-controls="ld"></button><a id="lask" href="../#contact"></a></div><div class="ldesc" id="ld" hidden></div></div>
+<div class="label" id="label" aria-live="polite"><span class="room" id="lr"></span><b id="lt"></b><span class="lm" id="lm"></span><span class="lp" id="lp"></span><span class="lh" id="lh"></span><div class="ldesc" id="ld"></div><div class="lrow"><button type="button" id="lzoom"></button><a id="lask" href="../#contact"></a></div></div>
+<div class="zoom" id="zoom" hidden><img id="zimg" alt="" draggable="false"><button type="button" class="zclose" id="zclose">✕</button><span class="zhint" id="zhint"></span></div>
 <div class="help" id="help"></div>
 <div class="joy" id="joy"><i id="knob"></i></div>
 <div class="ui"><button id="left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button id="tour"></button><button id="right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
@@ -72,13 +84,13 @@ import * as THREE from 'three';
 const T = {
   he: {back: '← חזרה לאתר', title: 'התערוכה של<br>סנדרה', loading: 'תולים את היצירות על הקירות…', enter: 'להיכנס לתערוכה', tour: 'סיור מודרך', stop: 'עצירה',
     help: 'גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה', about: 'על היצירה', ask: 'לפרטים ולרכישה',
-    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר'},
+    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', zoom: 'הגדלה', zoomHint: 'גלגלת או צביטה כדי להגדיל · גררו כדי לזוז · לחיצה כפולה לאיפוס', close: 'סגירה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר'},
   ru: {back: '← На сайт', title: 'Выставка<br>Сандры', loading: 'Развешиваем работы…', enter: 'Войти на выставку', tour: 'Экскурсия', stop: 'Стоп',
     help: 'Тяните, чтобы осмотреться · стрелки или W A S D, чтобы идти · нажмите на работу, чтобы подойти к ней', about: 'О работе', ask: 'Узнать о покупке',
-    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', cm: 'см', name: 'Сандра Лейфер', room: 'Зал'},
+    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', zoom: 'Увеличить', zoomHint: 'Колёсико или щипок — увеличить · тяните, чтобы двигать · двойной щелчок — сброс', close: 'Закрыть', cm: 'см', name: 'Сандра Лейфер', room: 'Зал'},
   en: {back: '← Back to the site', title: 'Sandra’s<br>exhibition', loading: 'Hanging the works…', enter: 'Enter the exhibition', tour: 'Guided tour', stop: 'Stop',
     help: 'Drag to look around · arrows or W A S D to walk · click a work to go to it', about: 'About the work', ask: 'Details and purchase',
-    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', cm: 'cm', name: 'Sandra Leifer', room: 'Room'}
+    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', zoom: 'Zoom in', zoomHint: 'Wheel or pinch to zoom · drag to move · double-click to reset', close: 'Close', cm: 'cm', name: 'Sandra Leifer', room: 'Room'}
 };
 const LANGS = ['he', 'ru', 'en'];
 const store = {get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }};
@@ -249,21 +261,55 @@ function progress() { $('bar').style.width = (loaded / hung.length * 100) + '%';
 $('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; setTimeout(() => l.remove(), 800); };
 
 /* ---------- the card ---------- */
-const label = $('label'), more = $('lmore'), desc = $('ld');
+const label = $('label'), desc = $('ld');
 let shown = -1;
 function showLabel(i, keep) {
   if (i === shown && !keep) return; shown = i;
-  if (i < 0) { label.classList.remove('show'); more.setAttribute('aria-expanded', 'false'); desc.hidden = true; return; }
+  if (i < 0) { label.classList.remove('show'); return; }
   const h = hung[i], f = info(h.id);
   $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
   $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
   $('lask').hidden = f.sold || !f.price;
-  more.hidden = !f.desc.length;
+  // what the work is about, always open
+  $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
   label.classList.add('show');
 }
-more.onclick = () => { const open = more.getAttribute('aria-expanded') !== 'true'; more.setAttribute('aria-expanded', String(open)); desc.hidden = !open; if (open) stopTour(); };
+
+/* ---------- looking closely ---------- */
+const zoom = $('zoom'), zimg = $('zimg');
+let zs = 1, zx = 0, zy = 0, zw = 0, zh = 0;
+const pointers = new Map(); let pinch = 0, zmoved = 0;
+function zApply() { zimg.style.transform = `translate(${zx}px,${zy}px) scale(${zs})`; zoom.classList.toggle('zoomed', zs > 1.01); }
+function zFit() { zs = 1; zx = -zw / 2; zy = -zh / 2; zApply(); }
+function zAt(f, cx, cy) { // scale by f around a screen point
+  const ns = Math.max(1, Math.min(8, zs * f)), k = ns / zs, ox = cx - innerWidth / 2, oy = cy - innerHeight / 2;
+  zx = ox - (ox - zx) * k; zy = oy - (oy - zy) * k; zs = ns; if (zs === 1) { zx = -zw / 2; zy = -zh / 2; } zApply();
+}
+function openZoom(i) {
+  const id = hung[i].id; stopTour();
+  zimg.alt = info(id).title; zimg.style.transform = ''; zoom.hidden = false;
+  zimg.onload = () => { zw = zimg.offsetWidth; zh = zimg.offsetHeight; zFit(); };
+  zimg.src = C.src(id, 2400);
+  if (zimg.complete && zimg.naturalWidth) zimg.onload();
+}
+$('lzoom').onclick = () => { if (shown >= 0) openZoom(shown); };
+$('zclose').onclick = () => { zoom.hidden = true; pointers.clear(); };
+addEventListener('keydown', e => { if (e.key === 'Escape' && !zoom.hidden) zoom.hidden = true; });
+zoom.addEventListener('wheel', e => { e.preventDefault(); zAt(Math.exp(-e.deltaY * .0015), e.clientX, e.clientY); }, {passive: false});
+zoom.addEventListener('dblclick', e => { if (zs > 1.01) zFit(); else zAt(2.5, e.clientX, e.clientY); });
+zoom.addEventListener('pointerdown', e => { if (e.target === $('zclose')) return; zoom.setPointerCapture(e.pointerId); pointers.set(e.pointerId, {x: e.clientX, y: e.clientY}); zmoved = 0; if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); } });
+zoom.addEventListener('pointermove', e => {
+  const p = pointers.get(e.pointerId); if (!p) return;
+  if (pointers.size === 2) { p.x = e.clientX; p.y = e.clientY; const [a, b] = [...pointers.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch) zAt(d / pinch, (a.x + b.x) / 2, (a.y + b.y) / 2); pinch = d; zmoved = 99; return; }
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; zmoved += Math.abs(dx) + Math.abs(dy);
+  if (zs > 1.01) { zx += dx; zy += dy; zApply(); }
+});
+['pointerup', 'pointercancel'].forEach(ev => zoom.addEventListener(ev, e => {
+  const tap = pointers.size === 1 && zmoved < 6 && e.target !== $('zclose'); pointers.delete(e.pointerId); pinch = 0;
+  if (tap && ev === 'pointerup' && e.pointerType !== 'mouse') { if (zs > 1.01) zFit(); else zAt(2.5, e.clientX, e.clientY); }
+}));
 
 /* ---------- moving around ---------- */
 const roomAt = zz => Math.max(0, ROOMS.findIndex(r => zz <= r.front && zz >= r.back));
@@ -282,7 +328,8 @@ cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY}; m
 cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; stopTour(); } });
 cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null; if (moved < 6) pick(e); });
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
-function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (hit) { stopTour(); goTo(hit.object.userData.index); } }
+// clicking a work takes you to it; clicking it again when you stand in front of it opens it up close
+function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.map(h => h.pic))[0]; if (!hit) return; stopTour(); const i = hit.object.userData.index; if (i === shown && !glide) openZoom(i); else goTo(i); }
 
 // going to a work: show its card first, then frame the work and its label in the part of the screen the card leaves free
 let glide = null, current = -1;
@@ -314,7 +361,7 @@ $('right').onclick = () => { stopTour(); goTo(current + 1); };
 $('left').onclick = () => { stopTour(); goTo(current - 1); };
 let tourTimer = 0;
 function stopTour() { if (tourTimer) { clearInterval(tourTimer); tourTimer = 0; $('tour').classList.remove('on'); $('tour').textContent = t('tour'); } }
-$('tour').onclick = () => { if (tourTimer) return stopTour(); goTo(current + 1); tourTimer = setInterval(() => goTo(current + 1), 7000); $('tour').classList.add('on'); $('tour').textContent = t('stop'); };
+$('tour').onclick = () => { if (tourTimer) return stopTour(); goTo(current + 1); tourTimer = setInterval(() => goTo(current + 1), 14000); $('tour').classList.add('on'); $('tour').textContent = t('stop'); };
 
 // the card follows the work you walk up to
 const fwd = new THREE.Vector3(), side = new THREE.Vector3(), toCam = new THREE.Vector3();
@@ -352,7 +399,7 @@ function tick() {
     camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
     collide(camera.position, prevZ);
     camera.position.y += (1.65 - camera.position.y) * Math.min(1, dt * 3);
-    const f = facing(); if (f !== shown && !(f < 0 && !desc.hidden)) { showLabel(f); if (f >= 0) current = f; }
+    const f = facing(); if (f !== shown) { showLabel(f); if (f >= 0) current = f; }
   }
   camera.rotation.set(pitch, yaw, 0);
   renderer.render(scene, camera); requestAnimationFrame(tick);
@@ -367,10 +414,11 @@ function applyLang() {
   if ($('loading')) { $('ltitle').innerHTML = t('title'); $('lsub').textContent = t('loading'); $('enter').textContent = t('enter'); }
   $('help').textContent = t('help'); $('tour').textContent = tourTimer ? t('stop') : t('tour');
   $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));
-  more.textContent = t('about'); $('lask').textContent = t('ask'); $('lask').href = '../?lang=' + lang + '#contact';
+  $('lzoom').textContent = t('zoom'); $('zhint').textContent = t('zoomHint'); $('zclose').setAttribute('aria-label', t('close'));
+  $('lask').textContent = t('ask'); $('lask').href = '../?lang=' + lang + '#contact';
   document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
   live.forEach(f => f()); fonts().then(() => live.forEach(f => f()));
-  if (shown >= 0) { const open = !desc.hidden; showLabel(shown, true); desc.hidden = !open; }
+  if (shown >= 0) showLabel(shown, true);
   store.set('sl-lang', lang);
   const u = new URL(location.href); u.searchParams.set('lang', lang); history.replaceState(null, '', u);
 }

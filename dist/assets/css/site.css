@@ -395,3 +395,15 @@ body{font-weight:300}
 .more-wrap{display:flex;justify-content:center;margin-top:10px}
 .btn-dark{background:var(--ink);color:var(--paper);min-width:220px}
 .btn-dark:hover{background:#3a2f28}
+
+/* ---------- Lightbox on wide screens: the work on one side, its details beside it ---------- */
+@media (min-width:900px){
+  .lightbox{grid-template-columns:minmax(0,1fr) clamp(330px,28vw,430px);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"top top" "stage info"}
+  .lb-top{grid-area:top}
+  .lb-stage{grid-area:stage;padding-inline:clamp(70px,6vw,110px)}
+  .lb-caption{grid-area:info;flex-direction:column;flex-wrap:nowrap;align-items:stretch;justify-content:center;gap:18px;overflow:auto;padding:10px clamp(24px,2.6vw,40px) 40px;padding-inline-start:clamp(18px,2vw,30px);border-inline-start:1px solid var(--line)}
+  .lb-info h2{font-size:clamp(40px,3.4vw,54px);line-height:1}
+  .lb-desc{order:2;max-height:none;overflow:visible;max-width:none}
+  .lb-actions{order:3}
+  .lb-about{display:none}
+}
