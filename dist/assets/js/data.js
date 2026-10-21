@@ -2,7 +2,8 @@
 /* Site content. Titles, technique, size, year, price and descriptions of the works in Sandra's
    catalog come from catalog.js (tools/build-catalog.py), which overrides the entries below. */
 window.SITE = {
-  galleryUrl: 'https://www.under1000.com/he-IL/artists/%D7%A1%D7%A0%D7%93%D7%A8%D7%94-%D7%9C%D7%99%D7%99%D7%A4%D7%A8-9ea352ad',
+  // Sandra on WhatsApp: purchase questions and the contact section open a chat with a ready message
+  whatsapp: {number: '972535380014', display: '053-538-0014'},
 
   series: [
     {id: 'neuro', cover: 'spiral', he: ["נוירוגרפיקה","קווים חופשיים שמתחברים לרשת, ואז מתמלאים בצבע."], ru: ["Нейрографика","Свободные линии сплетаются в сеть, а потом наполняются цветом."], en: ["Neurographics","Free lines weave into a net, then fill with colour."]},
@@ -11,7 +12,7 @@ window.SITE = {
     {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."], en: ["Body art","Artistic make-up on face and body, for photo shoots and performances."]}
   ],
 
-  /* kind = series id; m = medium key; t = [he, ru, en]. catalog.js adds Sandra's catalog details and the Under 1000 purchase links. */
+  /* kind = series id; m = medium key; t = [he, ru, en]. catalog.js adds Sandra's catalog details. */
   works: [
     {id: 'angels', kind: 'paint', m: 'canvas', y: 2026, t: ['שני מלאכים', 'Два ангела']},
     {id: 'serpent', kind: 'paint', m: 'canvas', y: 2025, t: ['הנחש והנזיר', 'Змей и отшельник']},
@@ -53,7 +54,7 @@ window.SITE = {
     {id: 'old-bridge', kind: 'hidden', m: 'paper', y: 2026, t: ['הגשר הישן', 'Старый мост']},
     {id: 'stone-dream', kind: 'hidden', m: 'paper', y: 2026, t: ['חלום של סלע', 'Сон камня']},
     {id: 'blue-horses', kind: 'paint', m: 'paper', t: ['סוסים כחולים', 'Синие кони']},
-    // from the Under 1000 gallery (Russian titles translated for the site)
+    // more works by Sandra, not in her catalog (Russian titles translated for the site)
     {id: 'tidal-spiral', kind: 'neuro', m: 'marker', t: ['סחרור גאות', 'Приливная спираль', 'Tidal Spiral']},
     {id: 'chromatic-veins', kind: 'neuro', m: 'marker', t: ['עורקי צבע', 'Прожилки цвета', 'Chromatic Veins']},
     {id: 'figure-study', kind: 'paint', m: 'pastel', t: ['לימוד דמות בהישענות', 'Этюд фигуры с опорой', 'Reclining Figure Study']},
@@ -125,7 +126,8 @@ window.SITE = {
       storiesIndex: 'אגדות', storiesTitle: 'אגדות<br><em>לילדים.</em>', storiesNote: 'שני סיפורים, בעברית וברוסית. אפשר לקרוא על המסך או להקריא לפני השינה.',
       unicornTag: 'ספר מאויר · 29 עמודים', unicornTitle: 'סיפור על החד־קרן', unicornText: 'בעמק נסתר בין הרים גבוהים, ילדה אחת יוצאת למסע של אומץ, חמלה וחברות מופלאה.', unicornCta: 'לפתוח את הספר',
       newBadge: 'חדש', dragonTag: 'אגדה חדשה · 8 פרקים', dragonTitle: 'סיפור על הדרקון', dragonText: 'הדרקון האחרון בעמק, רוח צפון כועסת, ונדיה המרפאה שיוצאת לבד להציל את כולם.', dragonCta: 'לקרוא את האגדה',
-      contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, דרך העמוד של סנדרה בגלריה ״פחות מאלף״.',
+      contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, כתבו לסנדרה בוואטסאפ: <bdi dir="ltr">053-538-0014</bdi>',
+      waWork: 'שלום סנדרה, ראיתי באתר את היצירה ״{title}״ ({details}) ואשמח לשמוע פרטים על רכישה.', waHello: 'שלום סנדרה, הגעתי מהאתר שלך ואשמח לדבר.',
       rights: 'כל הזכויות על היצירות שמורות לאמנית', backTop: 'בחזרה למעלה ↑',
       close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', workPage: 'לעמוד היצירה', zoomHint: 'לחצו להגדלה', aboutWork: 'על היצירה', askWork: 'לפרטים ולרכישה', sold: 'נמכרה',
       acrylic: 'אקריליק על בד', canvas: 'ציור על בד', inkcanvas: 'דיו על בד', water: 'צבעי מים על נייר', pastel: 'פסטל על נייר', marker: 'טושים על נייר', ink: 'דיו וטושים על נייר', paper: 'טכניקה מעורבת על נייר', body: 'בודי־ארט · צילום', cm: 'ס״מ'
@@ -159,7 +161,8 @@ window.SITE = {
       storiesIndex: 'Сказки', storiesTitle: 'Сказки<br><em>для детей.</em>', storiesNote: 'Две истории, на иврите и по-русски. Можно читать с экрана или вслух перед сном.',
       unicornTag: 'Иллюстрированная книга · 29 страниц', unicornTitle: 'Сказка о единороге', unicornText: 'В затерянной среди высоких гор долине одна девочка отправляется в путь, полный смелости, сострадания и чудесной дружбы.', unicornCta: 'Открыть книгу',
       newBadge: 'Новое', dragonTag: 'Новая сказка · 8 глав', dragonTitle: 'Сказка о драконе', dragonText: 'Последний дракон долины, сердитый Северный Ветер и целительница Надия, которая одна отправляется спасать всех.', dragonCta: 'Читать сказку',
-      contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — через страницу Сандры в галерее Under 1000.',
+      contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — напишите Сандре в WhatsApp: <bdi dir="ltr">+972 53-538-0014</bdi>',
+      waWork: 'Здравствуйте, Сандра! Я увидел(а) на сайте работу «{title}» ({details}) и хотел(а) бы узнать о покупке.', waHello: 'Здравствуйте, Сандра! Пишу вам с вашего сайта.',
       rights: 'Все права на работы принадлежат художнице', backTop: 'Наверх ↑',
       close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', workPage: 'Страница работы', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
       acrylic: 'Акрил на холсте', canvas: 'Живопись на холсте', inkcanvas: 'Тушь на холсте', water: 'Акварель на бумаге', pastel: 'Пастель на бумаге', marker: 'Маркеры на бумаге', ink: 'Тушь и маркеры на бумаге', paper: 'Смешанная техника на бумаге', body: 'Боди-арт · фотография', cm: 'см'
@@ -193,7 +196,8 @@ window.SITE = {
       storiesIndex: 'Fairy tales', storiesTitle: 'Fairy tales<br><em>for children.</em>', storiesNote: 'Two stories, in Hebrew and in Russian. Read them on the screen or aloud at bedtime.',
       unicornTag: 'Illustrated book · 29 pages', unicornTitle: 'The Tale of the Unicorn', unicornText: 'In a hidden valley among high mountains, a girl sets out on a journey of courage, compassion and a wonderful friendship.', unicornCta: 'Open the book',
       newBadge: 'New', dragonTag: 'A new tale · 8 chapters', dragonTitle: 'The Tale of the Dragon', dragonText: 'The last dragon in the valley, an angry North Wind, and Nadia the healer, who sets out alone to save everyone.', dragonCta: 'Read the tale',
-      contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, through Sandra’s page at the Under 1000 gallery.',
+      contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, message Sandra on WhatsApp: <bdi dir="ltr">+972 53-538-0014</bdi>',
+      waWork: 'Hello Sandra, I saw "{title}" ({details}) on your website and would like to know more about buying it.', waHello: 'Hello Sandra, I am writing to you from your website.',
       rights: 'All rights to the artworks are reserved by the artist', backTop: 'Back to top ↑',
       close: 'Close', prev: 'Previous work', next: 'Next work', open: 'Open the work', workPage: 'The work’s page', zoomHint: 'Click to zoom', aboutWork: 'About the work', askWork: 'Details and purchase', sold: 'Sold',
       acrylic: 'Acrylic on canvas', canvas: 'Painting on canvas', inkcanvas: 'Ink on canvas', water: 'Watercolour on paper', pastel: 'Pastel on paper', marker: 'Markers on paper', ink: 'Ink and markers on paper', paper: 'Mixed media on paper', body: 'Body art · photograph', cm: 'cm'
@@ -201,3 +205,13 @@ window.SITE = {
   }
 };
 
+/* WhatsApp links: a chat with Sandra, with a message about the work in the reader's language. */
+(S => {
+  S.waLink = text => `https://wa.me/${S.whatsapp.number}?text=${encodeURIComponent(text)}`;
+  S.waWork = (lang, w, url) => {
+    const k = ['he', 'ru', 'en'].indexOf(lang), T = S.text[lang], pick = a => a[k] ?? a[0];
+    const details = [w.med ? pick(w.med) : T[w.m], w.s ? `${w.s} ${T.cm}` : '', w.y || '', w.status ? '' : (w.price || '')].filter(Boolean).join(', ');
+    return S.waLink(T.waWork.replace('{title}', pick(w.t)).replace(' ({details})', details ? ` (${details})` : '') + '\n' + url);
+  };
+  S.waHello = lang => S.waLink(S.text[lang].waHello);
+})(window.SITE);

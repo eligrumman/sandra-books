@@ -334,8 +334,9 @@ function showLabel(i, keep) {
   $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
   $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
-  const ask = $('lask'), buy = work(h.id).buy; ask.hidden = f.sold || !(f.price || buy);
-  ask.href = buy || '../' + (lang === 'he' ? '' : lang + '/') + '#contact'; ask.target = buy ? '_blank' : ''; ask.rel = buy ? 'noopener' : '';
+  // a WhatsApp message to Sandra about this work
+  const ask = $('lask'); ask.hidden = f.sold;
+  ask.href = SITE.waWork(lang, work(h.id), 'https://sandraleifer.com/' + (lang === 'he' ? '' : lang + '/') + 'works/' + h.id + '/'); ask.target = '_blank'; ask.rel = 'noopener';
   // what the work is about, always open
   $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
