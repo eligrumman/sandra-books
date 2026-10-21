@@ -53,6 +53,7 @@ function applyLang() {
   $$('[data-book-link]').forEach(a => a.href = BASE + 'book/?lang=' + lang);
   $$('[data-dragon-link]').forEach(a => a.href = BASE + 'dragon/?lang=' + lang);
   $$('[data-museum-link]').forEach(a => a.href = BASE + 'museum/?lang=' + lang);
+  $$('[data-wa]').forEach(a => a.href = S.waHello(lang));
   // switching language keeps you in the same section
   $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));
   store.set('sl-lang', lang);
@@ -164,10 +165,10 @@ function show(i) {
   $('lbCount').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(visible.length).padStart(2, '0');
   // Price or status, Sandra's description, and a way to ask about the work
   const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || ''); price.classList.toggle('muted', !!w.status);
-  // straight to the work's page at the Under 1000 gallery when it is on sale there, otherwise to the contact section
-  const ask = $('lbAsk'); ask.hidden = !!w.status || !(w.price || w.buy);
+  // a WhatsApp message to Sandra about this work (not for works in a private collection)
+  const ask = $('lbAsk'); ask.hidden = !!w.status;
   $('lbPage').href = workUrl(w.id);
-  ask.href = w.buy || '#contact'; if (w.buy) { ask.target = '_blank'; ask.rel = 'noopener'; } else { ask.removeAttribute('target'); ask.removeAttribute('rel'); }
+  ask.href = S.waWork(lang, w, 'https://sandraleifer.com/' + (lang === 'he' ? '' : lang + '/') + 'works/' + w.id + '/'); ask.target = '_blank'; ask.rel = 'noopener';
   const desc = $('lbDesc'), about = $('lbAbout');
   desc.replaceChildren(...(w.d ? L(w.d) : []).map(x => { const p = el('p'); p.textContent = x; return p; }));
   about.hidden = !w.d; desc.hidden = !w.d || about.getAttribute('aria-expanded') !== 'true'; desc.scrollTop = 0;
@@ -187,7 +188,6 @@ $('lbAbout').addEventListener('click', () => {
   const open = $('lbAbout').getAttribute('aria-expanded') !== 'true';
   $('lbAbout').setAttribute('aria-expanded', String(open)); $('lbDesc').hidden = !open;
 });
-$('lbAsk').addEventListener('click', () => { if (!$('lbAsk').target) closeArt(); });
 $('lbPrev').addEventListener('click', () => show(current - 1));
 $('lbNext').addEventListener('click', () => show(current + 1));
 lb.addEventListener('click', e => { if (e.target === lb || e.target === $('lbStage')) closeArt(); });

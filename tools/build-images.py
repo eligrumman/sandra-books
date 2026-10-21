@@ -4,8 +4,7 @@
 Usage: python3 tools/build-images.py <originals-dir>
 
 <originals-dir> holds the photographer's JPEG originals (ALX_*.jpg) from the
-shared Drive folder. Artworks that come from the Under 1000 gallery are read
-from src/art/. Output goes to dist/assets/img/ together with
+shared Drive folder. Other artwork images are read from src/art/. Output goes to dist/assets/img/ together with
 dist/assets/js/images.js, which records each image's size and average colour
 so the page can reserve space and paint a placeholder before images load.
 """
@@ -40,10 +39,10 @@ WORKS = {
     'raven': 'art:catalog/raven.jpg', 'quiet-tale': 'art:catalog/quiet-tale.jpg', 'unicorn-water': 'art:catalog/unicorn-water.jpg',
     'star-wanderer': 'art:catalog/star-wanderer.jpg', 'shiva': 'art:catalog/shiva.jpg', 'webs': 'art:catalog/webs.jpg',
     'flowing': 'art:catalog/flowing.jpg', 'aspiration': 'art:catalog/aspiration.jpg',
-    # From the Under 1000 gallery
-    'tidal-spiral': 'art:under1000/tidal-spiral-2dac0fba.webp', 'chromatic-veins': 'art:under1000/chromatic-veins-80289f3f.webp',
-    'figure-study': 'art:under1000/reclining-figure-study-4d2fff76.webp', 'chromatic-silence': 'art:under1000/chromatic-silence-731c26f8.webp',
-    'chromatic-reverie': 'art:under1000/chromatic-reverie-cbbec154.webp',
+    # More works by Sandra (src/art/more)
+    'tidal-spiral': 'art:more/tidal-spiral-2dac0fba.webp', 'chromatic-veins': 'art:more/chromatic-veins-80289f3f.webp',
+    'figure-study': 'art:more/reclining-figure-study-4d2fff76.webp', 'chromatic-silence': 'art:more/chromatic-silence-731c26f8.webp',
+    'chromatic-reverie': 'art:more/chromatic-reverie-cbbec154.webp',
     # Body art
     'gaze': 'art:gaze.webp', 'smoke': 'art:smoke.webp', 'petals': 'art:petals.webp',
 }

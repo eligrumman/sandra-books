@@ -24,8 +24,8 @@ const dir = lang => lang === 'he' ? 'rtl' : 'ltr';
 const prefix = lang => lang === 'he' ? '' : lang + '/';
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const ltr = s => '\u2066' + s + '\u2069';
-const UNDER1000 = 'https://www.under1000.com/he-IL/artists/%D7%A1%D7%A0%D7%93%D7%A8%D7%94-%D7%9C%D7%99%D7%99%D7%A4%D7%A8-9ea352ad';
-const SAME_AS = [UNDER1000, 'https://sites.google.com/view/sandra-leifer-art'];
+const SAME_AS = ['https://sites.google.com/view/sandra-leifer-art'];
+const PHONE = '+972-53-538-0014';
 
 // How Sandra is named and described in each language
 const SEO = {
@@ -55,7 +55,8 @@ const workPath = (id, lang) => `${prefix(lang)}works/${id}/`;
 
 function person(lang) {
   return {'@type': 'Person', '@id': SITE_URL + '#sandra', name: SEO[lang].name, alternateName: NAMES.filter(n => n !== SEO[lang].name),
-    jobTitle: SEO[lang].job, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS,
+    jobTitle: SEO[lang].job, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS, telephone: PHONE,
+    contactPoint: {'@type': 'ContactPoint', telephone: PHONE, contactType: 'sales', availableLanguage: ['Hebrew', 'Russian', 'English']},
     knowsAbout: lang === 'he' ? ['ציור', 'נוירוגרפיקה', 'צבעי מים', 'בודי־ארט', 'הוראת אמנות'] : lang === 'ru' ? ['Живопись', 'Нейрографика', 'Акварель', 'Боди-арт', 'Преподавание искусства'] : ['Painting', 'Neurographics', 'Watercolour', 'Body art', 'Art teaching'],
     nationality: 'Israel'};
 }
@@ -105,6 +106,7 @@ function homePage(lang) {
     ]})
   ].join('\n');
   html = html.replace('<!--seo-->', head);
+  html = html.replace(/href="https:\/\/wa\.me\/[^"]*"(?= target="_blank" rel="noopener" data-wa)/, `href="${esc(SITE.waHello(lang))}"`);
   // relative links from /ru/ and /en/ lead back to the site root
   if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
   // links to the works of this language: works/<id>/ next to this page
@@ -121,13 +123,13 @@ function workPage(w, i, lang) {
   const summary = desc.length ? desc.join(' ') : `${title}, ${S.by.toLowerCase()} ${S.name}. ${metaLine(w, lang).replace(/[\u2066\u2069]/g, '')}.`;
   const metaDesc = summary.length > 160 ? summary.slice(0, 157).replace(/\s+\S*$/, '') + '…' : summary;
   const pageTitle = `${title} — ${S.name}`;
-  const askHref = w.buy || `${up}${prefix(lang)}#contact`;
+  const askHref = SITE.waWork(lang, w, SITE_URL + workPath(w.id, lang)); // a WhatsApp message to Sandra about this work
   const [cw, ch] = (w.s || '').split('×').map(n => parseFloat(n));
   const art = {'@type': 'VisualArtwork', '@id': SITE_URL + workPath(w.id, lang) + '#work', name: title, url: SITE_URL + workPath(w.id, lang), inLanguage: lang,
     image: SITE_URL + imgUrl(w.id, big), creator: {'@id': SITE_URL + '#sandra'}, artMedium: medium(w, lang), artform: series,
     ...(w.y ? {dateCreated: String(w.y)} : {}), ...(desc.length ? {description: desc.join(' ')} : {}),
     ...(cw && ch ? {width: {'@type': 'QuantitativeValue', value: cw, unitCode: 'CMT'}, height: {'@type': 'QuantitativeValue', value: ch, unitCode: 'CMT'}} : {}),
-    ...(price ? {offers: {'@type': 'Offer', price, priceCurrency: 'ILS', availability: 'https://schema.org/InStock', url: w.buy || SITE_URL + workPath(w.id, lang), seller: {'@id': SITE_URL + '#sandra'}}} : {})};
+    ...(price ? {offers: {'@type': 'Offer', price, priceCurrency: 'ILS', availability: 'https://schema.org/InStock', url: SITE_URL + workPath(w.id, lang), seller: {'@id': SITE_URL + '#sandra'}}} : {})};
   const crumbs = {'@type': 'BreadcrumbList', itemListElement: [
     {'@type': 'ListItem', position: 1, name: S.name, item: homeUrl(lang)},
     {'@type': 'ListItem', position: 2, name: S.allWorks, item: homeUrl(lang) + '#works'},
@@ -176,7 +178,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
       <p class="wp-meta">${esc(metaLine(w, lang))}</p>
       ${w.status ? `<p class="wp-price muted">${esc(L(w.status, lang))}</p>` : w.price ? `<p class="wp-price">${esc(w.price)}</p>` : ''}
       ${desc.length ? `<h2>${esc(S.about)}</h2>\n      ${desc.map(p => `<p>${esc(p)}</p>`).join('\n      ')}` : ''}
-      <p class="wp-actions">${!w.status && (w.price || w.buy) ? `<a class="wp-ask" href="${esc(askHref)}"${w.buy ? ' target="_blank" rel="noopener"' : ''}>${esc(S.ask)}</a>` : ''}${w.no ? `<a class="wp-museum" href="${up}museum/?lang=${lang}&amp;work=${w.id}">${esc(S.museum)}</a>` : ''}</p>
+      <p class="wp-actions">${!w.status ? `<a class="wp-ask" href="${esc(askHref)}" target="_blank" rel="noopener">${esc(S.ask)}</a>` : ''}${w.no ? `<a class="wp-museum" href="${up}museum/?lang=${lang}&amp;work=${w.id}">${esc(S.museum)}</a>` : ''}</p>
     </article>
   </div>
   <nav class="wp-next" aria-label="${esc(S.allWorks)}">

@@ -8,7 +8,7 @@ const read = p => fs.readFileSync(new URL(p, root), 'utf8');
 const exists = p => fs.existsSync(new URL(p, root));
 const ctx = vm.createContext({window: {}});
 vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('assets/js/catalog.js'), ctx);
-const {SITE, IMAGES, CATALOG, SHOP} = ctx.window;
+const {SITE, IMAGES, CATALOG} = ctx.window;
 
 // Works: unique, in a known series, with generated images.
 const ids = SITE.works.map(w => w.id);
@@ -30,13 +30,6 @@ for (const [id, c] of Object.entries(CATALOG)) {
   assert.match(c.y, /^20\d\d(–20\d\d)?$/, `${id}: year`);
   assert.ok(c.price ? /^₪[\d,]+$/.test(c.price) : c.status, `${id}: price or status`);
   assert.ok(c.d[0].length && c.d[1].length && c.d[2].length, `${id}: description in three languages`);
-}
-// Under 1000: every listed work is on the site and links to its product page.
-assert.equal(Object.keys(SHOP).length, 18, 'Under 1000 listings');
-for (const [id, g] of Object.entries(SHOP)) {
-  assert.ok(ids.includes(id), `shop ${id} not on the site`);
-  assert.match(g.url, /^https:\/\/www\.under1000\.com\/he-IL\/products\/[a-z0-9-]+$/, `${id}: link`);
-  assert.equal(SITE.works.find(w => w.id === id).buy, g.url, `${id}: purchase link`);
 }
 for (const s of SITE.series) {
   assert.ok(SITE.works.some(w => w.kind === s.id), `empty series ${s.id}`);
@@ -94,6 +87,10 @@ for (const b of dragon) {
   b.forEach((p, n) => { assert.equal(p.n, n); assert.ok(n === 0 || p.text.length > 100, `dragon page ${n}`); assert.ok(exists('dragon/' + p.image), p.image); });
 }
 dragon[0].forEach((p, n) => assert.equal(p.chapter, dragon[1][n].chapter, `dragon chapter on page ${n}`));
-assert.ok(!html.includes('mailto:') && !html.includes('tel:'), 'no invented contact details');
+// Contact: Sandra on WhatsApp, and no trace of the Under 1000 gallery anywhere on the site.
+assert.ok(html.includes('https://wa.me/972535380014?text='), 'contact section opens WhatsApp');
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'assets/js/data.js', 'assets/js/catalog.js', 'assets/js/site.js', ...workPages])
+  assert.ok(!/under\s?1000|פחות מאלף/i.test(read(page)), `${page}: mentions Under 1000`);
+for (const w of SITE.works.filter(w => !w.status)) assert.ok(read(`works/${w.id}/index.html`).includes('https://wa.me/972535380014?text='), `${w.id}: WhatsApp purchase link`);
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
