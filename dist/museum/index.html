@@ -51,17 +51,18 @@ canvas.drag{cursor:grabbing}
 #lzoom{display:inline-flex;align-items:center;gap:7px}
 .dock{display:contents}
 @media (max-width:899px){
-  .dock{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:42px auto 42px minmax(0,1fr) 42px 42px;
-    grid-template-areas:"room room room room room room" "title title title title price price" "meta meta meta meta meta meta" "desc desc desc desc desc desc" "left more zoom ask tour right";
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:42px 42px auto 42px minmax(0,1fr) 42px;
+    grid-template-areas:"room room room room room room" "title title title title price price" "meta meta meta meta meta meta" "desc desc desc desc desc desc" "left right more zoom ask tour";
     gap:4px 7px;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(14,12,18,.93);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.16);border-radius:16px 16px 0 0}
-  .dock:not(.has){grid-template-columns:42px 1fr 42px;grid-template-areas:"left tour right"}
-  /* the arrows keep their sides in every language; the rest reads from the language's own side */
+  .dock:not(.has){grid-template-columns:42px 42px 1fr;grid-template-areas:"left right tour"}
+  /* the two arrows sit together on the left in every language; the rest reads from the language's own side */
   .dock{direction:ltr}
   [dir=rtl] .label{direction:rtl}
-  [dir=rtl] .dock.has{grid-template-columns:42px 42px minmax(0,1fr) 42px auto 42px;grid-template-areas:"room room room room room room" "price price title title title title" "meta meta meta meta meta meta" "desc desc desc desc desc desc" "left tour ask zoom more right"}
+  [dir=rtl] .dock.has{grid-template-columns:42px 42px 42px minmax(0,1fr) 42px auto;grid-template-areas:"room room room room room room" "price price title title title title" "meta meta meta meta meta meta" "desc desc desc desc desc desc" "left right tour ask zoom more"}
   [dir=rtl] .label .lp{justify-self:start}
   [dir=rtl] .label .room,[dir=rtl] .label b,[dir=rtl] .label .lm{text-align:right}
   .label,.lrow,.ui{display:contents}
+  .label{text-align:start}
   .dock > *,.label > *,.lrow > *,.ui > *{min-width:0}
   .label .room,.label b,.label .lm,.ldesc{overflow-wrap:anywhere}
   .label:not(.show) > *,.label:not(.show) .lrow > *{display:none!important}
