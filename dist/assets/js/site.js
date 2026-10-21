@@ -175,6 +175,8 @@ function show(i) {
 }
 function openArt(i) {
   if (i < 0) i = 0;
+  // phones give the screen to the work and open the description on demand; wide screens show it beside the work
+  $('lbAbout').setAttribute('aria-expanded', String(matchMedia('(min-width:900px)').matches));
   lastFocus = document.activeElement; show(i); lb.showModal(); document.documentElement.style.overflow = 'hidden';
   $('announce').textContent = L(visible[current].t);
 }

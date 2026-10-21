@@ -410,4 +410,19 @@ body{font-weight:300}
   .lb-desc{order:2;max-height:none;overflow:visible;max-width:none}
   .lb-actions{order:3}
   .lb-about{display:none}
+  .lb-desc[hidden]{display:block}
+}
+/* phones and tablets: the work gets the screen, its details sit compactly under it */
+@media (max-width:899px){
+  .lightbox{grid-template-rows:auto minmax(0,1fr) auto}
+  .lb-top{padding:8px 14px 0}
+  .lb-stage{padding:4px 8px 62px}
+  .lb-stage img{max-height:100%}
+  .lb-caption{gap:6px;padding:10px 16px calc(14px + env(safe-area-inset-bottom));max-height:56vh;overflow:auto;border-top:1px solid var(--line)}
+  .lb-caption h2{font-size:34px;line-height:1}
+  .lb-caption p{font-size:13.5px}
+  .lb-price{font-size:16px!important;margin-top:2px!important}
+  .lb-actions{gap:8px 14px}
+  .lb-about,.lightbox .lb-caption a.lb-ask{padding:7px 14px;font-size:13.5px}
+  .lb-desc{max-height:32vh;overflow:auto;font-size:14.5px;line-height:1.65}
 }
