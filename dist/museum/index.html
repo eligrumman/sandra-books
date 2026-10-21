@@ -88,6 +88,8 @@ canvas.drag{cursor:grabbing}
   #tour .ico{line-height:0}
   html .joy{bottom:calc(var(--dock-h,64px) + 12px);right:12px;width:92px;height:92px}
   html .joy i{width:42px;height:42px;margin:-21px 0 0 -21px}
+  .joy,.langs{transition:opacity .35s}
+  body.viewing .joy,body.viewing .langs{opacity:0;pointer-events:none}
 }
 
 /* looking closely: the work full screen, zoom with the wheel or a pinch, drag to move */
@@ -314,6 +316,8 @@ $('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; setTim
 
 /* ---------- the card ---------- */
 const label = $('label'), desc = $('ld'), dock = $('dock');
+// looking at a work (phones hide the joystick and languages then); wandering the room shows them again
+function viewing(on) { document.body.classList.toggle('viewing', on); }
 // phones: the description opens on demand, and the work is framed again above the bar
 $('lmore').onclick = () => {
   const open = !label.classList.contains('open'); label.classList.toggle('open', open); $('lmore').setAttribute('aria-expanded', String(open));
@@ -324,7 +328,7 @@ let shown = -1;
 function showLabel(i, keep) {
   if (i === shown && !keep) return; shown = i;
   dock.classList.toggle('has', i >= 0);
-  if (i < 0) { label.classList.remove('show', 'open'); $('lmore').setAttribute('aria-expanded', 'false'); return; }
+  if (i < 0) { viewing(false); label.classList.remove('show', 'open'); $('lmore').setAttribute('aria-expanded', 'false'); return; }
   const h = hung[i], f = info(h.id);
   $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
   $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
@@ -385,7 +389,7 @@ joy.addEventListener('pointermove', e => { if (joy.classList.contains('active'))
 ['pointerup', 'pointercancel'].forEach(ev => joy.addEventListener(ev, () => { joy.classList.remove('active'); knob.style.transform = ''; held = 0; joyX = 0; }));
 const cv = renderer.domElement; let drag = null, moved = 0;
 cv.addEventListener('pointerdown', e => { drag = {x: e.clientX, y: e.clientY}; moved = 0; cv.classList.add('drag'); cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; focused = -1; zoomAfter = -1; stopTour(); } });
+cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; moved += Math.abs(dx) + Math.abs(dy); yaw += dx * .004; pitch = Math.max(-.6, Math.min(.6, pitch + dy * .003)); drag = {x: e.clientX, y: e.clientY}; if (moved > 4) { glide = null; focused = -1; zoomAfter = -1; viewing(false); stopTour(); } });
 cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null; if (moved < 6) pick(e); });
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 // clicking a work brings it into focus in front of you; only a work in focus opens up close
@@ -395,6 +399,7 @@ function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHe
 let glide = null, current = -1, focused = -1, zoomAfter = -1; // focused: the work the camera has arrived in front of
 function goTo(i) {
   current = (i + hung.length) % hung.length; const h = hung[current]; focused = -1; if (zoomAfter !== current) zoomAfter = -1;
+  viewing(true);
   showLabel(current, true);
   const rc = label.getBoundingClientRect(), wide = innerWidth >= 900;
   // the part of the screen the work can use: beside the card on wide screens, above the bar on phones
@@ -448,7 +453,7 @@ function tick() {
   const dt = Math.min(.05, clock.getDelta());
   const mv = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0) + held, st = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + joyX;
   if (keys.arrowleft) yaw += 1.8 * dt; if (keys.arrowright) yaw -= 1.8 * dt;
-  if (Math.abs(mv) > .05 || Math.abs(st) > .05 || keys.arrowleft || keys.arrowright) { glide = null; focused = -1; zoomAfter = -1; }
+  if (Math.abs(mv) > .05 || Math.abs(st) > .05 || keys.arrowleft || keys.arrowright) { glide = null; focused = -1; zoomAfter = -1; viewing(false); }
   fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw)); side.set(Math.cos(yaw), 0, -Math.sin(yaw));
   const prevZ = camera.position.z;
   if (glide) {
