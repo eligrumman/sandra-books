@@ -169,17 +169,25 @@ const unit = id => frameOf(id).fw + LABEL.gap + LABEL.w;
 // rooms in visiting order; each has its own wall colour and light
 const ROOMS = [
   {kind: 'paint', wall: '#ece6dc', ink: '#2a2420', sub: '#7a6a5a', light: '#fff4e2'},
-  {kind: 'hidden', wall: '#27294a', ink: '#f1e9dc', sub: '#b9b3d6', light: '#e6e2ff'},
+  {kind: 'hidden', wall: '#454b7e', ink: '#f1e9dc', sub: '#b9b3d6', light: '#e6e2ff'},
   {kind: 'neuro', wall: '#f4f3ef', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff'}
 ];
 const W = 12, H = 4.6, DOOR = {w: 2.2, h: 3}, WALL = .2, EDGE = .8;
+// a wall's stretches for works on either side of its doorway (x in the wall's own coordinates; none for a wall without one)
+function split(solid, dx) {
+  const s = W / 2 - EDGE, gap = DOOR.w / 2 + .5;
+  return (solid ? [[-s, s]] : [[-s, dx - gap], [dx + gap, s]]).filter(([a0, a1]) => a1 - a0 >= .8);
+}
 const all = Object.keys(CATALOG).sort((a, b) => CATALOG[a].no - CATALOG[b].no).filter(id => C.IMG[id]);
 let z = 0;
 ROOMS.forEach((r, i) => {
   // canvases first, so the big works face you as you come in
   r.works = all.filter(id => work(id).kind === r.kind).sort((a, b) => onCanvas(b) - onCanvas(a));
-  const last = i === ROOMS.length - 1, side = W / 2 - EDGE - DOOR.w / 2 - .5;
-  const backFront = (last ? W - 2 * EDGE : 2 * side) + 2 * side;
+  // doorways alternate between the sides, so each one frames a wall of works in the next room, not the next doorway
+  const last = i === ROOMS.length - 1;
+  r.doorX = last ? null : (i % 2 ? -3 : 3); r.frontDoorX = i ? ROOMS[i - 1].doorX : 0;
+  r.segs = {back: split(r.last = last, r.doorX), front: split(false, -r.frontDoorX)};
+  const backFront = [...r.segs.back, ...r.segs.front].reduce((a, [a0, a1]) => a + a1 - a0, 0);
   const need = r.works.reduce((a, id) => a + unit(id) + SPACE, 0);
   r.d = Math.max(7, Math.ceil((need - backFront) / 2 + 2 * EDGE));
   r.front = z; r.back = z - r.d; r.zc = z - r.d / 2; r.last = last; z = r.back;
@@ -190,7 +198,7 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setPixelRatio(Math.min(2, devicePixelRatio)); renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
 document.body.prepend(renderer.domElement);
-const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); scene.fog = new THREE.Fog('#0c0b0f', 22, 40);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); scene.fog = new THREE.Fog('#0c0b0f', 30, 60);
 const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, .05, 80);
 camera.rotation.order = 'YXZ';
 let yaw = 0, pitch = 0;
@@ -226,33 +234,35 @@ const trim = new THREE.MeshLambertMaterial({color: '#2b2622'});
 function face(mat, pos, rot, len, door) {
   const add = (w, h, x, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(...pos); m.rotation.y = rot; m.translateX(x); m.position.y = y; scene.add(m); };
   const base = (w, x) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, .12, .04), trim); b.position.set(...pos); b.rotation.y = rot; b.translateX(x); b.position.y = .06; b.translateZ(.02); scene.add(b); };
-  if (!door) { add(len, H, 0, H / 2); base(len, 0); return; }
-  const s = (len - DOOR.w) / 2, x = (DOOR.w + s) / 2;
-  add(s, H, -x, H / 2); add(s, H, x, H / 2); add(DOOR.w, H - DOOR.h, 0, (H + DOOR.h) / 2); base(s, -x); base(s, x);
+  if (door == null) { add(len, H, 0, H / 2); base(len, 0); return; } // door: the doorway's centre along the wall
+  for (const [a0, a1] of [[-len / 2, door - DOOR.w / 2], [door + DOOR.w / 2, len / 2]]) if (a1 > a0) { add(a1 - a0, H, (a0 + a1) / 2, H / 2); base(a1 - a0, (a0 + a1) / 2); }
+  add(DOOR.w, H - DOOR.h, door, (H + DOOR.h) / 2);
 }
 for (const [i, r] of ROOMS.entries()) {
   const mat = new THREE.MeshLambertMaterial({map: plaster(r.wall)});
   // local x of a face runs to the right of a visitor facing it
   r.faces = {
-    back: {pos: [0, 0, r.back + (r.last ? 0 : WALL / 2)], rot: 0, len: W, door: !r.last},
+    back: {pos: [0, 0, r.back + (r.last ? 0 : WALL / 2)], rot: 0, len: W, door: r.doorX},
     right: {pos: [W / 2, 0, r.zc], rot: -Math.PI / 2, len: r.d},
-    front: {pos: [0, 0, r.front - (i ? WALL / 2 : 0)], rot: Math.PI, len: W, door: true},
+    front: {pos: [0, 0, r.front - (i ? WALL / 2 : 0)], rot: Math.PI, len: W, door: -r.frontDoorX},
     left: {pos: [-W / 2, 0, r.zc], rot: Math.PI / 2, len: r.d}
   };
   for (const f of Object.values(r.faces)) face(mat, f.pos, f.rot, f.len, f.door);
-  if (!r.last) for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.PlaneGeometry(WALL, DOOR.h), trim); j.position.set(sx * DOOR.w / 2, DOOR.h / 2, r.back); j.rotation.y = -sx * Math.PI / 2; scene.add(j); }
+  if (!r.last) for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.PlaneGeometry(WALL, DOOR.h), trim); j.position.set(r.doorX + sx * DOOR.w / 2, DOOR.h / 2, r.back); j.rotation.y = -sx * Math.PI / 2; scene.add(j); }
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, r.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'})); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, r.zc); scene.add(ceil);
   for (const x of [-3.5, 3.5]) { const l = new THREE.Mesh(new THREE.BoxGeometry(.2, .05, r.d - 2), new THREE.MeshBasicMaterial({color: r.light})); l.position.set(x, H - .03, r.zc); scene.add(l); }
   r.pool = pool(r.light);
   // the room's name over the doorway ahead of you (in the last room, on the end wall)
-  const title = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
+  // the room's name over the doorways, facing in: ahead of you as you come in, and over the doorway back
+  const sign = () => new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
     g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
     const top = `${t('room')} ${i + 1}`, name = seriesText(r.kind, 0), line = seriesText(r.kind, 1);
     g.fillStyle = r.sub; fit(g, top, 400, 54, fontOf(), w - 80, 20); g.fillText(top, w / 2, 70);
     g.fillStyle = r.ink; fit(g, name, 700, 190, '"Amatic SC"', w - 80, 60); g.fillText(name, w / 2, 250);
     g.fillStyle = r.sub; fit(g, line, 400, 46, fontOf(), w - 80, 18); g.fillText(line, w / 2, 345);
   })}));
-  title.scale.setScalar(r.last ? 1 : .78); title.position.set(0, r.last ? 3.45 : 3.82, r.faces.back.pos[2] + .01); scene.add(title);
+  const ahead = sign(); ahead.scale.setScalar(r.last ? 1 : .78); ahead.position.set(r.last ? 0 : r.doorX, r.last ? 3.45 : 3.82, r.faces.back.pos[2] + .01); scene.add(ahead);
+  if (i) { const back = sign(); back.scale.setScalar(.78); back.position.set(r.frontDoorX, 3.82, r.faces.front.pos[2] - .01); back.rotation.y = Math.PI; scene.add(back); }
 }
 // the artist's name over the entrance, seen when you turn around in the first room
 { const r = ROOMS[0], nm = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
@@ -298,8 +308,8 @@ function hang(id, ri, fc, x) {
 }
 for (const [ri, r] of ROOMS.entries()) {
   // stretches of wall in the order a visitor meets them turning right: back, right, front, left
-  const s = W / 2 - EDGE, d = r.d / 2 - EDGE, gap = DOOR.w / 2 + .5;
-  const segs = [...(r.last ? [['back', -s, s]] : [['back', -s, -gap], ['back', gap, s]]), ['right', -d, d], ['front', -s, -gap], ['front', gap, s], ['left', -d, d]];
+  const d = r.d / 2 - EDGE;
+  const segs = [...r.segs.back.map(g => ['back', ...g]), ['right', -d, d], ...r.segs.front.map(g => ['front', ...g]), ['left', -d, d]];
   const len = segs.reduce((a, [, a0, a1]) => a + a1 - a0, 0), need = r.works.reduce((a, id) => a + unit(id), 0);
   let k = 0, acc = 0, share = 0;
   segs.forEach(([wall, a0, a1], si) => {
@@ -417,7 +427,7 @@ function goTo(i) {
   const look = Math.atan2(h.normal.x, h.normal.z);
   // through the doorways when the work is in another room
   const pts = [camera.position.clone()], from = roomAt(camera.position.z), to = h.room;
-  for (let k = from; k !== to; k += Math.sign(to - from)) { const zz = to > from ? ROOMS[k].back : ROOMS[k].front, dir = to > from ? -1 : 1; pts.push(new THREE.Vector3(0, 1.65, zz - dir * 1.2), new THREE.Vector3(0, 1.65, zz + dir * 1.2)); }
+  for (let k = from; k !== to; k += Math.sign(to - from)) { const zz = to > from ? ROOMS[k].back : ROOMS[k].front, dir = to > from ? -1 : 1, dx = to > from ? ROOMS[k].doorX : ROOMS[k - 1].doorX; pts.push(new THREE.Vector3(dx, 1.65, zz - dir * 1.2), new THREE.Vector3(dx, 1.65, zz + dir * 1.2)); }
   pts.push(target);
   const lens = pts.slice(1).map((p, k) => p.distanceTo(pts[k])), len = lens.reduce((a, b) => a + b, 0);
   glide = {pts, lens, len, yaw0: yaw, yaw1: yaw + ((look - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI), p0: pitch, t: 0, dur: 1.4 + len / 5, walk: pts.length > 2};
@@ -446,7 +456,7 @@ function collide(p, prevZ) {
   p.z = Math.min(ROOMS[0].front - .5, Math.max(ROOMS[ROOMS.length - 1].back + .5, p.z));
   for (const r of ROOMS.slice(0, -1)) {
     const wz = r.back, reach = WALL / 2 + .45;
-    if (Math.abs(p.x) > DOOR.w / 2 - .35 && Math.abs(p.z - wz) < reach) p.z = prevZ > wz ? wz + reach : wz - reach;
+    if (Math.abs(p.x - r.doorX) > DOOR.w / 2 - .35 && Math.abs(p.z - wz) < reach) p.z = prevZ > wz ? wz + reach : wz - reach;
   }
 }
 const clock = new THREE.Clock();
