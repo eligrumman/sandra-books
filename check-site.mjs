@@ -52,7 +52,7 @@ const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works
 for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
-    if (/^(https?:|mailto:|data:)/.test(ref) || ref.endsWith('/')) continue;
+    if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
     assert.ok(exists(dir + ref), `${page}: missing ${ref}`);
   }
 }
@@ -103,5 +103,19 @@ for (const k of ['ngS1Title', 'ngS11Title', 'ngCtaBtn', 'waNeuro', 'navNeuro', '
 for (const l of ['he', 'ru', 'en']) assert.ok(SITE.waNeuro(l).startsWith('https://wa.me/972535380014?text='), `waNeuro ${l}`);
 assert.ok(read('sitemap.xml').includes(`<loc>${SITE_URL}neurographics/</loc>`), 'neurographics in sitemap');
 for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('neurographics/'), `${page} links to neurographics`);
+
+// Professional framing: one h1 and a WhatsApp/tel contact on each home page, the draft tale stays out of search engines.
+for (const page of ['index.html', 'ru/index.html', 'en/index.html']) {
+  const h = read(page);
+  assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, `${page}: exactly one h1`);
+  assert.ok(/<h1[^>]*>[^<]*Sandra Leifer|<h1[^>]*>(סנדרה לייפר|Сандра Лейфер)/.test(h), `${page}: h1 names Sandra`);
+  assert.ok(h.includes('href="tel:+972535380014"'), `${page}: number as a tel: link`);
+  assert.ok(h.includes('data-wa-book') && h.includes('id="waFloat"'), `${page}: booking button and floating WhatsApp`);
+  assert.ok(!h.includes('new-badge'), `${page}: no New badge on the draft tale`);
+}
+assert.ok(/<meta name="robots" content="noindex"/.test(read('dragon/index.html')), 'dragon is noindex');
+assert.ok(!sitemap.includes('/dragon/'), 'dragon is not in the sitemap');
+for (const page of workPages) assert.ok(/content="[^"]*(?:[.!?…״"])">/.test(read(page).match(/<meta name="description" content="[^"]*">/)[0]), `${page}: description ends at a sentence or word boundary`);
+for (const dir of ['book/', 'dragon/']) { const h = read(dir + 'index.html'); assert.ok(h.includes('id="footWa"') && h.includes('id="footStudio"') && h.includes('id="metaDesc"'), `${dir}: footer links and language-aware description`); }
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);

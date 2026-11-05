@@ -55,6 +55,7 @@ function applyLang() {
   $$('[data-museum-link]').forEach(a => a.href = BASE + 'museum/?lang=' + lang);
   $$('[data-ng-link]').forEach(a => a.href = BASE + 'neurographics/?lang=' + lang);
   $$('[data-wa]').forEach(a => a.href = S.waHello(lang));
+  $$('[data-wa-book]').forEach(a => a.href = S.waBook(lang));
   // switching language keeps you in the same section
   $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));
   store.set('sl-lang', lang);
@@ -86,11 +87,17 @@ const spy = new IntersectionObserver(entries => entries.forEach(en => {
   navLinks.forEach(a => a.getAttribute('href') === '#' + en.target.id ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'));
 }), {rootMargin: '-45% 0px -50% 0px'});
 sections.forEach(s => s && spy.observe(s));
+// the floating WhatsApp button (phones only, by CSS) appears once the hero is behind you
+const waFloat = $('waFloat');
+if (waFloat) {
+  waFloat.hidden = false;
+  new IntersectionObserver(es => es.forEach(en => waFloat.classList.toggle('show', !en.isIntersecting)), {threshold: .02}).observe($('hero'));
+}
 
 /* ---------- hero: endless wall ---------- */
 window.EndlessWall($('hero'), S.works.map(w => w.id), {
   base: BASE, title: id => L(work(id).t), reduced: reduced.matches,
-  calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum')],
+  calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum'), document.querySelector('.wall-copy')],
   onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
 });
 
@@ -165,7 +172,7 @@ function show(i) {
   $('lbMeta').textContent = meta(w);
   $('lbCount').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(visible.length).padStart(2, '0');
   // Price or status, Sandra's description, and a way to ask about the work
-  const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || ''); price.classList.toggle('muted', !!w.status);
+  const price = $('lbPrice'); price.textContent = w.status ? L(w.status) : (w.price || t('priceOnRequest')); price.classList.toggle('muted', !!w.status || !w.price);
   // a WhatsApp message to Sandra about this work (not for works in a private collection)
   const ask = $('lbAsk'); ask.hidden = !!w.status;
   $('lbPage').href = workUrl(w.id);

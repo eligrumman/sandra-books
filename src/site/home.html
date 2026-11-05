@@ -22,11 +22,8 @@
   </a>
   <nav class="nav" id="nav" aria-label="ניווט ראשי" data-t-label="navLabel">
     <a href="#works" data-t="navWorks">עבודות</a>
-    <a href="#series" data-t="navSeries">סדרות</a>
-    <a href="museum/" data-museum-link data-t="navMuseum">מוזיאון</a>
-    <a href="#exhibition" data-t="navExhibition">תערוכה</a>
+    <a href="museum/" data-museum-link data-t="navMuseum">גלריית 3D</a>
     <a href="#studio" data-t="navStudio">סדנאות</a>
-    <a href="neurographics/" data-ng-link data-t="navNeuro">נסו נוירוגרפיקה</a>
     <a href="#about" data-t="navAbout">סנדרה</a>
     <a href="#stories" data-t="navStories">סיפורים</a>
     <a href="#contact" data-t="navContact">קשר</a>
@@ -45,6 +42,13 @@
 
 <!-- HERO: endless wall -->
 <section class="wall" id="hero" aria-label="קיר העבודות" data-t-label="wallLabel">
+  <div class="wall-copy">
+    <h1 class="wall-title" data-t="heroH1">סנדרה לייפר<span class="sr">. </span><span class="wall-sub">ציירת. ציורים מקוריים ומפגשי נוירוגרפיקה</span></h1>
+    <div class="wall-cta">
+      <a class="btn btn-solid" href="#works" data-t="heroBtnWorks">עבודות ורכישה</a>
+      <a class="btn btn-ghost" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa-book data-t="heroBtnBook">לתאם מפגש</a>
+    </div>
+  </div>
   <a class="wall-btn wall-museum" href="museum/" data-museum-link data-t="museumBtn">להיכנס למוזיאון</a>
   <a class="wall-btn wall-down" href="#series" data-t-label="continue" aria-label="להמשיך"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </section>
@@ -110,6 +114,9 @@
     <div class="reveal"><span>02</span><h3 data-t="studioP2t">צבע וחומר</h3><p data-t="studioP2">אקריליק, צבעי מים, פסטל וטושים. מתנסים, טועים, מגלים — בלי צורך בניסיון קודם.</p></div>
     <div class="reveal"><span>03</span><h3 data-t="studioP3t">לילדים ולמבוגרים</h3><p data-t="studioP3">שיעורים וסדנאות לקבוצות, למשפחות ולאירועים — בגובה העיניים ובהרבה סבלנות.</p></div>
   </div>
+  <div class="studio-book reveal">
+    <a class="btn btn-solid" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa-book data-t="studioBook">לתאם סדנה או מפגש</a>
+  </div>
   <div class="studio-ng reveal">
     <p data-t="ngTeaser">מדריך אינטראקטיבי: נסו את שיטת הנוירוגרפיקה בעצמכם, צעד אחר צעד, ישירות בדפדפן. כמה דקות, קו אחד ודף ריק.</p>
     <a class="btn btn-ghost" href="neurographics/" data-ng-link data-t="ngTeaserCta">לנסות עכשיו</a>
@@ -156,7 +163,7 @@
       </div>
     </a>
     <a class="story-card reveal" href="dragon/" data-dragon-link>
-      <div class="story-cover dragon-cover"><img src="assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"><span class="new-badge" data-t="newBadge">חדש</span></div>
+      <div class="story-cover dragon-cover"><img src="assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"></div>
       <div class="story-body">
         <span class="tag" data-t="dragonTag">אגדה חדשה · לקריאה</span>
         <h3 data-t="dragonTitle">סיפור על הדרקון</h3>
@@ -172,6 +179,7 @@
   <p class="index reveal">08 — <span data-t="contactIndex">להמשיך את השיחה</span></p>
   <h2 class="contact-title reveal" id="contactTitle"><a href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactTitle">בואו נדבר<br><em>על יצירה.</em> ↗</a></h2>
   <p class="contact-note reveal" data-t="contactNote">לקניית עבודות, להזמנת סדנה או סתם לשאלה, כתבו לסנדרה בוואטסאפ.</p>
+  <p class="contact-cta reveal"><a class="btn btn-dark" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactBtn">לכתוב בוואטסאפ</a></p>
 </section>
 
 </main>
@@ -203,6 +211,8 @@
     <div class="lb-desc" id="lbDesc" hidden></div>
   </div>
 </dialog>
+
+<a class="wa-float" id="waFloat" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t-label="waFloat" aria-label="WhatsApp" hidden><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path fill="currentColor" d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8c-1-.4-2-1.4-2.4-2.4l.8-1-1-2z"/></svg></a>
 
 <p class="sr" id="announce" aria-live="polite"></p>
 <script src="assets/js/images.js" defer></script>

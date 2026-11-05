@@ -42,11 +42,8 @@
   </a>
   <nav class="nav" id="nav" aria-label="Главное меню" data-t-label="navLabel">
     <a href="#works" data-t="navWorks">Работы</a>
-    <a href="#series" data-t="navSeries">Серии</a>
-    <a href="../museum/" data-museum-link data-t="navMuseum">Выставка вживую</a>
-    <a href="#exhibition" data-t="navExhibition">Выставка</a>
+    <a href="../museum/" data-museum-link data-t="navMuseum">3D-галерея</a>
     <a href="#studio" data-t="navStudio">Мастер-классы</a>
-    <a href="../neurographics/" data-ng-link data-t="navNeuro">Нейрографика</a>
     <a href="#about" data-t="navAbout">О Сандре</a>
     <a href="#stories" data-t="navStories">Сказки</a>
     <a href="#contact" data-t="navContact">Контакты</a>
@@ -65,7 +62,14 @@
 
 <!-- HERO: endless wall -->
 <section class="wall" id="hero" aria-label="Стена работ" data-t-label="wallLabel">
-  <a class="wall-btn wall-museum" href="../museum/" data-museum-link data-t="museumBtn">Выставка вживую</a>
+  <div class="wall-copy">
+    <h1 class="wall-title" data-t="heroH1">Сандра Лейфер<span class="sr">. </span><span class="wall-sub">Художница. Оригинальные картины и занятия по нейрографике</span></h1>
+    <div class="wall-cta">
+      <a class="btn btn-solid" href="#works" data-t="heroBtnWorks">Работы и покупка</a>
+      <a class="btn btn-ghost" href="https://wa.me/972535380014?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D0%A1%D0%B0%D0%BD%D0%B4%D1%80%D0%B0!%20%D0%9F%D0%B8%D1%88%D1%83%20%D0%B2%D0%B0%D0%BC%20%D1%81%20%D0%B2%D0%B0%D1%88%D0%B5%D0%B3%D0%BE%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0." target="_blank" rel="noopener" data-wa-book data-t="heroBtnBook">Записаться на занятие</a>
+    </div>
+  </div>
+  <a class="wall-btn wall-museum" href="../museum/" data-museum-link data-t="museumBtn">Войти в 3D-галерею</a>
   <a class="wall-btn wall-down" href="#series" data-t-label="continue" aria-label="Дальше"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </section>
 
@@ -130,6 +134,9 @@
     <div class="reveal"><span>02</span><h3 data-t="studioP2t">Цвет и материал</h3><p data-t="studioP2">Акрил, акварель, пастель и маркеры. Опыт не нужен.</p></div>
     <div class="reveal"><span>03</span><h3 data-t="studioP3t">Дети и взрослые</h3><p data-t="studioP3">Уроки и мастер-классы для детей, взрослых и групп.</p></div>
   </div>
+  <div class="studio-book reveal">
+    <a class="btn btn-solid" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa-book data-t="studioBook">Записаться на мастер-класс или занятие</a>
+  </div>
   <div class="studio-ng reveal">
     <p data-t="ngTeaser">Интерактивный гид: попробуйте метод нейрографики сами, шаг за шагом, прямо в браузере. Несколько минут, одна линия и чистый лист.</p>
     <a class="btn btn-ghost" href="../neurographics/" data-ng-link data-t="ngTeaserCta">Попробовать</a>
@@ -176,7 +183,7 @@
       </div>
     </a>
     <a class="story-card reveal" href="../dragon/" data-dragon-link>
-      <div class="story-cover dragon-cover"><img src="../assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"><span class="new-badge" data-t="newBadge">Новое</span></div>
+      <div class="story-cover dragon-cover"><img src="../assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"></div>
       <div class="story-body">
         <span class="tag" data-t="dragonTag">Новая сказка · 8 глав</span>
         <h3 data-t="dragonTitle">Сказка о драконе</h3>
@@ -190,8 +197,9 @@
 <!-- CONTACT -->
 <section class="contact pad" id="contact" aria-labelledby="contactTitle">
   <p class="index reveal">08 — <span data-t="contactIndex">Связаться</span></p>
-  <h2 class="contact-title reveal" id="contactTitle"><a href="https://wa.me/972535380014?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%2C%20%D0%A1%D0%B0%D0%BD%D0%B4%D1%80%D0%B0!%20%D0%9F%D0%B8%D1%88%D1%83%20%D0%B2%D0%B0%D0%BC%20%D1%81%20%D0%B2%D0%B0%D1%88%D0%B5%D0%B3%D0%BE%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0." target="_blank" rel="noopener" data-wa data-t="contactTitle">Хотите поговорить<br><em>с Сандрой?</em> ↗</a></h2>
-  <p class="contact-note reveal" data-t="contactNote">Купить работу, заказать мастер-класс или просто задать вопрос — напишите Сандре в WhatsApp: <bdi dir="ltr">+972 53-538-0014</bdi></p>
+  <h2 class="contact-title reveal" id="contactTitle"><a href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactTitle">Хотите поговорить<br><em>с Сандрой?</em> ↗</a></h2>
+  <p class="contact-note reveal" data-t="contactNote">Купить работу, заказать мастер-класс или просто задать вопрос — напишите Сандре в WhatsApp: <a class="tel" href="tel:+972535380014"><bdi dir="ltr">+972 53-538-0014</bdi></a></p>
+  <p class="contact-cta reveal"><a class="btn btn-dark" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactBtn">Написать в WhatsApp</a></p>
 </section>
 
 </main>
@@ -223,6 +231,8 @@
     <div class="lb-desc" id="lbDesc" hidden></div>
   </div>
 </dialog>
+
+<a class="wa-float" id="waFloat" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t-label="waFloat" aria-label="WhatsApp" hidden><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path fill="currentColor" d="M9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 .8c-1-.4-2-1.4-2.4-2.4l.8-1-1-2z"/></svg></a>
 
 <p class="sr" id="announce" aria-live="polite"></p>
 <script src="../assets/js/images.js" defer></script>
