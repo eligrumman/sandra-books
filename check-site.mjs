@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -92,5 +92,16 @@ assert.ok(html.includes('https://wa.me/972535380014?text='), 'contact section op
 for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'assets/js/data.js', 'assets/js/catalog.js', 'assets/js/site.js', ...workPages])
   assert.ok(!/under\s?1000|פחות מאלף/i.test(read(page)), `${page}: mentions Under 1000`);
 for (const w of SITE.works.filter(w => !w.status)) assert.ok(read(`works/${w.id}/index.html`).includes('https://wa.me/972535380014?text='), `${w.id}: WhatsApp purchase link`);
+
+// Neurographics guide: page exists, loads the shared texts, every key it uses exists in all three languages.
+assert.ok(exists('neurographics/index.html') && exists('neurographics/app.js'), 'neurographics page');
+const ng = read('neurographics/index.html');
+assert.ok(ng.includes('data.js') && ng.includes('app.js'), 'neurographics loads data.js and app.js');
+for (const [, key] of ng.matchAll(/data-t="([^"]+)"/g)) for (const l of ['he', 'ru', 'en']) assert.ok(key in SITE.text[l], `neurographics: ${l} missing ${key}`);
+for (const [, key] of read('neurographics/app.js').matchAll(/\bt\('(ng\w+|wa\w+)'\s*[,)]/g)) for (const l of ['he', 'ru', 'en']) assert.ok(key in SITE.text[l], `neurographics app: ${l} missing ${key}`);
+for (const k of ['ngS1Title', 'ngS11Title', 'ngCtaBtn', 'waNeuro', 'navNeuro', 'ngTeaser']) for (const l of ['he', 'ru', 'en']) assert.ok(SITE.text[l][k], `neurographics text ${k} ${l}`);
+for (const l of ['he', 'ru', 'en']) assert.ok(SITE.waNeuro(l).startsWith('https://wa.me/972535380014?text='), `waNeuro ${l}`);
+assert.ok(read('sitemap.xml').includes(`<loc>${SITE_URL}neurographics/</loc>`), 'neurographics in sitemap');
+for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('neurographics/'), `${page} links to neurographics`);
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);

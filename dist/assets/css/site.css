@@ -426,3 +426,7 @@ body{font-weight:300}
   .lb-about,.lightbox .lb-caption a.lb-ask{padding:7px 14px;font-size:13.5px}
   .lb-desc{max-height:32vh;overflow:auto;font-size:14.5px;line-height:1.65}
 }
+
+/* Teaser for the neurographics guide, under the workshops */
+.studio-ng{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px 40px;margin-top:clamp(30px,4vw,50px);padding:clamp(20px,3vw,32px) clamp(20px,3vw,36px);border:1px solid var(--line);border-radius:18px;background:var(--ink-2)}
+.studio-ng p{margin:0;max-width:56ch;font-size:18px;color:var(--text)}

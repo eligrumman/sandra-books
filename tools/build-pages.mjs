@@ -209,6 +209,7 @@ write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${entry(prefix, '1.0')}
 ${works.map(w => entry(l => workPath(w.id, l), '0.8')).join('\n')}
 ${single('museum/', '0.7')}
+${single('neurographics/', '0.7')}
 ${single('book/', '0.6')}
 ${single('dragon/', '0.6')}
 </urlset>
@@ -219,4 +220,4 @@ Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 1) * LANGS.length + 3} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 1) * LANGS.length + 4} addresses`);

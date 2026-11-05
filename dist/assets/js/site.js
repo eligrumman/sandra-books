@@ -53,6 +53,7 @@ function applyLang() {
   $$('[data-book-link]').forEach(a => a.href = BASE + 'book/?lang=' + lang);
   $$('[data-dragon-link]').forEach(a => a.href = BASE + 'dragon/?lang=' + lang);
   $$('[data-museum-link]').forEach(a => a.href = BASE + 'museum/?lang=' + lang);
+  $$('[data-ng-link]').forEach(a => a.href = BASE + 'neurographics/?lang=' + lang);
   $$('[data-wa]').forEach(a => a.href = S.waHello(lang));
   // switching language keeps you in the same section
   $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));

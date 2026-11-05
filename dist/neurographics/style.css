@@ -1,0 +1,145 @@
+/* Neurographics guide: dark page of the site, white sheet to draw on */
+.ng-page{background:var(--ink);font-family:var(--sans);--paper-sheet:#fbf8f1;--ok:#8fd3a8;--hot:#e0455a}
+.wp-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px var(--pad-x);border-bottom:1px solid var(--line)}
+.ng-head-tools{display:flex;align-items:center;gap:18px}
+.ng-home{font-size:14.5px;color:var(--muted);border-bottom:1px solid transparent}
+.ng-home:hover{color:var(--text);border-color:var(--line)}
+.ng{max-width:1160px;margin:0 auto;padding:clamp(18px,3vw,34px) var(--pad-x) clamp(36px,6vw,80px)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* progress */
+.ng-progress{margin-bottom:clamp(18px,3vw,32px)}
+.ng-progress-text{font-size:13px;letter-spacing:.1em;color:var(--gold);margin-bottom:8px}
+.ng-bar{height:4px;background:var(--ink-3);border-radius:4px;overflow:hidden}
+.ng-bar i{display:block;height:100%;width:0;background:var(--gold);border-radius:4px;transition:width .5s var(--ease)}
+.ng-dots{display:flex;gap:6px;list-style:none;margin:10px 0 0;padding:0}
+.ng-dots li{flex:1;height:3px;border-radius:3px;background:var(--ink-3)}
+.ng-dots li.done{background:var(--gold-soft);opacity:.9}
+.ng-dots li.now{background:var(--gold)}
+
+/* a step */
+.ng-step{min-height:50vh}
+.ng-step h1,.ng-step h2{font-family:var(--serif);font-weight:700;font-size:clamp(44px,5.4vw,78px);line-height:.95;margin:0 0 14px;outline:none}
+.ng-step p{margin:0 0 14px}
+.ng-lead{font-size:clamp(17px,1.7vw,20px);color:var(--text)}
+.ng-muted{color:var(--muted);font-size:15.5px}
+.ng-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(24px,4vw,64px);align-items:start}
+.ng-cols.narrow{grid-template-columns:minmax(0,1fr)}
+.ng-single{max-width:760px}
+.ng-card{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,2.4vw,26px)}
+.ng-list{margin:0 0 14px;padding-inline-start:1.2em}
+.ng-list li{margin:0 0 8px}
+.ng-list.rules{list-style:none;padding:0}
+.ng-list.rules li{position:relative;padding-inline-start:30px}
+.ng-list.rules li::before{content:"✳";position:absolute;inset-inline-start:0;top:0;color:var(--gold)}
+.ng-label{display:block;font-size:13.5px;letter-spacing:.06em;color:var(--gold);margin:0 0 6px}
+.ng-input,.ng-text{width:100%;font:inherit;font-size:17px;color:var(--text);background:var(--ink-2);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:12px 14px;line-height:1.5}
+.ng-text{resize:vertical;min-height:84px}
+.ng-input::placeholder,.ng-text::placeholder{color:#8f8780}
+.ng-input:focus-visible,.ng-text:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ng-field{margin:0 0 16px}
+.ng-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center}
+.ng-hero figure{margin:0}
+.ng-hero img{width:100%;height:auto;border-radius:10px;display:block;background:var(--ink-3)}
+.ng-hero figcaption{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.ng-by{font-size:15px;letter-spacing:.06em;color:var(--gold);margin:0 0 14px}
+
+/* neuro-line animation */
+.ng-anim{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+.ng-anim figure{margin:0;background:var(--paper-sheet);border-radius:12px;padding:8px 8px 10px;color:#1d1b24}
+.ng-anim svg{width:100%;height:auto;display:block}
+.ng-anim figcaption{font-size:14.5px;text-align:center;color:#3b3640;padding:4px 6px 0}
+.ng-anim path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:3.5}
+.ng-anim .habit{stroke:#7b7684}
+.ng-anim .neuro{stroke:#2459c6}
+.ng-anim path.run{stroke-dasharray:1;stroke-dashoffset:1;animation:ngdraw 6s ease-in-out infinite}
+.ng-anim path.run.b{animation-delay:.2s}
+@keyframes ngdraw{0%{stroke-dashoffset:1}60%,92%{stroke-dashoffset:0}100%{stroke-dashoffset:-1}}
+
+/* board */
+.board{display:flex;flex-direction:column;gap:10px}
+.sheet-wrap{position:relative;width:100%;max-width:min(100%,calc(100vh - 220px));min-width:260px;margin-inline:auto;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--paper-sheet);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.sheet{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:crosshair}
+.sheet-hint[hidden]{display:none}
+.sheet-hint{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;color:#8b8592;font-size:20px;font-family:var(--serif);font-weight:700;letter-spacing:.04em}
+.tools{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+.tool-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.swatch{width:40px;height:40px;border-radius:50%;border:2px solid transparent;display:grid;place-items:center;background:none;padding:0}
+.swatch i{display:block;width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.swatch[aria-checked=true]{border-color:var(--gold-soft)}
+.wbtn{min-width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.3);display:grid;place-items:center;background:none;padding:0 4px}
+.wbtn i{display:block;width:26px;border-radius:4px;background:var(--text)}
+.wbtn[aria-checked=true]{background:var(--paper);border-color:var(--paper)}
+.wbtn[aria-checked=true] i{background:var(--ink)}
+.tbtn{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.3);font-size:14.5px;line-height:1.2;color:var(--text);background:none}
+.tbtn:hover:not(:disabled){border-color:var(--gold);color:var(--gold-soft)}
+.tbtn:disabled{opacity:.4;cursor:default}
+.tbtn[aria-pressed=true]{background:var(--gold-soft);border-color:var(--gold-soft);color:#1a1408}
+.tbtn.round{background:var(--gold-soft);border-color:var(--gold-soft);color:#1a1408;font-weight:500}
+.tbtn.round:disabled{background:none;color:var(--text)}
+.board-status{min-height:1.6em;margin:0;font-size:15px;color:var(--gold-soft)}
+.board-status.good{color:var(--ok)}
+
+/* prompts and breathing */
+.prompt{font-size:clamp(20px,2.2vw,26px);line-height:1.4;color:var(--gold-soft);min-height:3.8em;margin:6px 0 14px}
+.breath{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.breath-dot{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold-soft),var(--gold));flex:none;transform:scale(.55);transition:transform 4.5s ease-in-out}
+.breath.in .breath-dot{transform:scale(1)}
+.breath-word{font-family:var(--serif);font-weight:700;font-size:34px;line-height:1;min-width:4.5em}
+.ng-info{font-size:15.5px;color:var(--gold-soft);margin:6px 0 12px}
+.ng-info.good{color:var(--ok)}
+
+/* timer and words */
+.timer{font-family:var(--serif);font-weight:700;font-size:clamp(56px,7vw,92px);line-height:1;color:var(--gold-soft);direction:ltr;text-align:start}
+.t-bar{height:4px;background:var(--ink-3);border-radius:4px;overflow:hidden;margin:6px 0 16px}
+.t-bar i{display:block;height:100%;width:100%;background:var(--gold);transform-origin:left;transition:transform .3s linear}
+.words-count{font-size:18px;margin:10px 0 4px;color:var(--text)}
+.words-msg{margin:0 0 14px;font-size:15.5px;color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.chip{min-height:44px;padding:0 16px;border-radius:30px;border:1px solid rgba(255,255,255,.3);font-size:17px;color:var(--text);background:none}
+.chip[aria-pressed=true]{background:var(--gold-soft);border-color:var(--gold-soft);color:#1a1408;font-weight:500}
+
+/* shapes */
+.shape-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+
+/* final */
+.final-sheet{width:100%;max-width:min(100%,calc(100vh - 260px));min-width:260px;margin-inline:auto;display:block;border-radius:10px;background:var(--paper-sheet);box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.final-actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px}
+.cta{background:linear-gradient(160deg,var(--ink-3),var(--ink-2));border:1px solid var(--gold);border-radius:18px;padding:clamp(18px,3vw,30px);margin-top:6px}
+.cta h3{font-family:var(--serif);font-weight:700;font-size:clamp(36px,4vw,54px);line-height:1;margin:0 0 10px}
+.cta .btn{margin:6px 0 12px;text-align:center;min-height:56px;padding:8px 26px;line-height:1.3}
+.btn-solid.gold{background:var(--gold-soft);color:#1a1408}
+.btn-solid.gold:hover{background:var(--paper)}
+.cta .ng-muted{margin:0}
+
+/* nav */
+.ng-nav{display:flex;justify-content:space-between;gap:12px;margin-top:clamp(22px,3vw,36px);padding-top:18px;border-top:1px solid var(--line)}
+.ng-nav .btn{min-width:120px}
+.ng-nav .btn[hidden]{display:none}
+.arrow{display:inline-block;font-size:18px;line-height:1}
+.arrow-back{transform:scaleX(-1)}
+[dir=rtl] .arrow-back{transform:none}
+[dir=rtl] .arrow-fwd{transform:scaleX(-1)}
+.btn:focus-visible,.tbtn:focus-visible,.chip:focus-visible,.swatch:focus-visible,.wbtn:focus-visible{outline:2px solid var(--gold-soft);outline-offset:3px}
+
+@media (max-width:900px){
+  .ng-cols,.ng-hero{grid-template-columns:minmax(0,1fr)}
+  .ng-step h1,.ng-step h2{font-size:clamp(46px,13vw,62px)}
+  .ng-head-tools .ng-home{display:none}
+  .ng-nav{position:sticky;bottom:0;background:var(--ink);padding:12px 0 calc(12px + env(safe-area-inset-bottom));z-index:5;margin-top:20px}
+  .ng-nav .btn{flex:1}
+  .sheet-wrap{max-width:100%}
+  .prompt{min-height:0;font-size:19px}
+  .breath-dot{width:34px;height:34px}
+  .breath-word{font-size:28px}
+}
+@media (max-width:520px){
+  .ng-anim{grid-template-columns:1fr}
+  .tools{gap:6px 8px}
+  .tbtn{padding:0 10px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ng-anim path.run{animation:none;stroke-dashoffset:0}
+  .breath-dot{transition:none}
+  .ng-bar i,.t-bar i{transition:none}
+}
