@@ -38,7 +38,7 @@ function buildAudit(audit){
  for(const c of audit.corrections){const p=document.createElement('div');p.className='correction';const label=document.createElement('span');label.textContent=pageLabel(c.page)+': ';const quote=document.createElement('bdi');quote.lang='he';quote.dir='rtl';quote.textContent=`״${c.before}״ ← ״${c.after}״`;p.append(label,quote);$('corrections').append(p);}
 }
 function setLanguage(value){
- lang=value==='ru'?'ru':'he';book=books[lang];$('artistBack').href='../?lang='+lang;$('artistBack').setAttribute('aria-label',lang==='ru'?'На сайт художницы':'לאתר האמנית');$('artistBack').lastElementChild.textContent=lang==='ru'?'Сайт художницы':'אתר האמנית';storage.set('dragon-lang',lang);document.documentElement.lang=lang;document.documentElement.dir=lang==='he'?'rtl':'ltr';$('language').value=lang;
+ lang=value==='ru'?'ru':'he';book=books[lang];$('artistBack').href='../?lang='+lang;$('artistBack').setAttribute('aria-label',lang==='ru'?'На сайт художницы':'לאתר האמנית');$('artistBack').lastElementChild.textContent=lang==='ru'?'Сайт художницы':'אתר האמנית';storage.set('dragon-lang',lang);document.documentElement.lang=lang;document.getElementById('metaDesc').content=t('metaDesc');$('footWa').href='https://wa.me/972535380014?text='+encodeURIComponent(t('waMsg'));$('footStudio').href=(lang==='ru'?'../ru/':'../')+'#studio';document.documentElement.dir=lang==='he'?'rtl':'ltr';$('language').value=lang;
  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
  document.querySelectorAll('[data-label]').forEach(el=>el.setAttribute('aria-label',t('label_'+el.dataset.label)));
  document.querySelector('.cover-art img').alt=t('coverAlt');

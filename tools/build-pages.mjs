@@ -32,15 +32,15 @@ const SEO = {
   he: {name: 'סנדרה לייפר', job: 'אמנית ומורה לאמנות', locale: 'he_IL', title: SITE.text.he.title,
     desc: 'סנדרה לייפר, אמנית ומורה לאמנות בישראל: ציורים מקוריים באקריליק ובצבעי מים, נוירוגרפיקה, עולמות נסתרים, בודי־ארט, סדנאות ואגדות מאוירות לילדים. עבודות מקוריות למכירה.',
     works: 'עבודות', allWorks: 'כל העבודות', by: 'מאת', about: 'על היצירה', ask: 'לפרטים ולרכישה', museum: 'לראות בתערוכה', prev: 'היצירה הקודמת', next: 'היצירה הבאה',
-    cm: 'ס״מ', home: 'סנדרה לייפר', series: 'סדרה', artwork: 'יצירה', imgAlt: (t, n) => `${t} — ${n}`, original: 'עבודה מקורית'},
+    cm: 'ס״מ', home: 'סנדרה לייפר', series: 'סדרה', artwork: 'יצירה', imgAlt: (t, n) => `${t} — ${n}`, original: 'עבודה מקורית', onRequest: 'מחיר לפי פנייה'},
   ru: {name: 'Сандра Лейфер', job: 'Художница и педагог', locale: 'ru_RU', title: SITE.text.ru.title,
     desc: 'Сандра Лейфер — художница и педагог из Израиля: оригинальные картины акрилом и акварелью, нейрографика, скрытые миры, боди-арт, мастер-классы и иллюстрированные сказки для детей. Оригиналы в продаже.',
     works: 'Работы', allWorks: 'Все работы', by: 'Автор', about: 'О работе', ask: 'Узнать о покупке', museum: 'Посмотреть на выставке', prev: 'Предыдущая работа', next: 'Следующая работа',
-    cm: 'см', home: 'Сандра Лейфер', series: 'Серия', artwork: 'Работа', imgAlt: (t, n) => `${t} — ${n}`, original: 'Оригинал'},
+    cm: 'см', home: 'Сандра Лейфер', series: 'Серия', artwork: 'Работа', imgAlt: (t, n) => `${t} — ${n}`, original: 'Оригинал', onRequest: 'Цена по запросу'},
   en: {name: 'Sandra Leifer', job: 'Artist and art teacher', locale: 'en_US', title: SITE.text.en.title,
-    desc: 'Sandra Leifer is an artist and art teacher in Israel: original acrylic and watercolour paintings, neurographics, hidden worlds, body art, workshops and illustrated fairy tales for children. Original works for sale.',
+    desc: 'Sandra Leifer is an artist and art teacher in Israel: original acrylic and watercolor paintings, neurographics, hidden worlds, body art, workshops and illustrated fairy tales for children. Original works for sale.',
     works: 'Works', allWorks: 'All works', by: 'By', about: 'About the work', ask: 'Details and purchase', museum: 'See it in the exhibition', prev: 'Previous work', next: 'Next work',
-    cm: 'cm', home: 'Sandra Leifer', series: 'Series', artwork: 'Artwork', imgAlt: (t, n) => `${t} — ${n}`, original: 'Original work'}
+    cm: 'cm', home: 'Sandra Leifer', series: 'Series', artwork: 'Artwork', imgAlt: (t, n) => `${t} — ${n}`, original: 'Original work', onRequest: 'Price on request'}
 };
 const NAMES = LANGS.map(l => SEO[l].name);
 
@@ -57,7 +57,7 @@ function person(lang) {
   return {'@type': 'Person', '@id': SITE_URL + '#sandra', name: SEO[lang].name, alternateName: NAMES.filter(n => n !== SEO[lang].name),
     jobTitle: SEO[lang].job, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS, telephone: PHONE,
     contactPoint: {'@type': 'ContactPoint', telephone: PHONE, contactType: 'sales', availableLanguage: ['Hebrew', 'Russian', 'English']},
-    knowsAbout: lang === 'he' ? ['ציור', 'נוירוגרפיקה', 'צבעי מים', 'בודי־ארט', 'הוראת אמנות'] : lang === 'ru' ? ['Живопись', 'Нейрографика', 'Акварель', 'Боди-арт', 'Преподавание искусства'] : ['Painting', 'Neurographics', 'Watercolour', 'Body art', 'Art teaching'],
+    knowsAbout: lang === 'he' ? ['ציור', 'נוירוגרפיקה', 'צבעי מים', 'בודי־ארט', 'הוראת אמנות'] : lang === 'ru' ? ['Живопись', 'Нейрографика', 'Акварель', 'Боди-арт', 'Преподавание искусства'] : ['Painting', 'Neurographics', 'Watercolor', 'Body art', 'Art teaching'],
     nationality: 'Israel'};
 }
 function alternates(pathFor) {
@@ -108,20 +108,30 @@ function homePage(lang) {
   html = html.replace('<!--seo-->', head);
   html = html.replace(/href="https:\/\/wa\.me\/[^"]*"(?= target="_blank" rel="noopener" data-wa)/, `href="${esc(SITE.waHello(lang))}"`);
   // relative links from /ru/ and /en/ lead back to the site root
-  if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
+  if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|tel:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
   // links to the works of this language: works/<id>/ next to this page
   return html.replace(/<!--works-->[\s\S]*?(?=<\/div>)/, '<!--works-->' + cards);
 }
 for (const lang of LANGS) write(prefix(lang) + 'index.html', homePage(lang));
 
 /* ---------- a page per work ---------- */
+// Meta description of at most 160 characters: whole sentences when they fit, otherwise whole words and an ellipsis
+function trimDesc(text, max = 160) {
+  text = text.replace(/\s+/g, ' ').trim();
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  const end = Math.max(...['. ', '! ', '? ', '.', '!', '?'].map(p => cut.lastIndexOf(p)));
+  if (end >= 70 && /[.!?]/.test(cut[end])) return cut.slice(0, end + 1);
+  const word = cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:\-–—(«“"]+$/, '');
+  return word + '…';
+}
 function workPage(w, i, lang) {
   const S = SEO[lang], T = SITE.text[lang], up = '../'.repeat(lang === 'he' ? 2 : 3);
   const title = L(w.t, lang), m = IMAGES.works[w.id], big = largest(w.id), desc = w.d ? L(w.d, lang) : [];
   const series = SITE.series.find(s => s.id === w.kind)[lang][0];
   const price = priceOf(w), prev = works[(i - 1 + works.length) % works.length], next = works[(i + 1) % works.length];
   const summary = desc.length ? desc.join(' ') : `${title}, ${S.by.toLowerCase()} ${S.name}. ${metaLine(w, lang).replace(/[\u2066\u2069]/g, '')}.`;
-  const metaDesc = summary.length > 160 ? summary.slice(0, 157).replace(/\s+\S*$/, '') + '…' : summary;
+  const metaDesc = trimDesc(summary);
   const pageTitle = `${title} — ${S.name}`;
   const askHref = SITE.waWork(lang, w, SITE_URL + workPath(w.id, lang)); // a WhatsApp message to Sandra about this work
   const [cw, ch] = (w.s || '').split('×').map(n => parseFloat(n));
@@ -176,7 +186,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
       <h1>${esc(title)}</h1>
       <p class="wp-artist">${esc(S.by)} <a href="${up}${prefix(lang)}#about">${esc(S.name)}</a></p>
       <p class="wp-meta">${esc(metaLine(w, lang))}</p>
-      ${w.status ? `<p class="wp-price muted">${esc(L(w.status, lang))}</p>` : w.price ? `<p class="wp-price">${esc(w.price)}</p>` : ''}
+      ${w.status ? `<p class="wp-price muted">${esc(L(w.status, lang))}</p>` : w.price ? `<p class="wp-price">${esc(w.price)}</p>` : `<p class="wp-price muted">${esc(S.onRequest)}</p>`}
       ${desc.length ? `<h2>${esc(S.about)}</h2>\n      ${desc.map(p => `<p>${esc(p)}</p>`).join('\n      ')}` : ''}
       <p class="wp-actions">${!w.status ? `<a class="wp-ask" href="${esc(askHref)}" target="_blank" rel="noopener">${esc(S.ask)}</a>` : ''}${w.no ? `<a class="wp-museum" href="${up}museum/?lang=${lang}&amp;work=${w.id}">${esc(S.museum)}</a>` : ''}</p>
     </article>
@@ -211,7 +221,6 @@ ${works.map(w => entry(l => workPath(w.id, l), '0.8')).join('\n')}
 ${single('museum/', '0.7')}
 ${single('neurographics/', '0.7')}
 ${single('book/', '0.6')}
-${single('dragon/', '0.6')}
 </urlset>
 `);
 write('robots.txt', `User-agent: *
@@ -220,4 +229,4 @@ Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 1) * LANGS.length + 4} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 1) * LANGS.length + 3} addresses`);

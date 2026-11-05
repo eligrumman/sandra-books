@@ -6,10 +6,10 @@ window.SITE = {
   whatsapp: {number: '972535380014', display: '053-538-0014'},
 
   series: [
-    {id: 'neuro', cover: 'spiral', he: ["נוירוגרפיקה","קווים חופשיים שמתחברים לרשת, ואז מתמלאים בצבע."], ru: ["Нейрографика","Свободные линии сплетаются в сеть, а потом наполняются цветом."], en: ["Neurographics","Free lines weave into a net, then fill with colour."]},
-    {id: 'hidden', cover: 'night-faces', he: ["עולמות נסתרים","כתמי צבע שקופים, ובתוכם מסתתרות דמויות. צריך להסתכל רגע כדי למצוא אותן."], ru: ["Скрытые миры","Прозрачные пятна цвета, а в них прячутся фигуры. Нужно присмотреться, чтобы их найти."], en: ["Hidden worlds","Transparent stains of colour with figures hiding inside. Look for a moment and you will find them."]},
-    {id: 'paint', cover: 'angels', he: ["ציור ורישום","אקריליק, צבעי מים ופסטל: סוס, אלכימאי, בת־ים, כפר בשלג."], ru: ["Живопись и рисунок","Акрил, акварель и пастель: конь, алхимик, русалка, деревня в снегу."], en: ["Painting and drawing","Acrylic, watercolour and pastel: a horse, an alchemist, a mermaid, a village in the snow."]},
-    {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."], en: ["Body art","Artistic make-up on face and body, for photo shoots and performances."]}
+    {id: 'neuro', cover: 'spiral', he: ["נוירוגרפיקה","קווים חופשיים שמתחברים לרשת, ואז מתמלאים בצבע."], ru: ["Нейрографика","Свободные линии сплетаются в сеть, а потом наполняются цветом."], en: ["Neurographics","Free lines weave into a net, then fill with color."]},
+    {id: 'hidden', cover: 'night-faces', he: ["עולמות נסתרים","כתמי צבע שקופים, ובתוכם מסתתרות דמויות. צריך להסתכל רגע כדי למצוא אותן."], ru: ["Скрытые миры","Прозрачные пятна цвета, а в них прячутся фигуры. Нужно присмотреться, чтобы их найти."], en: ["Hidden worlds","Transparent stains of color with figures hiding inside. Look for a moment and you will find them."]},
+    {id: 'paint', cover: 'angels', he: ["ציור ורישום","אקריליק, צבעי מים ופסטל: סוס, אלכימאי, בת־ים, כפר בשלג."], ru: ["Живопись и рисунок","Акрил, акварель и пастель: конь, алхимик, русалка, деревня в снегу."], en: ["Painting and drawing","Acrylic, watercolor and pastel: a horse, an alchemist, a mermaid, a village in the snow."]},
+    {id: 'body', cover: 'gaze', he: ["בודי־ארט","איפור אמנותי על פנים וגוף, לצילומים ולהופעות."], ru: ["Боди-арт","Художественный грим на лице и теле — для съёмок и выступлений."], en: ["Body art","Artistic makeup on face and body, for photo shoots and performances."]}
   ],
 
   /* kind = series id; m = medium key; t = [he, ru, en]. catalog.js adds Sandra's catalog details. */
@@ -49,7 +49,7 @@ window.SITE = {
     {id: 'threads', kind: 'neuro', m: 'ink', t: ['חוטי אור', 'Нити света']},
     {id: 'forest-moon', kind: 'hidden', m: 'paper', y: 2026, t: ['ירח ביער', 'Луна в лесу']},
     {id: 'vortex', kind: 'neuro', m: 'ink', y: 2025, t: ['מערבולת', 'Вихрь', 'Vortex']},
-    {id: 'neuro', kind: 'neuro', m: 'marker', s: '30 × 21', t: ['רשת צבעונית', 'Цветная сеть', 'Colour web']},
+    {id: 'neuro', kind: 'neuro', m: 'marker', s: '30 × 21', t: ['רשת צבעונית', 'Цветная сеть', 'Color web']},
     {id: 'drawing', kind: 'paint', m: 'pastel', s: '42 × 30', t: ['מנוחה שכובה', 'Отдых', 'Reclining rest']},
     {id: 'old-bridge', kind: 'hidden', m: 'paper', y: 2026, t: ['הגשר הישן', 'Старый мост']},
     {id: 'stone-dream', kind: 'hidden', m: 'paper', y: 2026, t: ['חלום של סלע', 'Сон камня']},
@@ -78,7 +78,7 @@ window.SITE = {
 
   exhibition: [
     {id: 'hall-1', he: 'קיר העבודות הגדולות', ru: 'Стена больших работ', en: 'The wall of large works'},
-    {id: 'hall-3', he: 'צבע לכל אורך הקיר', ru: 'Цвет вдоль всей стены', en: 'Colour along the whole wall'},
+    {id: 'hall-3', he: 'צבע לכל אורך הקיר', ru: 'Цвет вдоль всей стены', en: 'Color along the whole wall'},
     {id: 'hall-2', he: 'בין הקירות', ru: 'Между стенами', en: 'Between the walls'},
     {id: 'hall-4', he: 'אור על הבד', ru: 'Свет на холсте', en: 'Light on canvas'}
   ],
@@ -100,7 +100,7 @@ window.SITE = {
     he: {
       showLess: 'להציג פחות',
       showAll: 'לכל העבודות',
-      wallLabel: 'קיר העבודות', museumBtn: 'חווית תערוכה', continue: 'להמשיך', navMuseum: 'חווית תערוכה',
+      wallLabel: 'קיר העבודות', museumBtn: 'להיכנס לגלריית התלת־ממד', continue: 'להמשיך', navMuseum: 'גלריית 3D',
       exhibitionNote: 'העבודות של סנדרה על הקירות של הגלריה.',
       exhibitionTitle: 'התערוכה<br><em>האחרונה.</em>',
       exhibitionIndex: 'תערוכה',
@@ -126,8 +126,9 @@ window.SITE = {
       storiesIndex: 'אגדות', storiesTitle: 'אגדות<br><em>לילדים.</em>', storiesNote: 'שני סיפורים, בעברית וברוסית. אפשר לקרוא על המסך או להקריא לפני השינה.',
       unicornTag: 'ספר מאויר · 29 עמודים', unicornTitle: 'סיפור על החד־קרן', unicornText: 'בעמק נסתר בין הרים גבוהים, ילדה אחת יוצאת למסע של אומץ, חמלה וחברות מופלאה.', unicornCta: 'לפתוח את הספר',
       newBadge: 'חדש', dragonTag: 'אגדה חדשה · 8 פרקים', dragonTitle: 'סיפור על הדרקון', dragonText: 'הדרקון האחרון בעמק, רוח צפון כועסת, ונדיה המרפאה שיוצאת לבד להציל את כולם.', dragonCta: 'לקרוא את האגדה',
-      contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, כתבו לסנדרה בוואטסאפ: <bdi dir="ltr">053-538-0014</bdi>',
+      contactIndex: 'יצירת קשר', contactTitle: 'רוצים לדבר<br><em>עם סנדרה?</em> ↗', contactNote: 'לקניית עבודות, להזמנת סדנה או סתם לשאלה, כתבו לסנדרה בוואטסאפ: <a class="tel" href="tel:+972535380014"><bdi dir="ltr">053-538-0014</bdi></a>',
       waWork: 'שלום סנדרה, ראיתי באתר את היצירה ״{title}״ ({details}) ואשמח לשמוע פרטים על רכישה.', waHello: 'שלום סנדרה, הגעתי מהאתר שלך ואשמח לדבר.',
+      heroH1: 'סנדרה לייפר<span class="sr">. </span><span class="wall-sub">ציירת. ציורים מקוריים ומפגשי נוירוגרפיקה</span>', heroBtnWorks: 'עבודות ורכישה', heroBtnBook: 'לתאם מפגש', studioBook: 'לתאם סדנה או מפגש', contactBtn: 'לכתוב בוואטסאפ', waFloat: 'וואטסאפ', waBook: 'שלום סנדרה, ראיתי באתר את הסדנאות ואשמח לשמוע על מפגש או סדנה.', priceOnRequest: 'מחיר לפי פנייה',
       rights: 'כל הזכויות על היצירות שמורות לאמנית', backTop: 'בחזרה למעלה ↑',
       close: 'סגירה', prev: 'היצירה הקודמת', next: 'היצירה הבאה', open: 'פתיחת היצירה', workPage: 'לעמוד היצירה', zoomHint: 'לחצו להגדלה', aboutWork: 'על היצירה', askWork: 'לפרטים ולרכישה', sold: 'נמכרה',
       acrylic: 'אקריליק על בד', canvas: 'ציור על בד', inkcanvas: 'דיו על בד', water: 'צבעי מים על נייר', pastel: 'פסטל על נייר', marker: 'טושים על נייר', ink: 'דיו וטושים על נייר', paper: 'טכניקה מעורבת על נייר', body: 'בודי־ארט · צילום', cm: 'ס״מ'
@@ -135,7 +136,7 @@ window.SITE = {
     ru: {
       showLess: 'Свернуть',
       showAll: 'Все работы',
-      wallLabel: 'Стена работ', museumBtn: 'Выставка вживую', continue: 'Дальше', navMuseum: 'Выставка вживую',
+      wallLabel: 'Стена работ', museumBtn: 'Войти в 3D-галерею', continue: 'Дальше', navMuseum: '3D-галерея',
       exhibitionNote: 'Работы Сандры на стенах галереи.',
       exhibitionTitle: 'Последняя<br><em>выставка.</em>',
       exhibitionIndex: 'Выставка',
@@ -161,8 +162,9 @@ window.SITE = {
       storiesIndex: 'Сказки', storiesTitle: 'Сказки<br><em>для детей.</em>', storiesNote: 'Две истории, на иврите и по-русски. Можно читать с экрана или вслух перед сном.',
       unicornTag: 'Иллюстрированная книга · 29 страниц', unicornTitle: 'Сказка о единороге', unicornText: 'В затерянной среди высоких гор долине одна девочка отправляется в путь, полный смелости, сострадания и чудесной дружбы.', unicornCta: 'Открыть книгу',
       newBadge: 'Новое', dragonTag: 'Новая сказка · 8 глав', dragonTitle: 'Сказка о драконе', dragonText: 'Последний дракон долины, сердитый Северный Ветер и целительница Надия, которая одна отправляется спасать всех.', dragonCta: 'Читать сказку',
-      contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — напишите Сандре в WhatsApp: <bdi dir="ltr">+972 53-538-0014</bdi>',
+      contactIndex: 'Связаться', contactTitle: 'Хотите поговорить<br><em>с Сандрой?</em> ↗', contactNote: 'Купить работу, заказать мастер-класс или просто задать вопрос — напишите Сандре в WhatsApp: <a class="tel" href="tel:+972535380014"><bdi dir="ltr">+972 53-538-0014</bdi></a>',
       waWork: 'Здравствуйте, Сандра! Я увидел(а) на сайте работу «{title}» ({details}) и хотел(а) бы узнать о покупке.', waHello: 'Здравствуйте, Сандра! Пишу вам с вашего сайта.',
+      heroH1: 'Сандра Лейфер<span class="sr">. </span><span class="wall-sub">Художница. Оригинальные картины и занятия по нейрографике</span>', heroBtnWorks: 'Работы и покупка', heroBtnBook: 'Записаться на занятие', studioBook: 'Записаться на мастер-класс или занятие', contactBtn: 'Написать в WhatsApp', waFloat: 'WhatsApp', waBook: 'Здравствуйте, Сандра! Увидел(а) на сайте мастер-классы и хотел(а) бы узнать о занятии или мастер-классе.', priceOnRequest: 'Цена по запросу',
       rights: 'Все права на работы принадлежат художнице', backTop: 'Наверх ↑',
       close: 'Закрыть', prev: 'Предыдущая работа', next: 'Следующая работа', open: 'Открыть работу', workPage: 'Страница работы', zoomHint: 'Нажмите, чтобы увеличить', aboutWork: 'О работе', askWork: 'Узнать о покупке', sold: 'Продана',
       acrylic: 'Акрил на холсте', canvas: 'Живопись на холсте', inkcanvas: 'Тушь на холсте', water: 'Акварель на бумаге', pastel: 'Пастель на бумаге', marker: 'Маркеры на бумаге', ink: 'Тушь и маркеры на бумаге', paper: 'Смешанная техника на бумаге', body: 'Боди-арт · фотография', cm: 'см'
@@ -170,7 +172,7 @@ window.SITE = {
     en: {
       showLess: 'Show fewer',
       showAll: 'All works',
-      wallLabel: 'Wall of works', museumBtn: 'Exhibition experience', continue: 'Continue', navMuseum: 'Exhibition experience',
+      wallLabel: 'Wall of works', museumBtn: 'Enter the 3D gallery', continue: 'Continue', navMuseum: '3D gallery',
       exhibitionNote: 'Sandra’s works on the gallery walls.',
       exhibitionTitle: 'The latest<br><em>exhibition.</em>',
       exhibitionIndex: 'Exhibition',
@@ -181,26 +183,27 @@ window.SITE = {
       heroLead: 'She paints, teaches and writes fairy tales for children.', heroCta1: 'Works', heroCta2: 'Fairy tales', scrollHint: 'Scroll',
       journeyLabel: 'A journey between worlds', manifestoLabel: 'Manifesto', manifestoIndex: 'On the work',
       manifesto: 'Canvas, paper,<br>and sometimes a human face.<br><em>The imagination stays the same.</em>',
-      manifestoNote: 'Sandra works in several techniques side by side: acrylic, watercolour, neurographics and artistic make-up. The same subjects keep returning: faces, forests, the sea, horses and characters from fairy tales.',
+      manifestoNote: 'Sandra works in several techniques side by side: acrylic, watercolor, neurographics and artistic makeup. The same subjects keep returning: faces, forests, the sea, horses and characters from fairy tales.',
       seriesIndex: 'Series', seriesTitle: 'The series', seriesNote: 'Click a series to see its works.', works: 'works',
       worksIndex: 'Gallery', worksTitle: 'All<br><em>the works.</em>', worksNote: 'Click a work to open it large.', filterLabel: 'Filter by series', all: 'All', shown: 'works shown',
       studioIndex: 'Workshops', studioTitle: 'Workshops<br><em>with Sandra.</em>',
       studioNote: 'Sandra teaches children and adults and runs neurographics and painting workshops. This is what it looks like from the inside.', studioReelLabel: 'Photos from the exhibition and the workshop — scroll sideways',
-      studioP1t: 'Neurographics', studioP1: 'You draw lines without planning, round off the corners and colour them in. It is far more calming than it sounds.',
-      studioP2t: 'Colour and material', studioP2: 'Acrylic, watercolour, pastel and markers. No experience needed.',
+      studioP1t: 'Neurographics', studioP1: 'You draw lines without planning, round off the corners and color them in. It is far more calming than it sounds.',
+      studioP2t: 'Color and material', studioP2: 'Acrylic, watercolor, pastel and markers. No experience needed.',
       studioP3t: 'Children and adults', studioP3: 'Lessons and workshops for children, adults and groups.',
-      aboutIndex: 'Nice to meet you', aboutTitle: 'Sandra<br><em>Leifer.</em>', portraitAlt: 'Sandra Leifer', portraitCap: 'artist · art teacher',
-      aboutLead: 'Artist and art teacher. She paints, teaches and does artistic make-up.',
-      aboutText: 'Sandra studied art in Yaroslavl, Russia. Her works are full of fantasy: an alchemist holding a bottle of light, a horse made of lightning, a tree that is all a mosaic of colour. Alongside painting she teaches children and adults, runs workshops, and writes fairy tales for children that she also illustrates.',
-      fact1t: 'Painting', fact1: 'Acrylic, watercolour and pastel', fact2t: 'Line', fact2: 'Neurographics and drawing', fact3t: 'Body', fact3: 'Theatre make-up and body art', fact4t: 'Words', fact4: 'Illustrated fairy tales for children',
+      aboutIndex: 'Nice to meet you', aboutTitle: 'Sandra<br><em>Leifer.</em>', portraitAlt: 'Sandra Leifer', portraitCap: 'Artist · art teacher',
+      aboutLead: 'Artist and art teacher. She paints, teaches and does artistic makeup.',
+      aboutText: 'Sandra studied art in Yaroslavl, Russia. Her works are full of fantasy: an alchemist holding a bottle of light, a horse made of lightning, a tree that is all a mosaic of color. Alongside painting she teaches children and adults, runs workshops, and writes fairy tales for children that she also illustrates.',
+      fact1t: 'Painting', fact1: 'Acrylic, watercolor and pastel', fact2t: 'Line', fact2: 'Neurographics and drawing', fact3t: 'Body', fact3: 'Theater makeup and body art', fact4t: 'Words', fact4: 'Illustrated fairy tales for children',
       storiesIndex: 'Fairy tales', storiesTitle: 'Fairy tales<br><em>for children.</em>', storiesNote: 'Two stories, in Hebrew and in Russian. Read them on the screen or aloud at bedtime.',
       unicornTag: 'Illustrated book · 29 pages', unicornTitle: 'The Tale of the Unicorn', unicornText: 'In a hidden valley among high mountains, a girl sets out on a journey of courage, compassion and a wonderful friendship.', unicornCta: 'Open the book',
       newBadge: 'New', dragonTag: 'A new tale · 8 chapters', dragonTitle: 'The Tale of the Dragon', dragonText: 'The last dragon in the valley, an angry North Wind, and Nadia the healer, who sets out alone to save everyone.', dragonCta: 'Read the tale',
-      contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, message Sandra on WhatsApp: <bdi dir="ltr">+972 53-538-0014</bdi>',
+      contactIndex: 'Contact', contactTitle: 'Want to talk<br><em>with Sandra?</em> ↗', contactNote: 'To buy a work, book a workshop or just ask a question, message Sandra on WhatsApp: <a class="tel" href="tel:+972535380014"><bdi dir="ltr">+972 53-538-0014</bdi></a>',
       waWork: 'Hello Sandra, I saw "{title}" ({details}) on your website and would like to know more about buying it.', waHello: 'Hello Sandra, I am writing to you from your website.',
+      heroH1: 'Sandra Leifer<span class="sr">. </span><span class="wall-sub">Painter. Original paintings and neurographics sessions</span>', heroBtnWorks: 'Works and buying', heroBtnBook: 'Book a session', studioBook: 'Book a session or workshop', contactBtn: 'Message on WhatsApp', waFloat: 'WhatsApp', waBook: 'Hello Sandra, I saw your workshops on your website and would like to hear about a session or workshop.', priceOnRequest: 'Price on request',
       rights: 'All rights to the artworks are reserved by the artist', backTop: 'Back to top ↑',
       close: 'Close', prev: 'Previous work', next: 'Next work', open: 'Open the work', workPage: 'The work’s page', zoomHint: 'Click to zoom', aboutWork: 'About the work', askWork: 'Details and purchase', sold: 'Sold',
-      acrylic: 'Acrylic on canvas', canvas: 'Painting on canvas', inkcanvas: 'Ink on canvas', water: 'Watercolour on paper', pastel: 'Pastel on paper', marker: 'Markers on paper', ink: 'Ink and markers on paper', paper: 'Mixed media on paper', body: 'Body art · photograph', cm: 'cm'
+      acrylic: 'Acrylic on canvas', canvas: 'Painting on canvas', inkcanvas: 'Ink on canvas', water: 'Watercolor on paper', pastel: 'Pastel on paper', marker: 'Markers on paper', ink: 'Ink and markers on paper', paper: 'Mixed media on paper', body: 'Body art · photograph', cm: 'cm'
     }
   }
 };
@@ -214,6 +217,7 @@ window.SITE = {
     return S.waLink(T.waWork.replace('{title}', pick(w.t)).replace(' ({details})', details ? ` (${details})` : '') + '\n' + url);
   };
   S.waHello = lang => S.waLink(S.text[lang].waHello);
+  S.waBook = lang => S.waLink(S.text[lang].waBook);
 })(window.SITE);
 
 /* Neurographics guide (neurographics/): texts as [he, ru, en]. Draft for Sandra's approval. */
@@ -239,7 +243,7 @@ window.SITE = {
     ngWorkCap: ['מעבודותיה של סנדרה: ״{title}״', 'Из работ Сандры: «{title}»', 'From Sandra’s works: “{title}”'],
     ngMatTitle: ['מה צריך', 'Что понадобится', 'What you need'],
     ngMat1: ['דף נייר לבן, או המסך הזה', 'Лист белой бумаги или этот экран', 'A white sheet of paper, or this screen'],
-    ngMat2: ['טושים או עטי ג׳ל בכמה צבעים, למשל כחול וצהוב', 'Маркеры или гелевые ручки нескольких цветов, например синий и жёлтый', 'Markers or gel pens in a few colours, for example blue and yellow'],
+    ngMat2: ['טושים או עטי ג׳ל בכמה צבעים, למשל כחול וצהוב', 'Маркеры или гелевые ручки нескольких цветов, например синий и жёлтый', 'Markers or gel pens in a few colors, for example blue and yellow'],
     ngMat3: ['עט ג׳ל דק לעיגול פינות', 'Тонкая гелевая ручка, чтобы скруглять углы', 'A thin gel pen for rounding corners'],
     ngMat4: ['טוש עבה אחד ל״צורה שבחרתם״', 'Один толстый маркер для «фигуры по выбору»', 'One thick marker for your “figure of choice”'],
     ngMat5: ['בלי טושים מתכתיים (זהב, כסף, נחושת): הם ״קורעים״ את הדף במקום לאחד אותו', 'Без металлических маркеров (золото, серебро, медь): они «рвут» лист, а не объединяют его', 'No metallic markers (gold, silver, copper): they “tear” the sheet apart instead of uniting it'],
@@ -261,7 +265,7 @@ window.SITE = {
     ngBreatheOut: ['נשיפה', 'Выдох', 'Breathe out'],
     ngBreatheNote: ['עיניים פקוחות, נשימה רגועה, כתפיים ויד רפויות.', 'Глаза открыты, дыхание ровное, плечи и рука расслаблены.', 'Eyes open, breathing calm, shoulders and hand relaxed.'],
     ngTools: ['כלי ציור', 'Инструменты рисования', 'Drawing tools'],
-    ngColor: ['צבע', 'Цвет', 'Colour'],
+    ngColor: ['צבע', 'Цвет', 'Color'],
     ngCol0: ['שחור', 'Чёрный', 'Black'], ngCol1: ['כחול', 'Синий', 'Blue'], ngCol2: ['אדום', 'Красный', 'Red'], ngCol3: ['ירוק', 'Зелёный', 'Green'],
     ngCol4: ['כתום', 'Оранжевый', 'Orange'], ngCol5: ['סגול', 'Фиолетовый', 'Violet'], ngCol6: ['צהוב', 'Жёлтый', 'Yellow'],
     ngWidth: ['עובי הקו', 'Толщина линии', 'Stroke width'],
@@ -269,8 +273,8 @@ window.SITE = {
     ngUndo: ['ביטול', 'Отменить', 'Undo'],
     ngClear: ['ניקוי', 'Очистить', 'Clear'],
     ngSample: ['קו לדוגמה', 'Пример линии', 'Sample line'],
-    ngFill: ['צביעת חלק קטן', 'Закрасить кусочек', 'Colour a small piece'],
-    ngFillOn: ['לחצו על חלק קטן וסגור כדי לצבוע אותו.', 'Нажмите на маленький замкнутый кусочек, чтобы закрасить его.', 'Tap a small enclosed piece to colour it.'],
+    ngFill: ['צביעת חלק קטן', 'Закрасить кусочек', 'Color a small piece'],
+    ngFillOn: ['לחצו על חלק קטן וסגור כדי לצבוע אותו.', 'Нажмите на маленький замкнутый кусочек, чтобы закрасить его.', 'Tap a small enclosed piece to color it.'],
     ngFillBig: ['החלק הזה גדול מדי. בחרו חלק קטן וסגור.', 'Этот кусочек слишком большой. Выберите маленький замкнутый.', 'That piece is too big. Pick a small enclosed one.'],
     ngFillOpen: ['החלק הזה לא סגור. בחרו חלק שסגור בקווים.', 'Этот кусочек не замкнут. Выберите тот, что ограничен линиями.', 'That piece is not closed. Pick one enclosed by lines.'],
     ngPen: ['חזרה לציור', 'Вернуться к рисованию', 'Back to drawing'],
@@ -317,7 +321,7 @@ window.SITE = {
     ngRule1: ['הקווים הם קווים נוירוגרפיים.', 'Линии должны быть нейролиниями.', 'The lines must be neuro-lines.'],
     ngRule2: ['מעגלים את כל הפינות.', 'Скругляем все углы.', 'Round all corners.'],
     ngRule3: ['אין אלמנטים מבודדים: הכול מתחבר לקומפוזיציה אחת.', 'Никаких изолированных элементов: всё соединяется в одну композицию.', 'No isolated elements: everything connects into one composition.'],
-    ngRule4: ['חלקים קטנים וסגורים מאוד אפשר פשוט לצבוע, לפי מה שיפה לכם.', 'Совсем маленькие замкнутые кусочки можно просто закрасить, так, как кажется красивым.', 'Very small enclosed pieces may simply be coloured in, as feels beautiful to you.'],
+    ngRule4: ['חלקים קטנים וסגורים מאוד אפשר פשוט לצבוע, לפי מה שיפה לכם.', 'Совсем маленькие замкнутые кусочки можно просто закрасить, так, как кажется красивым.', 'Very small enclosed pieces may simply be colored in, as feels beautiful to you.'],
     ngRule5: ['בלי טושים מתכתיים: הם קורעים את הקומפוזיציה.', 'Без металлических маркеров: они разрывают композицию.', 'No metallic markers: they tear the composition apart.'],
     ngRule6: ['במהלך העבודה ממשיכים לשים לב לרגשות, לתחושות בגוף ולמחשבות.', 'Во время работы продолжайте замечать чувства, ощущения в теле и мысли.', 'While you work, keep watching your feelings, body sensations and thoughts.'],
     ngS10Title: ['הצורה שבחרתם: האי שלכם', 'Фигура по выбору: ваш остров', 'Your figure of choice: your island'],

@@ -31,3 +31,10 @@
   .wp-next{grid-template-columns:1fr 1fr}
   .wp-next a:nth-child(2){display:none}
 }
+/* phones: the purchase button stays in view */
+@media (max-width:900px){
+  .wp{padding-bottom:104px}
+  .wp-actions{position:fixed;inset-inline:0;bottom:0;z-index:30;margin:0;gap:10px;flex-wrap:nowrap;padding:10px var(--pad-x) calc(10px + env(safe-area-inset-bottom));background:rgba(14,12,19,.93);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+  .wp-actions a{flex:1 1 auto;text-align:center;padding:13px 14px}
+  .wp-actions:empty{display:none}
+}
