@@ -95,11 +95,9 @@ if (waFloat) {
   new IntersectionObserver(es => es.forEach(en => waFloat.classList.toggle('show', !en.isIntersecting)), {threshold: .02}).observe($('hero'));
 }
 
-/* ---------- analytics hook (no cookies, no third-party script) ---------- */
+/* ---------- analytics hook ---------- */
 // Every WhatsApp tap fires a 'sl:wa' event on document: detail = {type: 'work' | 'book' | 'hello', slug}.
-// To measure it, listen here (or in your own script), for example:
-//   document.addEventListener('sl:wa', e => plausible('whatsapp', {props: e.detail}));
-//   document.addEventListener('sl:wa', e => gtag('event', 'whatsapp_click', e.detail));
+// assets/js/analytics.js listens and sends it to PostHog as whatsapp_click (cookieless).
 document.addEventListener('click', e => {
   const a = e.target.closest && e.target.closest('a'); if (!a) return;
   let type = null, slug = '';

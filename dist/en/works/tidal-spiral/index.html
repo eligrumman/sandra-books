@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="../../../assets/css/site.css">
 <link rel="stylesheet" href="../../../assets/css/work.css">
+<script src="../../../assets/js/analytics.js" defer></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"VisualArtwork","@id":"https://sandraleifer.com/en/works/tidal-spiral/#work","name":"Tidal Spiral","url":"https://sandraleifer.com/en/works/tidal-spiral/","inLanguage":"en","image":"https://sandraleifer.com/assets/img/works/tidal-spiral-1600.webp","creator":{"@id":"https://sandraleifer.com/#sandra"},"artMedium":"Markers on paper","artform":"Neurographics"},{"@type":"Person","@id":"https://sandraleifer.com/#sandra","name":"Sandra Leifer","alternateName":["סנדרה לייפר","Сандра Лейфер"],"jobTitle":"Artist and art teacher","description":"Sandra Leifer is a professional artist with formal academic training in fine art and more than 20 years of experience teaching visual arts.","url":"https://sandraleifer.com/en/","image":"https://sandraleifer.com/assets/img/portrait-900.webp?v=2","sameAs":["https://sites.google.com/view/sandra-leifer-art"],"telephone":"+972-53-538-0014","contactPoint":{"@type":"ContactPoint","telephone":"+972-53-538-0014","contactType":"sales","availableLanguage":["Hebrew","Russian","English"]},"alumniOf":[{"@type":"EducationalOrganization","name":"Art School No. 1, Yaroslavl"},{"@type":"EducationalOrganization","name":"Yaroslavl Art College"}],"memberOf":[{"@type":"Organization","name":"Union of Professional Artists of Israel"},{"@type":"Organization","name":"UNESCO Artists’ Union"}],"award":["International awards in creative makeup and artistic makeup","First prizes at international competitions in Israel, 2025 and 2026"],"knowsAbout":["Painting","NeuroGraphica","Watercolor","Body art","Visual arts education","Aesthetic coaching","Bodywork"],"nationality":"Israel"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Sandra Leifer","item":"https://sandraleifer.com/en/"},{"@type":"ListItem","position":2,"name":"All works","item":"https://sandraleifer.com/en/#works"},{"@type":"ListItem","position":3,"name":"Tidal Spiral","item":"https://sandraleifer.com/en/works/tidal-spiral/"}]}]}</script>
 </head>
 <body class="work-page">
@@ -55,8 +56,7 @@
 </main>
 <footer class="footer"><span>© 2026 Sandra Leifer</span><span>All rights to the artworks are reserved by the artist</span><span class="foot-titles">Arts Professional of Israel · Member, Union of Professional Artists of Israel · Member, UNESCO Artists’ Union</span><a href="../../../en/about/" data-bio-link>About</a></footer>
 <script>
-// Hook for analytics: every WhatsApp ask fires 'sl:wa' (no cookies, no third-party script).
-// Example: document.addEventListener('sl:wa', e => plausible('whatsapp', {props: e.detail}));
+// Every WhatsApp ask fires 'sl:wa' on document; assets/js/analytics.js sends it to PostHog as whatsapp_click.
 document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('.wp-ask'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: "tidal-spiral"}})); });
 </script>
 </body>
