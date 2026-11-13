@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -63,7 +63,7 @@ const SITE_URL = 'https://sandraleifer.com/';
 const sitemap = read('sitemap.xml');
 assert.ok(read('robots.txt').includes(`Sitemap: ${SITE_URL}sitemap.xml`), 'robots.txt points to the sitemap');
 for (const [i, l] of ['he', 'ru', 'en'].entries()) {
-  for (const page of [`${['', 'ru/', 'en/'][i]}index.html`, ...SITE.works.map(w => `${['', 'ru/', 'en/'][i]}works/${w.id}/index.html`)]) {
+  for (const page of [`${['', 'ru/', 'en/'][i]}index.html`, `${['', 'ru/', 'en/'][i]}about/index.html`, ...SITE.works.map(w => `${['', 'ru/', 'en/'][i]}works/${w.id}/index.html`)]) {
     const h = read(page), url = SITE_URL + page.replace(/index\.html$/, '');
     assert.ok(h.includes(`<html lang="${l}"`), `${page}: lang`);
     assert.ok(h.includes(`<link rel="canonical" href="${url}">`), `${page}: canonical`);
@@ -104,6 +104,15 @@ for (const l of ['he', 'ru', 'en']) assert.ok(SITE.waNeuro(l).startsWith('https:
 assert.ok(read('sitemap.xml').includes(`<loc>${SITE_URL}neurographics/</loc>`), 'neurographics in sitemap');
 for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('neurographics/'), `${page} links to neurographics`);
 
+// Biography: a page per language, the home About link points to it, the switcher reaches the other versions, bullets and pull quote present.
+for (const [i, l] of ['he', 'ru', 'en'].entries()) {
+  const pre = ['', 'ru/', 'en/'][i], b = read(pre + 'about/index.html');
+  assert.ok(b.includes(`dir="${l === 'he' ? 'rtl' : 'ltr'}"`), `${pre}about: dir`);
+  assert.equal((b.match(/<h1[\s>]/g) || []).length, 1, `${pre}about: one h1`);
+  assert.ok(/<ul class="bio-list">[\s\S]*<\/ul>/.test(b) && b.includes('<blockquote>') && b.includes('<figcaption>'), `${pre}about: bullets and pull quote`);
+  for (const k of ['he', 'ru', 'en']) assert.ok(b.includes(`<a href="${'../'.repeat(l === 'he' ? 1 : 2)}${k === 'he' ? '' : k + '/'}about/" hreflang="${k}"`), `${pre}about: switcher to ${k}`);
+  assert.ok(read(pre + 'index.html').includes('data-bio-link'), `${pre}index: About link to the biography`);
+}
 // Professional framing: one h1 and a WhatsApp/tel contact on each home page, the draft tale stays out of search engines.
 for (const page of ['index.html', 'ru/index.html', 'en/index.html']) {
   const h = read(page);

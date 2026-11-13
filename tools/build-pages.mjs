@@ -109,6 +109,8 @@ function homePage(lang) {
   html = html.replace(/href="https:\/\/wa\.me\/[^"]*"(?= target="_blank" rel="noopener" data-wa)/, `href="${esc(SITE.waHello(lang))}"`);
   // relative links from /ru/ and /en/ lead back to the site root
   if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|tel:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
+  // the biography page of this language (about/ next to the home page)
+  if (base) html = html.replace('href="../about/" data-bio-link', `href="../${lang}/about/" data-bio-link`);
   // links to the works of this language: works/<id>/ next to this page
   return html.replace(/<!--works-->[\s\S]*?(?=<\/div>)/, '<!--works-->' + cards);
 }
@@ -208,6 +210,75 @@ for (const lang of LANGS) {
   works.forEach((w, i) => write(workPath(w.id, lang) + 'index.html', workPage(w, i, lang)));
 }
 
+
+/* ---------- biography page per language (/about/, /ru/about/, /en/about/) ---------- */
+// The text is src/site/bio.md, verbatim: three sections (HE, EN, RU). Per section: name (h1), a **roles** line,
+// "# " headings (h2), paragraphs, "- " bullets (ul), a closing *quote* and the signature line.
+const bioSrc = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
+const BIO_ORDER = ['he', 'en', 'ru'];
+const bioPath = lang => `${prefix(lang)}about/`;
+const BIO_LABEL = {he: 'אודות', ru: 'О художнице', en: 'About'};
+function bioPage(lang) {
+  const S = SEO[lang], T = SITE.text[lang];
+  const lines = bioSrc[BIO_ORDER.indexOf(lang)].split('\n').map(l => l.trim()).filter(Boolean);
+  const name = lines.shift(), roles = lines.shift().replace(/^\*\*|\*\*$/g, '');
+  const signature = lines.pop(), quote = lines.pop().replace(/^\*|\*$/g, '');
+  let body = '', list = false;
+  for (const l of lines) {
+    const li = l.startsWith('- ');
+    if (list && !li) { body += '</ul>\n'; list = false; }
+    if (li) { if (!list) { body += '<ul class="bio-list">\n'; list = true; } body += `<li>${esc(l.slice(2))}</li>\n`; }
+    else if (l.startsWith('# ')) body += `<h2>${esc(l.slice(2))}</h2>\n`;
+    else body += `<p>${esc(l)}</p>\n`;
+  }
+  if (list) body += '</ul>\n';
+  const first = lines.find(l => !l.startsWith('#') && !l.startsWith('- ')), desc = first.match(/^.*?[.!?](?=\s|$)/)[0];
+  const title = `${S.name} · ${BIO_LABEL[lang]}`, url = SITE_URL + bioPath(lang), up = '../'.repeat(lang === 'he' ? 1 : 2);
+  return `<!doctype html>
+<html lang="${lang}" dir="${dir(lang)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0c13">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)}">
+<link rel="canonical" href="${url}">
+${alternates(bioPath)}
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="${esc(S.name)}">
+<meta property="og:locale" content="${S.locale}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE_URL}assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="${up}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="${up}assets/css/site.css">
+<link rel="stylesheet" href="${up}assets/css/bio.css">
+</head>
+<body class="bio-page">
+<header class="bio-head">
+  <a class="wordmark" href="${up}${prefix(lang)}" aria-label="Sandra Leifer"><span class="wordmark-name">Sandra Leifer</span><span class="wordmark-mark" aria-hidden="true">✳</span></a>
+  <div class="bio-tools">
+    <nav class="lang" aria-label="שפה / Язык / Language">${LANGS.map(l => `<a href="${up}${bioPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU', en: 'EN'}[l]}</a>`).join('')}</nav>
+  </div>
+</header>
+<main class="bio" id="bio">
+<h1>${esc(name)}</h1>
+<p class="bio-roles">${esc(roles)}</p>
+${body}<figure class="bio-quote"><blockquote><p><em>${esc(quote)}</em></p></blockquote><figcaption>${esc(signature)}</figcaption></figure>
+</main>
+<footer class="footer"><span>© 2026 Sandra Leifer</span><span>${esc(T.rights)}</span></footer>
+<script>try{localStorage.setItem('sl-lang','${lang}')}catch(e){}</script>
+</body>
+</html>
+`;
+}
+for (const lang of LANGS) write(bioPath(lang) + 'index.html', bioPage(lang));
+
 /* ---------- sitemap and robots ---------- */
 const today = new Date().toISOString().slice(0, 10);
 const entry = (pathFor, priority) => LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${pathFor(l)}</loc>\n` +
@@ -218,6 +289,7 @@ write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${entry(prefix, '1.0')}
 ${works.map(w => entry(l => workPath(w.id, l), '0.8')).join('\n')}
+${entry(bioPath, '0.7')}
 ${single('museum/', '0.7')}
 ${single('neurographics/', '0.7')}
 ${single('book/', '0.6')}
@@ -229,4 +301,4 @@ Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 1) * LANGS.length + 3} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 2) * LANGS.length + 3} addresses`);
