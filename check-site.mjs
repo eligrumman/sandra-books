@@ -127,4 +127,26 @@ assert.ok(!sitemap.includes('/dragon/'), 'dragon is not in the sitemap');
 for (const page of workPages) assert.ok(/content="[^"]*(?:[.!?…״"])">/.test(read(page).match(/<meta name="description" content="[^"]*">/)[0]), `${page}: description ends at a sentence or word boundary`);
 for (const dir of ['book/', 'dragon/']) { const h = read(dir + 'index.html'); assert.ok(h.includes('id="footWa"') && h.includes('id="footStudio"') && h.includes('id="metaDesc"'), `${dir}: footer links and language-aware description`); }
 
+// Site improvements: new text keys in all three languages, credibility and bio links on every page type, structured data, hooks.
+for (const k of ['heroRoles', 'aboutCred', 'bioMore', 'footTitles', 'achTitle', 'achIntro', 'ach1', 'ach2', 'ach3', 'ach4', 'ach5', 'childrenTitle', 'childrenText', 'studioMethodT', 'studioMethod', 'studioRole', 'fact5', 'fact6']) for (const l of ['he', 'ru', 'en']) assert.ok(SITE.text[l][k] && SITE.text[l][k].length > 5, `text ${k} ${l}`);
+assert.ok(/NeuroGraphica|НейроГрафик|נוירוגרפיקה/.test(SITE.text.en.portraitCap + SITE.text.ru.portraitCap + SITE.text.he.portraitCap) && SITE.text.en.portraitCap.includes('NeuroGraphica instructor'), 'portraitCap names her as a NeuroGraphica instructor');
+for (const page of ['index.html', 'ru/index.html', 'en/index.html']) {
+  const h = read(page);
+  assert.ok((h.match(/data-bio-link/g) || []).length >= 3, `${page}: bio links in nav, About and footer`);
+  assert.ok(h.includes('class="foot-titles"') && h.includes('id="achievements"') && h.includes('class="wall-roles"') && h.includes('class="studio-method'), `${page}: titles, achievements, roles, method`);
+  const ldj = JSON.parse(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  const p = ldj.find(x => x['@type'] === 'Person');
+  for (const f of ['description', 'alumniOf', 'memberOf', 'award', 'knowsAbout']) assert.ok(p[f] && p[f].length, `${page}: Person.${f}`);
+  assert.ok(ldj.some(x => x['@type'] === 'Organization' && x.founder), `${page}: Children Artists founder`);
+  assert.ok(/<a class="story-card[^>]*data-dragon-link hidden>/.test(h), `${page}: dragon card hidden on the home page`);
+}
+for (const pre of ['', 'ru/', 'en/']) { const b = read(pre + 'about/index.html'); assert.ok(b.includes('"@type":"ProfilePage"') && b.includes('class="foot-titles"'), `${pre}about: ProfilePage and titles`); }
+for (const page of workPages) assert.ok(read(page).includes('class="foot-titles"') && read(page).includes('data-bio-link') && read(page).includes("'sl:wa'"), `${page}: footer titles, bio link, sl:wa hook`);
+for (const dir of ['book/', 'museum/', 'neurographics/']) { const h = read(dir + 'index.html'); assert.ok(h.includes(`<link rel="canonical" href="${SITE_URL}${dir}">`) && h.includes('og:description') && h.includes('application/ld+json'), `${dir}: canonical, og and JSON-LD`); }
+for (const dir of ['book/', 'neurographics/']) assert.ok(read(dir + 'index.html').includes('class="foot-titles"') || read(dir + 'index.html').includes('footTitles'), `${dir}: titles in the footer`);
+assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
+assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
+assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts');
+assert.ok(SITE.works.find(w => w.id === 'blue-horses').t[0] === 'הנווד המהורהר', 'blue-horses title matches the catalog');
+
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);

@@ -24,7 +24,11 @@ window.EndlessWall = function (root, ids, opts) {
     for (let a = 0; a < copiesX; a++) for (let b = 0; b < copiesY; b++) col.items.forEach(it => {
       const el = document.createElement('button'); el.type = 'button'; el.className = 'wall-tile';
       el.style.width = it.w + 'px'; el.style.height = it.h + 'px'; el.setAttribute('aria-label', opts.title(it.id));
-      const im = new Image(); im.src = src(it.id); im.alt = ''; im.decoding = 'async'; im.loading = 'lazy'; el.append(im);
+      const im = new Image(); im.width = Math.round(it.w); im.height = Math.round(it.h); im.alt = ''; im.decoding = 'async';
+      // the first tile of the first columns is what the eye lands on: it loads at once (the very first one with top priority); every other tile is lazy
+      const first = a === 0 && b === 0 && it.y === 0 && c < 3;
+      im.loading = first ? 'eager' : 'lazy'; if (first && c === 0) im.fetchPriority = 'high';
+      im.src = src(it.id); el.append(im);
       el.dataset.id = it.id; world.append(el);
       tiles.push({el, x: c * (colW + gap) + (colW - it.w) / 2 + a * BW, y: it.y + b * col.h, w: it.w, h: it.h, W: copiesX * BW, H: copiesY * col.h});
     });
