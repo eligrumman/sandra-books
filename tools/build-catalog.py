@@ -24,7 +24,7 @@ SRC = ROOT / 'src/catalog'
 # Electric Equine Drift (the site's 'horse'), a different painting; it waits for its own photo.
 IDS = {
     1: 'flute', 2: 'night-faces', 3: 'blue-current', 4: 'earth-profile', 5: 'two-profiles',
-    6: 'blue-horses', 7: 'red-forest', 8: 'raven', 9: 'quiet-tale', 10: 'stone-dream',
+    6: 'thoughtful-wanderer', 7: 'red-forest', 8: 'raven', 9: 'quiet-tale', 10: 'stone-dream',
     11: 'europa', 12: 'unicorn-water', 13: 'angels', 14: 'forest-giants', 15: 'alchemist',
     16: 'lilac-gazes', 17: 'blue-tree', 18: None, 19: 'mermaid', 20: 'night-light',
     21: 'tree-tears', 22: 'forest-moon', 23: 'lilac-dance', 24: 'water-whisper', 25: 'serpent',

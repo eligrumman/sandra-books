@@ -29,7 +29,7 @@ WORKS = {
     'earth-profile': 'raw:ALX_0135.jpg', 'forest-giants': 'raw:ALX_0148.jpg',
     # Painting & drawing
     'horse': 'art:horse.webp', 'alchemist': 'art:alchemist.webp', 'mermaid': 'raw:ALX_0134.JPG',
-    'blue-tree': 'raw:ALX_0139.JPG', 'blue-horses': 'raw:ALX_0147.jpg', 'star-voyage': 'raw:ALX_0122.jpg',
+    'blue-tree': 'raw:ALX_0139.JPG', 'thoughtful-wanderer': 'raw:ALX_0147.jpg', 'star-voyage': 'raw:ALX_0122.jpg',
     'embrace': 'raw:ALX_0129.jpg', 'winter': 'art:winter.webp', 'drawing': 'art:drawing.webp',
     # Canvases sent in chat (about 1500px; replace with the originals when available)
     'tree-tears': 'art:catalog/tree-tears.jpg', 'serpent': 'art:serpent.jpg', 'night-light': 'art:night-light.jpg',

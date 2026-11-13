@@ -147,6 +147,6 @@ for (const dir of ['book/', 'neurographics/']) assert.ok(read(dir + 'index.html'
 assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
 assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
 assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts');
-assert.ok(SITE.works.find(w => w.id === 'blue-horses').t[0] === 'הנווד המהורהר', 'blue-horses title matches the catalog');
+assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנווד המהורהר', 'thoughtful-wanderer title matches the catalog');
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
