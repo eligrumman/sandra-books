@@ -30,15 +30,15 @@ const PHONE = '+972-53-538-0014';
 // How Sandra is named and described in each language
 const SEO = {
   he: {name: 'סנדרה לייפר', job: 'אמנית ומורה לאמנות', locale: 'he_IL', title: SITE.text.he.title,
-    desc: 'סנדרה לייפר, אמנית ומורה לאמנות בישראל: ציורים מקוריים באקריליק ובצבעי מים, נוירוגרפיקה, עולמות נסתרים, בודי־ארט, סדנאות ואגדות מאוירות לילדים. עבודות מקוריות למכירה.',
+    desc: 'סנדרה לייפר, אמנית מקצועית עם יותר מעשרים שנות ניסיון בהוראת אמנות חזותית וחברה באיגוד אמני אונסק״ו. ציורים מקוריים, נוירוגרפיקה וסדנאות.',
     works: 'עבודות', allWorks: 'כל העבודות', by: 'מאת', about: 'על היצירה', ask: 'לפרטים ולרכישה', museum: 'לראות בתערוכה', prev: 'היצירה הקודמת', next: 'היצירה הבאה',
     cm: 'ס״מ', home: 'סנדרה לייפר', series: 'סדרה', artwork: 'יצירה', imgAlt: (t, n) => `${t} — ${n}`, original: 'עבודה מקורית', onRequest: 'מחיר לפי פנייה'},
   ru: {name: 'Сандра Лейфер', job: 'Художница и педагог', locale: 'ru_RU', title: SITE.text.ru.title,
-    desc: 'Сандра Лейфер — художница и педагог из Израиля: оригинальные картины акрилом и акварелью, нейрографика, скрытые миры, боди-арт, мастер-классы и иллюстрированные сказки для детей. Оригиналы в продаже.',
+    desc: 'Сандра Лейфер — профессиональная художница с более чем 20-летним опытом преподавания изобразительного искусства, член Союза художников ЮНЕСКО. Оригинальные картины, НейроГрафика и мастер-классы.',
     works: 'Работы', allWorks: 'Все работы', by: 'Автор', about: 'О работе', ask: 'Узнать о покупке', museum: 'Посмотреть на выставке', prev: 'Предыдущая работа', next: 'Следующая работа',
     cm: 'см', home: 'Сандра Лейфер', series: 'Серия', artwork: 'Работа', imgAlt: (t, n) => `${t} — ${n}`, original: 'Оригинал', onRequest: 'Цена по запросу'},
   en: {name: 'Sandra Leifer', job: 'Artist and art teacher', locale: 'en_US', title: SITE.text.en.title,
-    desc: 'Sandra Leifer is an artist and art teacher in Israel: original acrylic and watercolor paintings, neurographics, hidden worlds, body art, workshops and illustrated fairy tales for children. Original works for sale.',
+    desc: 'Sandra Leifer is a professional artist with more than 20 years of experience teaching visual arts and a member of the UNESCO Artists’ Union. Original paintings, NeuroGraphica and workshops.',
     works: 'Works', allWorks: 'All works', by: 'By', about: 'About the work', ask: 'Details and purchase', museum: 'See it in the exhibition', prev: 'Previous work', next: 'Next work',
     cm: 'cm', home: 'Sandra Leifer', series: 'Series', artwork: 'Artwork', imgAlt: (t, n) => `${t} — ${n}`, original: 'Original work', onRequest: 'Price on request'}
 };
@@ -52,12 +52,27 @@ const largest = (id, max = 1600) => { const s = IMAGES.works[id].s.filter(x => x
 const imgUrl = (id, w) => `assets/img/works/${id}-${w}.webp`;
 const homeUrl = lang => SITE_URL + prefix(lang);
 const workPath = (id, lang) => `${prefix(lang)}works/${id}/`;
+const bioPath = lang => `${prefix(lang)}about/`;
 
+const PERSON = {
+  he: {desc: SITE.text.he.aboutLead, alumni: ['בית הספר לאמנות מספר 1, ירוסלבל', 'המכללה לאמנות בירוסלבל'], member: ['איגוד האמנים המקצועיים בישראל', 'איגוד אמני אונסק״ו'],
+    award: ['פרסים בינלאומיים באיפור יצירתי ובאיפור אמנותי', 'מקום ראשון בתחרויות בינלאומיות בישראל, 2025 ו־2026'], org: 'ילדים אמנים',
+    know: ['ציור', 'נוירוגרפיקה', 'צבעי מים', 'בודי־ארט', 'הוראת אמנות חזותית', 'אימון אסתטי', 'עבודה עם הגוף']},
+  ru: {desc: SITE.text.ru.aboutLead, alumni: ['Художественная школа № 1, Ярославль', 'Ярославское художественное училище'], member: ['Союз профессиональных художников Израиля', 'Союз художников ЮНЕСКО'],
+    award: ['Международные награды в области креативного макияжа и художественного грима', 'Первые места на международных конкурсах в Израиле, 2025 и 2026'], org: 'Дети-художники',
+    know: ['Живопись', 'Нейрографика', 'Акварель', 'Боди-арт', 'Преподавание изобразительного искусства', 'Эстетический коучинг', 'Телесные практики']},
+  en: {desc: SITE.text.en.aboutLead, alumni: ['Art School No. 1, Yaroslavl', 'Yaroslavl Art College'], member: ['Union of Professional Artists of Israel', 'UNESCO Artists’ Union'],
+    award: ['International awards in creative makeup and artistic makeup', 'First prizes at international competitions in Israel, 2025 and 2026'], org: 'Children Artists',
+    know: ['Painting', 'NeuroGraphica', 'Watercolor', 'Body art', 'Visual arts education', 'Aesthetic coaching', 'Bodywork']}
+};
 function person(lang) {
+  const X = PERSON[lang];
   return {'@type': 'Person', '@id': SITE_URL + '#sandra', name: SEO[lang].name, alternateName: NAMES.filter(n => n !== SEO[lang].name),
-    jobTitle: SEO[lang].job, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS, telephone: PHONE,
+    jobTitle: SEO[lang].job, description: X.desc, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS, telephone: PHONE,
     contactPoint: {'@type': 'ContactPoint', telephone: PHONE, contactType: 'sales', availableLanguage: ['Hebrew', 'Russian', 'English']},
-    knowsAbout: lang === 'he' ? ['ציור', 'נוירוגרפיקה', 'צבעי מים', 'בודי־ארט', 'הוראת אמנות'] : lang === 'ru' ? ['Живопись', 'Нейрографика', 'Акварель', 'Боди-арт', 'Преподавание искусства'] : ['Painting', 'Neurographics', 'Watercolor', 'Body art', 'Art teaching'],
+    alumniOf: X.alumni.map(name => ({'@type': 'EducationalOrganization', name})),
+    memberOf: X.member.map(name => ({'@type': 'Organization', name})),
+    award: X.award, knowsAbout: X.know,
     nationality: 'Israel'};
 }
 function alternates(pathFor) {
@@ -102,6 +117,7 @@ function homePage(lang) {
     ld({'@context': 'https://schema.org', '@graph': [
       person(lang),
       {'@type': 'WebSite', '@id': SITE_URL + '#site', url: SITE_URL, name: S.name, inLanguage: LANGS, publisher: {'@id': SITE_URL + '#sandra'}},
+      {'@type': 'Organization', '@id': SITE_URL + '#children-artists', name: PERSON[lang].org, founder: {'@id': SITE_URL + '#sandra'}},
       {'@type': 'ProfilePage', url: homeUrl(lang), name: S.title, inLanguage: lang, mainEntity: {'@id': SITE_URL + '#sandra'}}
     ]})
   ].join('\n');
@@ -110,7 +126,7 @@ function homePage(lang) {
   // relative links from /ru/ and /en/ lead back to the site root
   if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|tel:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
   // the biography page of this language (about/ next to the home page)
-  if (base) html = html.replace('href="../about/" data-bio-link', `href="../${lang}/about/" data-bio-link`);
+  if (base) html = html.split('href="../about/" data-bio-link').join(`href="../${lang}/about/" data-bio-link`);
   // links to the works of this language: works/<id>/ next to this page
   return html.replace(/<!--works-->[\s\S]*?(?=<\/div>)/, '<!--works-->' + cards);
 }
@@ -199,7 +215,12 @@ ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
     <a href="${up}${workPath(next.id, lang)}" rel="next"><small>${esc(S.next)}</small>${esc(L(next.t, lang))}</a>
   </nav>
 </main>
-<footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span></footer>
+<footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a></footer>
+<script>
+// Hook for analytics: every WhatsApp ask fires 'sl:wa' (no cookies, no third-party script).
+// Example: document.addEventListener('sl:wa', e => plausible('whatsapp', {props: e.detail}));
+document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('.wp-ask'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: ${JSON.stringify(w.id)}}})); });
+</script>
 </body>
 </html>
 `;
@@ -216,7 +237,6 @@ for (const lang of LANGS) {
 // "# " headings (h2), paragraphs, "- " bullets (ul), a closing *quote* and the signature line.
 const bioSrc = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
 const BIO_ORDER = ['he', 'en', 'ru'];
-const bioPath = lang => `${prefix(lang)}about/`;
 const BIO_LABEL = {he: 'אודות', ru: 'О художнице', en: 'About'};
 function bioPage(lang) {
   const S = SEO[lang], T = SITE.text[lang];
@@ -258,6 +278,7 @@ ${alternates(bioPath)}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="${up}assets/css/site.css">
 <link rel="stylesheet" href="${up}assets/css/bio.css">
+${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'ProfilePage', '@id': url + '#profile', url, name: title, inLanguage: lang, mainEntity: {'@id': SITE_URL + '#sandra'}}]})}
 </head>
 <body class="bio-page">
 <header class="bio-head">
@@ -271,7 +292,7 @@ ${alternates(bioPath)}
 <p class="bio-roles">${esc(roles)}</p>
 ${body}<figure class="bio-quote"><blockquote><p><em>${esc(quote)}</em></p></blockquote><figcaption>${esc(signature)}</figcaption></figure>
 </main>
-<footer class="footer"><span>© 2026 Sandra Leifer</span><span>${esc(T.rights)}</span></footer>
+<footer class="footer"><span>© 2026 Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
 <script>try{localStorage.setItem('sl-lang','${lang}')}catch(e){}</script>
 </body>
 </html>

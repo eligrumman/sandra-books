@@ -44,6 +44,7 @@
 <section class="wall" id="hero" aria-label="קיר העבודות" data-t-label="wallLabel">
   <div class="wall-copy">
     <h1 class="wall-title" data-t="heroH1">סנדרה לייפר<span class="sr">. </span><span class="wall-sub">ציירת. ציורים מקוריים ומפגשי נוירוגרפיקה</span></h1>
+    <p class="wall-roles" data-t="heroRoles">אמנית · מורה לאמנות חזותית · מדריכת נוירוגרפיקה · יותר מעשרים שנות ניסיון בהוראת אמנות חזותית</p>
     <div class="wall-cta">
       <a class="btn btn-solid" href="#works" data-t="heroBtnWorks">עבודות ורכישה</a>
       <a class="btn btn-ghost" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa-book data-t="heroBtnBook">לתאם מפגש</a>
@@ -114,6 +115,11 @@
     <div class="reveal"><span>02</span><h3 data-t="studioP2t">צבע וחומר</h3><p data-t="studioP2">אקריליק, צבעי מים, פסטל וטושים. מתנסים, טועים, מגלים — בלי צורך בניסיון קודם.</p></div>
     <div class="reveal"><span>03</span><h3 data-t="studioP3t">לילדים ולמבוגרים</h3><p data-t="studioP3">שיעורים וסדנאות לקבוצות, למשפחות ולאירועים — בגובה העיניים ובהרבה סבלנות.</p></div>
   </div>
+  <div class="studio-method reveal">
+    <h3 data-t="studioMethodT">שיטות מקוריות וחקירה עצמית יצירתית</h3>
+    <p data-t="studioMethod"></p>
+    <p data-t="studioRole"></p>
+  </div>
   <div class="studio-book reveal">
     <a class="btn btn-solid" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa-book data-t="studioBook">לתאם סדנה או מפגש</a>
   </div>
@@ -127,7 +133,7 @@
 <section class="about pad" id="about" aria-labelledby="aboutTitle">
   <figure class="about-portrait reveal">
     <img src="assets/img/portrait-900.webp" width="580" height="725" alt="סנדרה לייפר" data-t-alt="portraitAlt" loading="lazy" decoding="async">
-    <figcaption>Sandra Leifer<br><span data-t="portraitCap">אמנית · מורה לאמנות</span></figcaption>
+    <figcaption>Sandra Leifer<br><span data-t="portraitCap">אמנית · מורה לאמנות חזותית · מדריכת נוירוגרפיקה</span></figcaption>
   </figure>
   <div class="about-copy">
     <p class="index reveal">06 — <span data-t="aboutIndex">נעים להכיר</span></p>
@@ -139,7 +145,29 @@
       <div><dt data-t="fact2t">קו</dt><dd data-t="fact2">נוירוגרפיקה ורישום</dd></div>
       <div><dt data-t="fact3t">גוף</dt><dd data-t="fact3">איפור לתיאטרון ובודי־ארט</dd></div>
       <div><dt data-t="fact4t">מילים</dt><dd data-t="fact4">אגדות מאוירות לילדים</dd></div>
+      <div><dt data-t="fact5t">עבודה עם הגוף</dt><dd data-t="fact5">מומחית לעבודה עם הגוף</dd></div>
+      <div><dt data-t="fact6t">אימון</dt><dd data-t="fact6">מאמנת אסתטית</dd></div>
     </dl>
+    <p class="about-cred reveal" data-t="aboutCred"></p>
+    <p class="about-more reveal"><a class="link-arrow" href="about/" data-bio-link data-t="bioMore">לקריאת הביוגרפיה המלאה</a></p>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS + CHILDREN ARTISTS -->
+<section class="achieve pad" id="achievements" aria-labelledby="achTitle">
+  <p class="index reveal"><span data-t="achIndex">הישגים</span></p>
+  <h2 class="section-title reveal" id="achTitle" data-t="achTitle">תערוכות והישגים</h2>
+  <p class="reveal" data-t="achIntro"></p>
+  <ul class="ach-list reveal">
+    <li data-t="ach1"></li>
+    <li data-t="ach2"></li>
+    <li data-t="ach3"></li>
+    <li data-t="ach4"></li>
+    <li data-t="ach5"></li>
+  </ul>
+  <div class="ach-children reveal">
+    <h3 data-t="childrenTitle">ילדים אמנים</h3>
+    <p data-t="childrenText"></p>
   </div>
 </section>
 
@@ -162,7 +190,7 @@
         <span class="link-arrow" data-t="unicornCta">לפתוח את הספר</span>
       </div>
     </a>
-    <a class="story-card reveal" href="dragon/" data-dragon-link>
+    <a class="story-card reveal" href="dragon/" data-dragon-link hidden>
       <div class="story-cover dragon-cover"><img src="assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"></div>
       <div class="story-body">
         <span class="tag" data-t="dragonTag">אגדה חדשה · לקריאה</span>
@@ -187,6 +215,8 @@
 <footer class="footer">
   <span>© <span id="year">2026</span> Sandra Leifer</span>
   <span data-t="rights">כל הזכויות על היצירות שמורות לאמנית</span>
+  <span class="foot-titles" data-t="footTitles"></span>
+  <a href="about/" data-bio-link data-t="navAbout">סנדרה</a>
   <a href="#top" data-t="backTop">בחזרה למעלה ↑</a>
 </footer>
 
