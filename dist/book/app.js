@@ -61,5 +61,5 @@ $('start').onclick=()=>go(1,{focus:true});$('resume').onclick=()=>go(Number(stor
  let touch=null;$('artCrop').addEventListener('touchstart',e=>{touch=e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});$('artCrop').addEventListener('touchend',e=>{if(!touch)return;const dx=e.changedTouches[0].clientX-touch.x,dy=e.changedTouches[0].clientY-touch.y;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(page+(dx>0?1:-1)*(lang==='he'?1:-1),{focus:true});touch=null},{passive:true});
  window.addEventListener('hashchange',()=>{if(book.length)go(Number(location.hash.match(/^#p=(\d+)$/)?.[1]||0))});init();
 
-// Analytics hook: a tap on the WhatsApp link fires 'sl:wa' (no cookies, no third-party script).
+// Analytics hook: a tap on the WhatsApp link fires 'sl:wa'; assets/js/analytics.js sends it to PostHog.
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#footWa');if(a)document.dispatchEvent(new CustomEvent('sl:wa',{detail:{type:'hello',slug:'book'}}))});

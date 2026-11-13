@@ -188,6 +188,7 @@ ${alternates(l => workPath(w.id, l))}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="${up}assets/css/site.css">
 <link rel="stylesheet" href="${up}assets/css/work.css">
+<script src="${up}assets/js/analytics.js" defer></script>
 ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
 </head>
 <body class="work-page">
@@ -217,8 +218,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
 </main>
 <footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a></footer>
 <script>
-// Hook for analytics: every WhatsApp ask fires 'sl:wa' (no cookies, no third-party script).
-// Example: document.addEventListener('sl:wa', e => plausible('whatsapp', {props: e.detail}));
+// Every WhatsApp ask fires 'sl:wa' on document; assets/js/analytics.js sends it to PostHog as whatsapp_click.
 document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('.wp-ask'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: ${JSON.stringify(w.id)}}})); });
 </script>
 </body>
@@ -283,6 +283,7 @@ ${alternates(bioPath)}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="${up}assets/css/site.css">
 <link rel="stylesheet" href="${up}assets/css/bio.css">
+<script src="${up}assets/js/analytics.js" defer></script>
 ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'ProfilePage', '@id': url + '#profile', url, name: title, inLanguage: lang, mainEntity: {'@id': SITE_URL + '#sandra'}}]})}
 </head>
 <body class="bio-page">
