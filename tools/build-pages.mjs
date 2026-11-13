@@ -68,7 +68,7 @@ const PERSON = {
 function person(lang) {
   const X = PERSON[lang];
   return {'@type': 'Person', '@id': SITE_URL + '#sandra', name: SEO[lang].name, alternateName: NAMES.filter(n => n !== SEO[lang].name),
-    jobTitle: SEO[lang].job, description: X.desc, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp', sameAs: SAME_AS, telephone: PHONE,
+    jobTitle: SEO[lang].job, description: X.desc, url: homeUrl(lang), image: SITE_URL + 'assets/img/portrait-900.webp?v=2', sameAs: SAME_AS, telephone: PHONE,
     contactPoint: {'@type': 'ContactPoint', telephone: PHONE, contactType: 'sales', availableLanguage: ['Hebrew', 'Russian', 'English']},
     alumniOf: X.alumni.map(name => ({'@type': 'EducationalOrganization', name})),
     memberOf: X.member.map(name => ({'@type': 'Organization', name})),
@@ -294,7 +294,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'Prof
 </header>
 <main class="bio" id="bio">
 <div class="bio-intro">
-<img class="bio-portrait" src="${up}assets/img/portrait-900.webp" width="580" height="725" alt="${esc(ALT[0])}" decoding="async">
+<img class="bio-portrait" src="${up}assets/img/portrait-900.webp?v=2" width="580" height="725" alt="${esc(ALT[0])}" decoding="async">
 <div class="bio-intro-text">
 <h1>${esc(name)}</h1>
 <p class="bio-roles">${esc(roles)}</p>
