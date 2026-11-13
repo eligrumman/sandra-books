@@ -53,7 +53,7 @@ window.SITE = {
     {id: 'drawing', kind: 'paint', m: 'pastel', s: '42 × 30', t: ['מנוחה שכובה', 'Отдых', 'Reclining rest']},
     {id: 'old-bridge', kind: 'hidden', m: 'paper', y: 2026, t: ['הגשר הישן', 'Старый мост']},
     {id: 'stone-dream', kind: 'hidden', m: 'paper', y: 2026, t: ['חלום של סלע', 'Сон камня']},
-    {id: 'blue-horses', kind: 'paint', m: 'paper', t: ['הנווד המהורהר', 'Задумчивый странник']},
+    {id: 'thoughtful-wanderer', kind: 'paint', m: 'paper', t: ['הנווד המהורהר', 'Задумчивый странник']},
     // more works by Sandra, not in her catalog (Russian titles translated for the site)
     {id: 'tidal-spiral', kind: 'neuro', m: 'marker', t: ['סחרור גאות', 'Приливная спираль', 'Tidal Spiral']},
     {id: 'chromatic-veins', kind: 'neuro', m: 'marker', t: ['עורקי צבע', 'Прожилки цвета', 'Chromatic Veins']},
