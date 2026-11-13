@@ -104,7 +104,7 @@ def main():
         got = save(im, OUT / 'studio' / f'{sid}.webp', 1400, 78)
         studio[sid] = {'w': got[0], 'h': got[1], 'c': avg_colour(im)}
     # Portrait, story covers and social preview
-    save(load('art:portrait-workshop.jpg'), OUT / 'portrait-900.webp', 900)
+    # portrait-900.webp is now a hand-cropped photo (Nov 2026), not generated here
     save(Image.open(ROOT / 'dist/book/assets/page-00.webp').convert('RGB'), OUT / 'unicorn-cover-900.webp', 900)
     save(load('art:winter.webp'), OUT / 'dragon-cover-900.webp', 900)
     # The link-preview image is rendered by tools/og.py.
