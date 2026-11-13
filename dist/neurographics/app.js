@@ -474,7 +474,7 @@ const STEPS = [
     const keep = h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => go(9)}, t('ngKeepDrawing'));
     const again = h('button', {type: 'button', class: 'btn btn-ghost', onclick: restart}, t('ngRestart'));
     const cta = h('div', {class: 'cta'}, h('h3', {}, t('ngCtaTitle')), h('p', {class: 'ng-lead'}, t('ngCtaText')),
-      h('a', {class: 'btn btn-solid gold', id: 'ctaBtn', href: S.waNeuro(lang), target: '_blank', rel: 'noopener'}, t('ngCtaBtn')), h('p', {class: 'ng-muted'}, t('ngCtaNote')));
+      h('a', {class: 'btn btn-solid gold', id: 'ctaBtn', href: S.waNeuro(lang), target: '_blank', rel: 'noopener', onclick: () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'book', slug: 'neurographics'}}))}, t('ngCtaBtn')), h('p', {class: 'ng-muted'}, t('ngCtaNote')));
     return h('div', {class: 'ng-cols'}, cv, h('div', {}, title('ngS11Title'), h('p', {class: 'ng-lead'}, t('ngS11Text')), h('div', {class: 'final-actions'}, dl, keep, again), cta));
   }
 ];
@@ -582,6 +582,7 @@ function applyLang() {
   document.querySelectorAll('[data-lang-link]').forEach(a => { if (a.dataset.langLink === lang) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   const base = lang === 'he' ? '../' : '../' + lang + '/';
   $('homeLink').href = base; $('siteLink').href = base;
+  document.querySelectorAll('[data-bio-link]').forEach(a => { a.href = base + 'about/'; });
   document.querySelector('footer span').textContent = `© ${new Date().getFullYear()} Sandra Leifer`;
   store.set('sl-lang', lang);
 }
