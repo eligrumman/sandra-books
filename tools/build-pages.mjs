@@ -223,17 +223,22 @@ function bioPage(lang) {
   const lines = bioSrc[BIO_ORDER.indexOf(lang)].split('\n').map(l => l.trim()).filter(Boolean);
   const name = lines.shift(), roles = lines.shift().replace(/^\*\*|\*\*$/g, '');
   const signature = lines.pop(), quote = lines.pop().replace(/^\*|\*$/g, '');
-  let body = '', list = false;
+  const up = '../'.repeat(lang === 'he' ? 1 : 2);
+  let body = '', list = false, h2n = 0;
+  const ALT = {he: ['סנדרה לייפר', 'סנדרה לייפר מנחה סדנת אמנות סביב שולחן עבודה'], en: ['Sandra Leifer', 'Sandra Leifer leading an art workshop at a work table'], ru: ['Сандра Лейфер', 'Сандра Лейфер ведёт арт-мастерскую у рабочего стола']}[lang];
   for (const l of lines) {
     const li = l.startsWith('- ');
     if (list && !li) { body += '</ul>\n'; list = false; }
     if (li) { if (!list) { body += '<ul class="bio-list">\n'; list = true; } body += `<li>${esc(l.slice(2))}</li>\n`; }
-    else if (l.startsWith('# ')) body += `<h2>${esc(l.slice(2))}</h2>\n`;
+    else if (l.startsWith('# ')) {
+      if (++h2n === 3) body += `<figure class="bio-photo"><img src="${up}assets/img/studio/ws-4.webp" width="1400" height="933" alt="${esc(ALT[1])}" loading="lazy" decoding="async"></figure>\n`;
+      body += `<h2>${esc(l.slice(2))}</h2>\n`;
+    }
     else body += `<p>${esc(l)}</p>\n`;
   }
   if (list) body += '</ul>\n';
   const first = lines.find(l => !l.startsWith('#') && !l.startsWith('- ')), desc = first.match(/^.*?[.!?](?=\s|$)/)[0];
-  const title = `${S.name} · ${BIO_LABEL[lang]}`, url = SITE_URL + bioPath(lang), up = '../'.repeat(lang === 'he' ? 1 : 2);
+  const title = `${S.name} · ${BIO_LABEL[lang]}`, url = SITE_URL + bioPath(lang);
   return `<!doctype html>
 <html lang="${lang}" dir="${dir(lang)}">
 <head>
@@ -267,8 +272,13 @@ ${alternates(bioPath)}
   </div>
 </header>
 <main class="bio" id="bio">
+<div class="bio-intro">
+<img class="bio-portrait" src="${up}assets/img/portrait-900.webp" width="580" height="725" alt="${esc(ALT[0])}" decoding="async">
+<div class="bio-intro-text">
 <h1>${esc(name)}</h1>
 <p class="bio-roles">${esc(roles)}</p>
+</div>
+</div>
 ${body}<figure class="bio-quote"><blockquote><p><em>${esc(quote)}</em></p></blockquote><figcaption>${esc(signature)}</figcaption></figure>
 </main>
 <footer class="footer"><span>© 2026 Sandra Leifer</span><span>${esc(T.rights)}</span></footer>
