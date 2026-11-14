@@ -2,6 +2,7 @@
 // w/h = the 1600 file, w8/h8 = the 800 file. No titles, years or sizes exist for these photos, so none are given.
 // review: 'nudity' marks partly nude photos awaiting the Owner's decision. To take them off the page change hideReview to ['nudity'] and rebuild (node tools/build-pages.mjs); or delete the entries.
 // Review-tagged files: those entries below carry review: 'nudity'.
+// year: the contest year (Owner, 2026-11-14: body-art-13 is the 2025 contest, the event-* photos the 2026 one); a group with years shows one h3 sub-section per year, oldest first.
 // credit: the photographer's name where it is visible on the photo.
 window.BODY_ART = {
   hideReview: [],
@@ -18,7 +19,7 @@ window.BODY_ART = {
     {id: 'body-art-10', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-11', group: 'art', w: 1600, h: 1065, w8: 800, h8: 533, credit: 'Susanna'},
     {id: 'body-art-12', group: 'art', w: 1106, h: 1600, w8: 553, h8: 800, review: 'nudity'},
-    {id: 'body-art-13', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
+    {id: 'body-art-13', group: 'events', year: '2025', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-14', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-15', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-16', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
@@ -27,9 +28,9 @@ window.BODY_ART = {
     {id: 'body-art-19', group: 'art', w: 1026, h: 1294, w8: 635, h8: 800},
     {id: 'body-art-20', group: 'art', w: 1270, h: 1600, w8: 635, h8: 800},
     {id: 'body-art-21', group: 'art', w: 1068, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-event-01', group: 'events', w: 1200, h: 1600, w8: 600, h8: 800},
-    {id: 'body-art-event-02', group: 'events', w: 1067, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-event-03', group: 'events', w: 1067, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-event-04', group: 'events', w: 1067, h: 1600, w8: 534, h8: 800, review: 'nudity'}
+    {id: 'body-art-event-01', group: 'events', year: '2026', w: 1200, h: 1600, w8: 600, h8: 800},
+    {id: 'body-art-event-02', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800},
+    {id: 'body-art-event-03', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800},
+    {id: 'body-art-event-04', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800, review: 'nudity'}
   ]
 };

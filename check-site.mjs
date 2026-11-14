@@ -186,6 +186,10 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     // the group intro is the bio's sentence verbatim
     const sentence = bio[['he', 'en', 'ru'].indexOf(l)].split('\n').map(x => x.trim()).find(x => /2025/.test(x) && !x.startsWith('#'));
     assert.ok(sentence && h.includes(`<p class="ba-intro">${sentence.replace(/&/g, '&amp;')}</p>`), `${page}: contest sentence from the bio`);
+    // contests: 2025 (body-art-13) then 2026 (events), as h3 year headings in page order
+    const i25 = h.indexOf('<h3 class="ba-year">2025</h3>'), i26 = h.indexOf('<h3 class="ba-year">2026</h3>'), i13 = h.indexOf('/body-art-13-1600.webp" data-w'), iE1 = h.indexOf('/body-art-event-01-1600.webp" data-w');
+    assert.ok(i25 > h.indexOf('id="events"') && i25 < i13 && i13 < i26 && i26 < iE1, `${page}: 2025 heading above body-art-13, 2026 heading above the events`);
+    assert.ok(h.indexOf('/body-art-14-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
     assert.ok(h.includes('id="baLb"') && h.includes('body-art.js') && h.includes('<figcaption class="ba-credit">'), `${page}: lightbox and credit`);
     assert.ok(/Susanna/.test(h), `${page}: photographer credit`);
     assert.ok(read(pre + 'index.html').includes('data-body-link'), `${pre}index: link to the body-art page`);
