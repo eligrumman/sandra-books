@@ -336,16 +336,22 @@ function bodyPage(lang) {
   let n = 0, sections = '';
   const ld_imgs = [];
   for (const [g, heading, alt, intro] of groups) {
-    const items = bodyItems.filter(i => i.group === g);
+    const items = bodyItems.filter(i => i.group === g).sort((a, b) => (a.year || '').localeCompare(b.year || ''));
     if (!items.length) continue;
-    const figs = items.map((i, k) => {
+    const fig = (i, k) => {
       const label = `${alt}, ${B.photo(k + 1, items.length)}`;
       ld_imgs.push({'@type': 'ImageObject', contentUrl: `${SITE_URL}assets/img/body-art/${i.id}-1600.webp`, name: label, creator: {'@id': SITE_URL + '#sandra'}});
       return `<figure class="ba-item"${i.review ? ` data-review="${i.review}"` : ''}><a href="${up}assets/img/body-art/${i.id}-1600.webp" data-w="${i.w}" data-h="${i.h}"><img src="${up}assets/img/body-art/${i.id}-800.webp" srcset="${up}assets/img/body-art/${i.id}-800.webp ${i.w8}w, ${up}assets/img/body-art/${i.id}-1600.webp ${i.w}w" sizes="(max-width:700px) 50vw, (max-width:1100px) 33vw, 25vw" width="${i.w8}" height="${i.h8}" alt="${esc(label)}" loading="lazy" decoding="async"></a>${i.credit ? `<figcaption class="ba-credit">${esc(B.credit(i.credit))}</figcaption>` : ''}</figure>`;
+    };
+    // items with a year (the contests) get one h3 + grid per year, oldest first; the year is the same digits in every language
+    const years = [...new Set(items.map(i => i.year || ''))];
+    const figs = years.map(y => {
+      const grid = `<div class="ba-grid">\n${items.map((i, k) => [i, k]).filter(([i]) => (i.year || '') === y).map(([i, k]) => fig(i, k)).join('\n')}\n</div>`;
+      return y ? `<h3 class="ba-year">${esc(y)}</h3>\n${grid}` : grid;
     }).join('\n');
     // the first group needs no h2 of its own: the page h1 already names it (same words), so it is labelled by aria-label
     const head = g === 'art' ? '' : `<h2 id="h-${g}">${esc(heading)}</h2>\n`;
-    sections += `<section class="ba-group" id="${g}" ${g === 'art' ? `aria-label="${esc(heading)}"` : `aria-labelledby="h-${g}"`}>\n${head}${intro ? `<p class="ba-intro">${esc(intro)}</p>\n` : ''}<div class="ba-grid">\n${figs}\n</div>\n</section>\n`;
+    sections += `<section class="ba-group" id="${g}" ${g === 'art' ? `aria-label="${esc(heading)}"` : `aria-labelledby="h-${g}"`}>\n${head}${intro ? `<p class="ba-intro">${esc(intro)}</p>\n` : ''}${figs}\n</section>\n`;
   }
   const desc = `${B.title}, ${S.name}.`;
   const title = `${B.title} · ${S.name}`;
