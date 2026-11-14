@@ -189,7 +189,14 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     // contests: 2025 (body-art-13) then 2026 (events), as h3 year headings in page order
     const i25 = h.indexOf('<h3 class="ba-year">2025</h3>'), i26 = h.indexOf('<h3 class="ba-year">2026</h3>'), i13 = h.indexOf('/body-art-13-1600.webp" data-w'), iE1 = h.indexOf('/body-art-event-01-1600.webp" data-w');
     assert.ok(i25 > h.indexOf('id="events"') && i25 < i13 && i13 < i26 && i26 < iE1, `${page}: 2025 heading above body-art-13, 2026 heading above the events`);
-    assert.ok(h.indexOf('/body-art-14-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    assert.ok(h.indexOf('/body-art-16-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    // one home, no doubles: the 5 catalog body works come first as cards to their work pages (titles as in the catalog); the photos that duplicated them are gone
+    const cat = SITE.works.filter(w => w.kind === 'body');
+    assert.equal(cat.length, 5, 'five catalog body works');
+    assert.equal((h.match(/class="ba-work"/g) || []).length, cat.length, `${page}: a card per catalog body work`);
+    for (const w of cat) assert.ok(h.includes(`href="${up}${['', 'ru/', 'en/'][i]}works/${w.id}/"`) && h.includes(`<span class="ba-work-t">${w.t[i]}</span>`), `${page}: card for ${w.id}`);
+    assert.ok(h.indexOf('data-body-works') < h.indexOf('class="ba-grid"'), `${page}: catalog works before the photos`);
+    for (const dup of ['body-art-01', 'body-art-06', 'body-art-14', 'body-art-15', 'body-art-event-03']) assert.ok(!h.includes(`/${dup}-`) && !BODY.items.some(x => x.id === dup), `${page}: ${dup} duplicates a catalog work or another frame and stays out`);
     assert.ok(h.includes('id="baLb"') && h.includes('body-art.js') && h.includes('<figcaption class="ba-credit">'), `${page}: lightbox and credit`);
     assert.ok(/Susanna/.test(h), `${page}: photographer credit`);
     assert.ok(read(pre + 'index.html').includes('data-body-link'), `${pre}index: link to the body-art page`);
