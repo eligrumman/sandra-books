@@ -246,6 +246,19 @@ for (const lang of LANGS) {
 /* ---------- biography page per language (/about/, /ru/about/, /en/about/) ---------- */
 // The text is src/site/bio.md, verbatim: three sections (HE, EN, RU). Per section: name (h1), a **roles** line,
 // "# " headings (h2), paragraphs, "- " bullets (ul), a closing *quote* and the signature line.
+/* ---------- closing block (about, body-art): WhatsApp, workshops, works ---------- */
+// Labels are existing site text (contactBtn) plus two short link labels (closeStudio, closeWorks: draft for Sandra, in data.js).
+const closingBlock = (lang, up, slug, cls = '') => {
+  const T = SITE.text[lang];
+  return `<section class="closing${cls ? ' ' + cls : ''}" aria-label="${esc(T.contactBtn)}">
+<a class="btn btn-solid" href="${esc(SITE.waHello(lang))}" target="_blank" rel="noopener" data-wa>${esc(T.contactBtn)}</a>
+<a class="btn btn-ghost" href="${up}${prefix(lang)}#studio">${esc(T.closeStudio)}</a>
+<a class="btn btn-ghost" href="${up}${prefix(lang)}#works">${esc(T.closeWorks)}</a>
+</section>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('.closing [data-wa]'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'hello', slug: '${slug}'}})); });</script>
+`;
+};
+
 const bioSrc = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
 const BIO_ORDER = ['he', 'en', 'ru'];
 const BIO_LABEL = {he: 'אודות', ru: 'О художнице', en: 'About'};
@@ -314,6 +327,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'Prof
 </div>
 ${body}<figure class="bio-quote"><blockquote><p><em>${esc(quote)}</em></p></blockquote><figcaption>${esc(signature)}</figcaption></figure>
 </main>
+${closingBlock(lang, up, 'about', 'bio-closing')}
 <footer class="footer"><span>© 2026 Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
 <script>try{localStorage.setItem('sl-lang','${lang}')}catch(e){}</script>
 </body>
@@ -396,7 +410,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'Imag
 <nav class="ba-crumbs" aria-label="${esc(S.allWorks)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <a href="${up}${prefix(lang)}#works">${esc(B.back)}</a></nav>
 <h1>${esc(B.title)}</h1>
 <p class="ba-room"><a href="${up}mirror-room/?lang=${lang}" data-mirror-room-link>${esc(ROOM_LINK[lang])}</a></p>
-${sections}</main>
+${sections}${closingBlock(lang, up, 'body-art')}</main>
 <footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
 <dialog class="ba-lb" id="baLb" aria-label="${esc(B.gallery)}">
   <div class="ba-lb-top"><span id="baLbCount"></span><button type="button" class="ba-lb-btn" id="baLbClose" aria-label="${esc(B.close)}">✕</button></div>
@@ -434,7 +448,6 @@ ${single('book/', '0.6')}
 `);
 write('robots.txt', `User-agent: *
 Allow: /
-Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);

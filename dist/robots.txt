@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /concepts/
 
 Sitemap: https://sandraleifer.com/sitemap.xml
