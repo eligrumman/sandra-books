@@ -143,3 +143,5 @@
   .breath-dot{transition:none}
   .ng-bar i,.t-bar i{transition:none}
 }
+.board-tip{margin:0}
+.ng-before{margin:2px 0 6px;font-style:italic}
