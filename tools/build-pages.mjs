@@ -15,8 +15,8 @@ const read = p => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const write = (p, s) => { fs.mkdirSync(path.dirname(path.join(DIST, p)), {recursive: true}); fs.writeFileSync(path.join(DIST, p), s); };
 
 const ctx = vm.createContext({window: {}});
-vm.runInContext(read('dist/assets/js/images.js') + read('dist/assets/js/data.js') + read('dist/assets/js/catalog.js'), ctx);
-const {SITE, IMAGES} = ctx.window;
+vm.runInContext(read('dist/assets/js/images.js') + read('dist/assets/js/data.js') + read('dist/assets/js/catalog.js') + read('dist/assets/js/body-art-data.js'), ctx);
+const {SITE, IMAGES, BODY_ART} = ctx.window;
 
 const LANGS = ['he', 'ru', 'en'];
 const L = (arr, lang) => arr[LANGS.indexOf(lang)] ?? arr[0];
@@ -43,6 +43,15 @@ const SEO = {
     cm: 'cm', home: 'Sandra Leifer', series: 'Series', artwork: 'Artwork', imgAlt: (t, n) => `${t} — ${n}`, original: 'Original work', onRequest: 'Price on request'}
 };
 const NAMES = LANGS.map(l => SEO[l].name);
+// UI labels of the body-art page (no facts about the photos: they have no titles, years or sizes)
+const BA = {
+  he: {title: 'בודי־ארט ופייס־ארט', art: 'בודי־ארט ופייס־ארט', events: 'תחרויות ואירועים', alt: 'בודי־ארט מאת סנדרה לייפר', altEvents: 'תחרויות ואירועים, סנדרה לייפר',
+    photo: (n, t) => `תמונה ${n} מתוך ${t}`, credit: n => `צילום: ${n}`, more: 'עוד בודי־ארט ופייס־ארט', back: 'כל העבודות', close: 'סגירה', prev: 'התמונה הקודמת', next: 'התמונה הבאה', gallery: 'גלריית תמונות'},
+  ru: {title: 'Боди-арт и фейс-арт', art: 'Боди-арт и фейс-арт', events: 'Конкурсы и мероприятия', alt: 'Боди-арт, Сандра Лейфер', altEvents: 'Конкурсы и мероприятия, Сандра Лейфер',
+    photo: (n, t) => `фото ${n} из ${t}`, credit: n => `Фото: ${n}`, more: 'Ещё боди-арт и фейс-арт', back: 'Все работы', close: 'Закрыть', prev: 'Предыдущее фото', next: 'Следующее фото', gallery: 'Галерея фотографий'},
+  en: {title: 'Body art & face art', art: 'Body art & face art', events: 'Contests & events', alt: 'Body art by Sandra Leifer', altEvents: 'Contests and events, Sandra Leifer',
+    photo: (n, t) => `photo ${n} of ${t}`, credit: n => `Photo: ${n}`, more: 'More body art & face art', back: 'All works', close: 'Close', prev: 'Previous photo', next: 'Next photo', gallery: 'Photo gallery'}
+};
 
 const works = SITE.works.filter(w => IMAGES.works[w.id]);
 const medium = (w, lang) => w.med ? L(w.med, lang) : SITE.text[lang][w.m];
@@ -53,6 +62,7 @@ const imgUrl = (id, w) => `assets/img/works/${id}-${w}.webp`;
 const homeUrl = lang => SITE_URL + prefix(lang);
 const workPath = (id, lang) => `${prefix(lang)}works/${id}/`;
 const bioPath = lang => `${prefix(lang)}about/`;
+const bodyPath = lang => `${prefix(lang)}body-art/`;
 
 const PERSON = {
   he: {desc: SITE.text.he.aboutLead, alumni: ['בית הספר לאמנות מספר 1, ירוסלבל', 'המכללה לאמנות בירוסלבל'], member: ['איגוד האמנים המקצועיים בישראל', 'איגוד אמני אונסק״ו'],
@@ -206,7 +216,8 @@ ${ld({'@context': 'https://schema.org', '@graph': [art, person(lang), crumbs]})}
       <p class="wp-artist">${esc(S.by)} <a href="${up}${prefix(lang)}#about">${esc(S.name)}</a></p>
       <p class="wp-meta">${esc(metaLine(w, lang))}</p>
       ${w.status ? `<p class="wp-price muted">${esc(L(w.status, lang))}</p>` : w.price ? `<p class="wp-price">${esc(w.price)}</p>` : `<p class="wp-price muted">${esc(S.onRequest)}</p>`}
-      ${desc.length ? `<h2>${esc(S.about)}</h2>\n      ${desc.map(p => `<p>${esc(p)}</p>`).join('\n      ')}` : ''}
+      ${desc.length ? `<h2>${esc(S.about)}</h2>\n      ${desc.map(p => `<p>${esc(p)}</p>`).join('\n      ')}` : ''}${w.kind === 'body' ? `
+      <p class="wp-more"><a href="${up}${bodyPath(lang)}" data-body-art-link>${esc(BA[lang].more)} →</a></p>` : ''}
       <p class="wp-actions">${!w.status ? `<a class="wp-ask" href="${esc(askHref)}" target="_blank" rel="noopener">${esc(S.ask)}</a>` : ''}${w.no ? `<a class="wp-museum" href="${up}museum/?lang=${lang}&amp;work=${w.id}">${esc(S.museum)}</a>` : ''}</p>
     </article>
   </div>
@@ -311,6 +322,85 @@ ${body}<figure class="bio-quote"><blockquote><p><em>${esc(quote)}</em></p></bloc
 }
 for (const lang of LANGS) write(bioPath(lang) + 'index.html', bioPage(lang));
 
+/* ---------- body-art gallery page per language (/body-art/, /ru/body-art/, /en/body-art/) ---------- */
+// Photos from BODY_ART (body-art-data.js). Two groups: studio/face-art photos and contest/event photos. Items tagged
+// review:'nudity' carry data-review="nudity" and drop out when BODY_ART.hideReview lists their tag.
+const bodyItems = BODY_ART.items.filter(i => !BODY_ART.hideReview.includes(i.review));
+const bioSections = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
+// the bio's own sentence about the first places in contests, verbatim, per language
+const contestSentence = lang => bioSections[BIO_ORDER.indexOf(lang)].split('\n').map(l => l.trim()).find(l => /2025/.test(l) && !l.startsWith('#'));
+function bodyPage(lang) {
+  const S = SEO[lang], T = SITE.text[lang], B = BA[lang], up = '../'.repeat(lang === 'he' ? 1 : 2);
+  const url = SITE_URL + bodyPath(lang);
+  const groups = [['art', B.art, B.alt, null], ['events', B.events, B.altEvents, contestSentence(lang)]];
+  let n = 0, sections = '';
+  const ld_imgs = [];
+  for (const [g, heading, alt, intro] of groups) {
+    const items = bodyItems.filter(i => i.group === g);
+    if (!items.length) continue;
+    const figs = items.map((i, k) => {
+      const label = `${alt}, ${B.photo(k + 1, items.length)}`;
+      ld_imgs.push({'@type': 'ImageObject', contentUrl: `${SITE_URL}assets/img/body-art/${i.id}-1600.webp`, name: label, creator: {'@id': SITE_URL + '#sandra'}});
+      return `<figure class="ba-item"${i.review ? ` data-review="${i.review}"` : ''}><a href="${up}assets/img/body-art/${i.id}-1600.webp" data-w="${i.w}" data-h="${i.h}"><img src="${up}assets/img/body-art/${i.id}-800.webp" srcset="${up}assets/img/body-art/${i.id}-800.webp ${i.w8}w, ${up}assets/img/body-art/${i.id}-1600.webp ${i.w}w" sizes="(max-width:700px) 50vw, (max-width:1100px) 33vw, 25vw" width="${i.w8}" height="${i.h8}" alt="${esc(label)}" loading="lazy" decoding="async"></a>${i.credit ? `<figcaption class="ba-credit">${esc(B.credit(i.credit))}</figcaption>` : ''}</figure>`;
+    }).join('\n');
+    sections += `<section class="ba-group" id="${g}" aria-labelledby="h-${g}">\n<h2 id="h-${g}">${esc(heading)}</h2>\n${intro ? `<p class="ba-intro">${esc(intro)}</p>\n` : ''}<div class="ba-grid">\n${figs}\n</div>\n</section>\n`;
+  }
+  const desc = `${B.title}, ${S.name}.`;
+  const title = `${B.title} · ${S.name}`;
+  return `<!doctype html>
+<html lang="${lang}" dir="${dir(lang)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0c13">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(desc)} ${esc(SITE.series.find(s => s.id === 'body')[lang][1])}">
+<link rel="canonical" href="${url}">
+${alternates(bodyPath)}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${esc(S.name)}">
+<meta property="og:locale" content="${S.locale}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE_URL}assets/img/body-art/${bodyItems.find(i => i.group === 'art').id}-1600.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="${up}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="${up}assets/css/site.css">
+<link rel="stylesheet" href="${up}assets/css/body-art.css">
+<script src="${up}assets/js/analytics.js" defer></script>
+<script src="${up}assets/js/body-art.js" defer></script>
+${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'ImageGallery', '@id': url + '#gallery', url, name: title, inLanguage: lang, creator: {'@id': SITE_URL + '#sandra'}, image: ld_imgs}]})}
+</head>
+<body class="ba-page">
+<header class="ba-head">
+  <a class="wordmark" href="${up}${prefix(lang)}" aria-label="Sandra Leifer"><span class="wordmark-name">Sandra Leifer</span><span class="wordmark-mark" aria-hidden="true">✳</span></a>
+  <nav class="lang" aria-label="שפה / Язык / Language">${LANGS.map(l => `<a href="${up}${bodyPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU', en: 'EN'}[l]}</a>`).join('')}</nav>
+</header>
+<main class="ba" id="main">
+<nav class="ba-crumbs" aria-label="${esc(S.allWorks)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <a href="${up}${prefix(lang)}#works">${esc(B.back)}</a></nav>
+<h1>${esc(B.title)}</h1>
+${sections}</main>
+<footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
+<dialog class="ba-lb" id="baLb" aria-label="${esc(B.gallery)}">
+  <div class="ba-lb-top"><span id="baLbCount"></span><button type="button" class="ba-lb-btn" id="baLbClose" aria-label="${esc(B.close)}">✕</button></div>
+  <div class="ba-lb-stage">
+    <button type="button" class="ba-lb-btn ba-lb-nav" id="baLbPrev" aria-label="${esc(B.prev)}"><span aria-hidden="true">‹</span></button>
+    <img id="baLbImg" alt="" draggable="false">
+    <button type="button" class="ba-lb-btn ba-lb-nav" id="baLbNext" aria-label="${esc(B.next)}"><span aria-hidden="true">›</span></button>
+  </div>
+  <div class="ba-lb-cap" id="baLbCap"></div>
+</dialog>
+<script>try{localStorage.setItem('sl-lang','${lang}')}catch(e){}</script>
+</body>
+</html>
+`;
+}
+for (const lang of LANGS) write(bodyPath(lang) + 'index.html', bodyPage(lang));
+
 /* ---------- sitemap and robots ---------- */
 const today = new Date().toISOString().slice(0, 10);
 const entry = (pathFor, priority) => LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${pathFor(l)}</loc>\n` +
@@ -322,6 +412,7 @@ write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${entry(prefix, '1.0')}
 ${works.map(w => entry(l => workPath(w.id, l), '0.8')).join('\n')}
 ${entry(bioPath, '0.7')}
+${entry(bodyPath, '0.7')}
 ${single('museum/', '0.7')}
 ${single('neurographics/', '0.7')}
 ${single('book/', '0.6')}
@@ -333,4 +424,4 @@ Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 2) * LANGS.length + 3} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 3) * LANGS.length + 3} addresses`);
