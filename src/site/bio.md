@@ -8,7 +8,7 @@
 
 סנדרה לייפר היא אמנית מקצועית בעלת הכשרה אקדמית באמנות, עם יותר מעשרים שנות ניסיון בהוראת אמנות חזותית. היא פיתחה גישה בין־תחומית ייחודית המשלבת יצירה, פסיכולוגיה, עבודה עם הגוף וחקר הפוטנציאל האנושי.
 
-נולדה בירוסלבל, שם רכשה את השכלתה המקצועית באמנות. למדה בבית הספר לאמנות מספר 1 ובמכללה לאמנות בירוסלבל, והייתה תלמידתו האישית של האמן בוריס לייפר.
+נולדה בירוסלבל, שם רכשה את השכלתה המקצועית באמנות. למדה בבית הספר לאמנות מספר 1 ובמכללה לאמנות בירוסלבל, והייתה תלמידתו האישית של אביה, האמן בוריס לייפר.
 
 מאז שנת 2022 היא חיה ועובדת בישראל.
 
@@ -86,7 +86,7 @@ Sandra Leifer
 
 Sandra Leifer is a professional artist with formal academic training in fine art, more than 20 years of experience teaching visual arts, and her own interdisciplinary approach that brings together creativity, psychology, bodywork, and the exploration of human potential.
 
-Born in Yaroslavl, she received her professional art education there. She studied at Art School No. 1 and Yaroslavl Art College and was a private student of the artist Boris Leifer.
+Born in Yaroslavl, she received her professional art education there. She studied at Art School No. 1 and Yaroslavl Art College and was a private student of her father, the artist Boris Leifer.
 
 She has lived and worked in Israel since 2022.
 
@@ -164,7 +164,7 @@ Sandra Leifer
 
 Сандра Лейфер — профессиональная художница с академическим художественным образованием, более чем 20-летним опытом преподавания изобразительного искусства и авторским междисциплинарным подходом, объединяющим творчество, психологию, телесные практики и исследование человеческого потенциала.
 
-Родилась в Ярославле, где получила профессиональное художественное образование. Училась в Художественной школе № 1 и Ярославском художественном училище, была личной ученицей художника Бориса Лейфера.
+Родилась в Ярославле, где получила профессиональное художественное образование. Училась в Художественной школе № 1 и Ярославском художественном училище, была личной ученицей своего отца, художника Бориса Лейфера.
 
 С 2022 года живёт и работает в Израиле.
 
