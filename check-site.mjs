@@ -206,30 +206,32 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.ok(exists('assets/css/body-art.css') && exists('assets/js/body-art.js'), 'body-art css and js');
 }
 
-// The 3D mirror room: its page and script, the figure cutouts it loads, the vendored Reflector (three@0.160.0, MIT)
-// next to the vendored three.js of the same version, and the links into the room.
+// The mirror room: a white backstage makeup room, the last room of the museum (museum/makeup-room.js).
+// The figures sit at vanity mirrors, the vendored Reflector (three@0.160.0, MIT) shows their faces;
+// no walking Sandra; /mirror-room/ only redirects into the museum room; the links into the room.
 {
-  const h = read('mirror-room/index.html'), js = read('mirror-room/room.js');
-  assert.ok(h.includes('<html lang="he" dir="rtl">') && h.includes(`<link rel="canonical" href="${SITE_URL}mirror-room/">`), 'mirror-room: lang and canonical');
-  assert.ok(h.includes('"three":"../assets/vendor/three.module.min.js"') && h.includes('<script type="module" src="room.js"></script>'), 'mirror-room: import map and room.js');
-  assert.ok(h.includes('id="baLb"') && h.includes('../assets/js/body-art.js') && h.includes('id="fallback"'), 'mirror-room: lightbox and no-WebGL fallback');
-  for (const [, ref] of h.matchAll(/href="\.\.\/(assets\/img\/body-art\/[^"]+)"/g)) assert.ok(exists(ref), `mirror-room: missing ${ref}`);
-  const figs = [...js.matchAll(/\{id: '(\d\d)',(?: link: '([^']+)',)? w: \d+, h: \d+, H:/g)].map(m => ({id: m[1], link: m[2] || 'body-art-' + m[1]})), cut = [...new Set(figs.map(f => f.id))];
-  assert.ok(cut.length >= 10, 'mirror-room: figures');
-  for (const id of cut) for (const s of ['hi', 'lo']) assert.ok(fs.statSync(new URL(`assets/img/mirror-room/mr-${id}-${s}.webp`, root)).size > 5000, `mirror-room: mr-${id}-${s}.webp`);
-  for (const f of figs) assert.ok(h.includes(`data-id="${f.link}"`), `mirror-room: figure ${f.id} has its photo in the lightbox list`);
-  assert.equal(new Set(figs.map(f => f.link)).size, figs.length, 'mirror-room: no photo has two figures');
-  for (const dup of ['01', '06', '14', '15']) assert.ok(!h.includes(`body-art-${dup}-1600`), `mirror-room: dropped duplicate photo ${dup} is not referenced`);
-  for (const [, ref] of h.matchAll(/href="\.\.\/(assets\/img\/works\/[^"]+)"/g)) assert.ok(exists(ref), `mirror-room: missing ${ref}`);
-  assert.ok(figs.filter(f => f.link.startsWith('work-')).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => h.includes(`data-id="work-${n}"`) && h.includes(`img/works/${n}-1600.webp`)), 'mirror-room: the three figures that are catalog shoots open the catalog image');
-  assert.ok(js.includes("from '../assets/vendor/Reflector.js'"), 'mirror-room: uses the vendored Reflector');
+  const m = read('museum/index.html'), js = read('museum/makeup-room.js'), r = read('mirror-room/index.html');
+  assert.ok(m.includes("from './makeup-room.js'") && m.includes('makeup: true') && m.includes('id="lroom" href="?room=mirror"'), 'museum: the mirror room is its last room, with a link to it');
+  assert.ok(js.includes("from '../assets/vendor/Reflector.js'") && js.includes("from 'three'"), 'makeup-room.js: three and the vendored Reflector');
+  assert.ok(!exists('mirror-room/room.js') && !/sandra|trail|walker/i.test(js.replace(/\/\/.*$/gm, '').replace(/Sandra Leifer/g, '')), 'mirror room: no walking Sandra and no paint trail');
+  assert.ok(r.includes('<meta name="robots" content="noindex">') && r.includes(`<link rel="canonical" href="${SITE_URL}museum/">`) && r.includes("location.replace('../museum/?room=mirror'") && r.includes('url=../museum/?room=mirror'), 'mirror-room/: redirects into the museum room');
+  const figs = [...js.matchAll(/\{id: '(\d\d)',(?: link: '([^']+)',)? w: \d+, h: \d+, H:/g)].map(m => ({id: m[1], link: m[2] || 'body-art-' + m[1]}));
+  const prints = [...js.matchAll(/\{id: '(\d\d)', w: \d+, h: \d+\}/g)].map(m => m[1]);
+  assert.ok(figs.length >= 10 && prints.length >= 1, 'mirror room: figures and prints');
+  for (const f of figs) for (const s of ['hi', 'lo']) assert.ok(fs.statSync(new URL(`assets/img/mirror-room/mr-${f.id}-${s}.webp`, root)).size > 5000, `mirror room: mr-${f.id}-${s}.webp`);
+  for (const f of figs) if (!f.link.startsWith('work-')) assert.ok(exists(`assets/img/body-art/body-art-${f.id}-1600.webp`), `mirror room: body-art-${f.id}-1600.webp`);
+  for (const id of prints) for (const s of [800, 1600]) assert.ok(exists(`assets/img/body-art/body-art-${id}-${s}.webp`), `mirror room: print body-art-${id}-${s}.webp`);
+  assert.equal(new Set(figs.map(f => f.link)).size, figs.length, 'mirror room: no photo has two figures');
+  assert.ok(figs.filter(f => f.link.startsWith('work-')).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => figs.some(f => f.link === 'work-' + n) && SITE.works.some(w => w.id === n)), 'mirror room: the three figures that are catalog shoots open the catalog work');
+  // nothing awaiting the Owner's nudity decision, and no contest or event photo, is in the room
+  const BA = ctx.window.BODY_ART.items, inRoom = [...figs.filter(f => !f.link.startsWith('work-')).map(f => 'body-art-' + f.id), ...prints.map(id => 'body-art-' + id)];
+  for (const id of inRoom) { const x = BA.find(b => b.id === id); assert.ok(x && !x.review && x.group !== 'events', `mirror room: ${id} is an art photo with no review tag`); }
   const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
   assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
   assert.ok(/The MIT License/.test(lic) && /three\.js authors/.test(lic), 'Reflector.LICENSE.txt: MIT');
   assert.ok(/(?:REVISION|t)="160"/.test(read('assets/vendor/three.module.min.js')), 'vendored three.js is r160');
-  assert.ok(sitemap.includes(`<loc>${SITE_URL}mirror-room/</loc>`), 'sitemap: mirror-room/');
-  for (const pre of ['', 'ru/', 'en/']) assert.ok(read(pre + 'body-art/index.html').includes('data-mirror-room-link'), `${pre}body-art: link to the mirror room`);
-  assert.ok(read('museum/index.html').includes('href="../mirror-room/"'), 'museum: link to the mirror room');
+  assert.ok(!sitemap.includes(`<loc>${SITE_URL}mirror-room/</loc>`), 'sitemap: no mirror-room/ (it redirects)');
+  for (const pre of ['', 'ru/', 'en/']) assert.ok(read(pre + 'body-art/index.html').includes(`museum/?room=mirror&amp;lang=${pre ? pre.slice(0, 2) : 'he'}" data-mirror-room-link`), `${pre}body-art: link to the mirror room in the museum`);
 }
 
 // Information-architecture quick wins: closing blocks, no internal pages, series only once.
