@@ -40,7 +40,7 @@
 /* the catalog's body-art works: cards to their work pages, above the photos */
 .ba-works{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);margin:0 0 clamp(10px,1.4vw,18px)}
 .ba-work{display:block;border-radius:8px;overflow:hidden;background:var(--ink-2)}
-.ba-work img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--bg,var(--ink-2));transition:transform .5s var(--ease)}
+.ba-work img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--bg,var(--ink-2));transition:transform .5s var(--ease)}
 .ba-work:hover img{transform:scale(1.03)}
 .ba-work-t{display:block;padding:8px 10px 10px;font-size:14px;line-height:1.35;color:var(--text)}
 @media (max-width:1100px){.ba-works{grid-template-columns:repeat(3,minmax(0,1fr))}}
