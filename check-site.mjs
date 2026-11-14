@@ -189,7 +189,14 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     // contests: 2025 (body-art-13) then 2026 (events), as h3 year headings in page order
     const i25 = h.indexOf('<h3 class="ba-year">2025</h3>'), i26 = h.indexOf('<h3 class="ba-year">2026</h3>'), i13 = h.indexOf('/body-art-13-1600.webp" data-w'), iE1 = h.indexOf('/body-art-event-01-1600.webp" data-w');
     assert.ok(i25 > h.indexOf('id="events"') && i25 < i13 && i13 < i26 && i26 < iE1, `${page}: 2025 heading above body-art-13, 2026 heading above the events`);
-    assert.ok(h.indexOf('/body-art-14-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    assert.ok(h.indexOf('/body-art-16-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    // one home, no doubles: the 5 catalog body works come first as cards to their work pages (titles as in the catalog); the photos that duplicated them are gone
+    const cat = SITE.works.filter(w => w.kind === 'body');
+    assert.equal(cat.length, 5, 'five catalog body works');
+    assert.equal((h.match(/class="ba-work"/g) || []).length, cat.length, `${page}: a card per catalog body work`);
+    for (const w of cat) assert.ok(h.includes(`href="${up}${['', 'ru/', 'en/'][i]}works/${w.id}/"`) && h.includes(`<span class="ba-work-t">${w.t[i]}</span>`), `${page}: card for ${w.id}`);
+    assert.ok(h.indexOf('data-body-works') < h.indexOf('class="ba-grid"'), `${page}: catalog works before the photos`);
+    for (const dup of ['body-art-01', 'body-art-06', 'body-art-14', 'body-art-15', 'body-art-event-03']) assert.ok(!h.includes(`/${dup}-`) && !BODY.items.some(x => x.id === dup), `${page}: ${dup} duplicates a catalog work or another frame and stays out`);
     assert.ok(h.includes('id="baLb"') && h.includes('body-art.js') && h.includes('<figcaption class="ba-credit">'), `${page}: lightbox and credit`);
     assert.ok(/Susanna/.test(h), `${page}: photographer credit`);
     assert.ok(read(pre + 'index.html').includes('data-body-link'), `${pre}index: link to the body-art page`);
@@ -207,10 +214,14 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.ok(h.includes('"three":"../assets/vendor/three.module.min.js"') && h.includes('<script type="module" src="room.js"></script>'), 'mirror-room: import map and room.js');
   assert.ok(h.includes('id="baLb"') && h.includes('../assets/js/body-art.js') && h.includes('id="fallback"'), 'mirror-room: lightbox and no-WebGL fallback');
   for (const [, ref] of h.matchAll(/href="\.\.\/(assets\/img\/body-art\/[^"]+)"/g)) assert.ok(exists(ref), `mirror-room: missing ${ref}`);
-  const cut = [...new Set([...js.matchAll(/\{id: '(\d\d)', w: \d+, h: \d+, H:/g)].map(m => m[1]))];
+  const figs = [...js.matchAll(/\{id: '(\d\d)',(?: link: '([^']+)',)? w: \d+, h: \d+, H:/g)].map(m => ({id: m[1], link: m[2] || 'body-art-' + m[1]})), cut = [...new Set(figs.map(f => f.id))];
   assert.ok(cut.length >= 10, 'mirror-room: figures');
   for (const id of cut) for (const s of ['hi', 'lo']) assert.ok(fs.statSync(new URL(`assets/img/mirror-room/mr-${id}-${s}.webp`, root)).size > 5000, `mirror-room: mr-${id}-${s}.webp`);
-  for (const id of cut) assert.ok(h.includes(`data-id="body-art-${id}"`), `mirror-room: figure ${id} has its photo in the lightbox list`);
+  for (const f of figs) assert.ok(h.includes(`data-id="${f.link}"`), `mirror-room: figure ${f.id} has its photo in the lightbox list`);
+  assert.equal(new Set(figs.map(f => f.link)).size, figs.length, 'mirror-room: no photo has two figures');
+  for (const dup of ['01', '06', '14', '15']) assert.ok(!h.includes(`body-art-${dup}-1600`), `mirror-room: dropped duplicate photo ${dup} is not referenced`);
+  for (const [, ref] of h.matchAll(/href="\.\.\/(assets\/img\/works\/[^"]+)"/g)) assert.ok(exists(ref), `mirror-room: missing ${ref}`);
+  assert.ok(figs.filter(f => f.link.startsWith('work-')).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => h.includes(`data-id="work-${n}"`) && h.includes(`img/works/${n}-1600.webp`)), 'mirror-room: the three figures that are catalog shoots open the catalog image');
   assert.ok(js.includes("from '../assets/vendor/Reflector.js'"), 'mirror-room: uses the vendored Reflector');
   const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
   assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');

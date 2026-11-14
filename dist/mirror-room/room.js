@@ -188,24 +188,24 @@ const FIG = [
   {id: '20', w: 1120, h: 1214, H: 1.1, eye: .24, x: 0, z: -6.3, side: 0},
   {id: '13', w: 635, h: 1542, H: 1.34, eye: .33, x: -3, z: -5.0, side: -1},
   {id: '19', w: 770, h: 1290, H: 1.12, eye: .22, x: 3, z: -3.9, side: 1},
-  {id: '06', w: 1060, h: 1593, H: .5, eye: .30, x: -3, z: -2.8, side: -1},
+  {id: '06', link: 'work-chromatic-reverie', w: 1060, h: 1593, H: .5, eye: .30, x: -3, z: -2.8, side: -1},
   {id: '17', w: 1026, h: 1549, H: .72, eye: .285, x: 3, z: -1.7, side: 1},
   {id: '10', w: 1030, h: 1492, H: .67, eye: .24, x: -3, z: -.6, side: -1},
-  {id: '15', w: 1061, h: 1498, H: .6, eye: .30, x: 3, z: .5, side: 1},
-  {id: '14', w: 1061, h: 1593, H: .73, eye: .27, x: -3, z: 1.6, side: -1},
-  {id: '01', w: 1260, h: 1503, H: .58, eye: .28, x: 3, z: 2.7, side: 1},
+  {id: '14', link: 'work-gaze', w: 1061, h: 1593, H: .73, eye: .27, x: -3, z: 1.6, side: -1},
+  {id: '01', link: 'work-smoke', w: 1260, h: 1503, H: .58, eye: .28, x: 3, z: 2.7, side: 1},
   {id: '03', w: 1061, h: 1539, H: .64, eye: .29, x: -3, z: 3.8, side: -1},
   {id: '11', w: 998, h: 1036, H: .75, eye: .42, x: 3, z: 4.9, side: 1},
   {id: '02', w: 946, h: 1017, H: .6, eye: .36, x: -3, z: 6.0, side: -1},
   {id: '09', w: 1477, h: 1065, H: .58, eye: .16, x: 3, z: -5.6, side: 1}
 ];
+// Figures 01, 06 and 14 are other frames of the catalog works smoke, chromatic-reverie and gaze: they open the catalog image (link). The same shoot is never shown twice (the 15th frame of gaze has no figure).
 // photos whose cutout was not clean enough: framed on the side walls
 const PANELS = [
   {id: '04', w: 912, h: 1600, x: -X, z: -1.7, side: -1},
   {id: '21', w: 1068, h: 1600, x: X, z: 3.8, side: 1},
   {id: '16', w: 1067, h: 1600, x: -X, z: 4.9, side: -1}
 ];
-const linkOf = id => links.findIndex(a => a.parentNode.dataset.id === 'body-art-' + id);
+const linkOf = f => links.findIndex(a => a.parentNode.dataset.id === (f.link || 'body-art-' + f.id));
 const loader = new THREE.TextureLoader();
 const pickable = [], pieces = [], obstacles = [];
 const pedSide = canvasTex(64, 256, (g, w, h) => { const l = g.createLinearGradient(0, 0, 0, h); l.addColorStop(0, '#f1ebe2'); l.addColorStop(.35, '#bdb6ac'); l.addColorStop(1, '#5b5650'); g.fillStyle = l; g.fillRect(0, 0, w, h); });
@@ -242,7 +242,7 @@ function figure(f, n) {
   face.castShadow = !low; face.customDepthMaterial = depth;
   const base = f.side === 0 ? 0 : f.side < 0 ? Math.PI / 2 : -Math.PI / 2;
   pivot.rotation.y = base;
-  const piece = {kind: 'figure', f, link: linkOf(f.id), mesh: face, mat: front, pivot, base, yaw: base, colours: [new THREE.Color('#c96a4a')], top: ph + f.H * (1 - f.eye), pos: new THREE.Vector3(f.x, ph + f.H * .55, f.z)};
+  const piece = {kind: 'figure', f, link: linkOf(f), mesh: face, mat: front, pivot, base, yaw: base, colours: [new THREE.Color('#c96a4a')], top: ph + f.H * (1 - f.eye), pos: new THREE.Vector3(f.x, ph + f.H * .55, f.z)};
   face.userData.piece = piece; pickable.push(face); pieces.push(piece);
   obstacles.push({x: f.x, z: f.z, r: pr + .38});
   loader.load(`../assets/img/mirror-room/mr-${f.id}-${low ? 'lo' : 'hi'}.webp`, tx => {
@@ -260,7 +260,7 @@ function panel(p) {
   const mat = new THREE.MeshBasicMaterial({color: '#222'}); const pic = plane(W, H, mat, 0, 0, .023, 0, g);
   const wash = plane(W * 3, 3.2, new THREE.MeshBasicMaterial({map: poolTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending}), 0, .45, -.015, 0, g);
   wash.renderOrder = -1;
-  const piece = {kind: 'panel', f: p, link: linkOf(p.id), mesh: pic, mat, colours: [new THREE.Color('#d0a050')], pos: new THREE.Vector3(p.x - p.side * .3, 1.72, p.z)};
+  const piece = {kind: 'panel', f: p, link: linkOf(p), mesh: pic, mat, colours: [new THREE.Color('#d0a050')], pos: new THREE.Vector3(p.x - p.side * .3, 1.72, p.z)};
   pic.userData.piece = piece; pickable.push(pic); pieces.push(piece);
   loader.load(`../assets/img/body-art/body-art-${p.id}-${low ? 800 : 1600}.webp`, tx => {
     tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = low ? 2 : 8; mat.map = tx; mat.color.set(.95, .95, .95); mat.needsUpdate = true;

@@ -353,7 +353,9 @@ function bodyPage(lang) {
     }).join('\n');
     // the first group needs no h2 of its own: the page h1 already names it (same words), so it is labelled by aria-label
     const head = g === 'art' ? '' : `<h2 id="h-${g}">${esc(heading)}</h2>\n`;
-    sections += `<section class="ba-group" id="${g}" ${g === 'art' ? `aria-label="${esc(heading)}"` : `aria-labelledby="h-${g}"`}>\n${head}${intro ? `<p class="ba-intro">${esc(intro)}</p>\n` : ''}${figs}\n</section>\n`;
+    // the catalog's body-art works come first (the page is the one home for body art): cards to their own work pages, titles as in the catalog; the photos that duplicate them were dropped from BODY_ART
+    const cards = g === 'art' ? `<div class="ba-works" data-body-works>\n${works.filter(w => w.kind === 'body').map(w => { const m = IMAGES.works[w.id], title = L(w.t, lang); return `<a class="ba-work" href="${up}${workPath(w.id, lang)}" style="--bg:${m.c}"><img src="${up}${imgUrl(w.id, 800)}" width="${m.w}" height="${m.h}" alt="${esc(S.imgAlt(title, S.name))}" loading="lazy" decoding="async"><span class="ba-work-t">${esc(title)}</span></a>`; }).join('\n')}\n</div>\n` : '';
+    sections += `<section class="ba-group" id="${g}" ${g === 'art' ? `aria-label="${esc(heading)}"` : `aria-labelledby="h-${g}"`}>\n${head}${intro ? `<p class="ba-intro">${esc(intro)}</p>\n` : ''}${cards}${figs}\n</section>\n`;
   }
   const desc = `${B.title}, ${S.name}.`;
   const title = `${B.title} · ${S.name}`;
