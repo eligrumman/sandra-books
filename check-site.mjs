@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -148,7 +148,7 @@ assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
 assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
 assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts in the HTML (PostHog loads from assets/js/analytics.js)');
 // Analytics: every public page loads the shared PostHog file; the unpublished dragon tale does not.
-const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html'];
+const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html'];
 for (const page of publicPages) assert.ok(/<script src="(\.\.\/)*assets\/js\/analytics\.js" defer><\/script>/.test(read(page)), `${page}: analytics.js`);
 assert.ok(!read('dragon/index.html').includes('analytics.js'), 'dragon: no analytics');
 const an = read('assets/js/analytics.js');
@@ -197,6 +197,28 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     assert.ok(bw.includes('data-body-art-link') && bw.includes('body-art/"'), `${pre}works/gaze: link to the body-art page`);
   }
   assert.ok(exists('assets/css/body-art.css') && exists('assets/js/body-art.js'), 'body-art css and js');
+}
+
+// The 3D mirror room: its page and script, the figure cutouts it loads, the vendored Reflector (three@0.160.0, MIT)
+// next to the vendored three.js of the same version, and the links into the room.
+{
+  const h = read('mirror-room/index.html'), js = read('mirror-room/room.js');
+  assert.ok(h.includes('<html lang="he" dir="rtl">') && h.includes(`<link rel="canonical" href="${SITE_URL}mirror-room/">`), 'mirror-room: lang and canonical');
+  assert.ok(h.includes('"three":"../assets/vendor/three.module.min.js"') && h.includes('<script type="module" src="room.js"></script>'), 'mirror-room: import map and room.js');
+  assert.ok(h.includes('id="baLb"') && h.includes('../assets/js/body-art.js') && h.includes('id="fallback"'), 'mirror-room: lightbox and no-WebGL fallback');
+  for (const [, ref] of h.matchAll(/href="\.\.\/(assets\/img\/body-art\/[^"]+)"/g)) assert.ok(exists(ref), `mirror-room: missing ${ref}`);
+  const cut = [...new Set([...js.matchAll(/\{id: '(\d\d)', w: \d+, h: \d+, H:/g)].map(m => m[1]))];
+  assert.ok(cut.length >= 10, 'mirror-room: figures');
+  for (const id of cut) for (const s of ['hi', 'lo']) assert.ok(fs.statSync(new URL(`assets/img/mirror-room/mr-${id}-${s}.webp`, root)).size > 5000, `mirror-room: mr-${id}-${s}.webp`);
+  for (const id of cut) assert.ok(h.includes(`data-id="body-art-${id}"`), `mirror-room: figure ${id} has its photo in the lightbox list`);
+  assert.ok(js.includes("from '../assets/vendor/Reflector.js'"), 'mirror-room: uses the vendored Reflector');
+  const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
+  assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
+  assert.ok(/The MIT License/.test(lic) && /three\.js authors/.test(lic), 'Reflector.LICENSE.txt: MIT');
+  assert.ok(/(?:REVISION|t)="160"/.test(read('assets/vendor/three.module.min.js')), 'vendored three.js is r160');
+  assert.ok(sitemap.includes(`<loc>${SITE_URL}mirror-room/</loc>`), 'sitemap: mirror-room/');
+  for (const pre of ['', 'ru/', 'en/']) assert.ok(read(pre + 'body-art/index.html').includes('data-mirror-room-link'), `${pre}body-art: link to the mirror room`);
+  assert.ok(read('museum/index.html').includes('href="../mirror-room/"'), 'museum: link to the mirror room');
 }
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
