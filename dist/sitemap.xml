@@ -1486,6 +1486,33 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://sandraleifer.com/body-art/</loc>
+    <xhtml:link rel="alternate" hreflang="he" href="https://sandraleifer.com/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://sandraleifer.com/ru/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sandraleifer.com/en/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sandraleifer.com/body-art/"/>
+    <lastmod>2026-11-14</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://sandraleifer.com/ru/body-art/</loc>
+    <xhtml:link rel="alternate" hreflang="he" href="https://sandraleifer.com/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://sandraleifer.com/ru/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sandraleifer.com/en/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sandraleifer.com/body-art/"/>
+    <lastmod>2026-11-14</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://sandraleifer.com/en/body-art/</loc>
+    <xhtml:link rel="alternate" hreflang="he" href="https://sandraleifer.com/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://sandraleifer.com/ru/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://sandraleifer.com/en/body-art/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://sandraleifer.com/body-art/"/>
+    <lastmod>2026-11-14</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://sandraleifer.com/museum/</loc>
     <lastmod>2026-11-14</lastmod>
     <priority>0.7</priority>

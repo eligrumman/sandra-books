@@ -7,7 +7,7 @@ const root = new URL('./dist/', import.meta.url);
 const read = p => fs.readFileSync(new URL(p, root), 'utf8');
 const exists = p => fs.existsSync(new URL(p, root));
 const ctx = vm.createContext({window: {}});
-vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('assets/js/catalog.js'), ctx);
+vm.runInContext(read('assets/js/images.js') + read('assets/js/data.js') + read('assets/js/catalog.js') + read('assets/js/body-art-data.js'), ctx);
 const {SITE, IMAGES, CATALOG} = ctx.window;
 
 // Works: unique, in a known series, with generated images.
@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -148,11 +148,51 @@ assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
 assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
 assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts in the HTML (PostHog loads from assets/js/analytics.js)');
 // Analytics: every public page loads the shared PostHog file; the unpublished dragon tale does not.
-const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html'];
+const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html'];
 for (const page of publicPages) assert.ok(/<script src="(\.\.\/)*assets\/js\/analytics\.js" defer><\/script>/.test(read(page)), `${page}: analytics.js`);
 assert.ok(!read('dragon/index.html').includes('analytics.js'), 'dragon: no analytics');
 const an = read('assets/js/analytics.js');
 assert.ok(an.includes("persistence: 'memory'") && an.includes('disable_session_recording: true') && an.includes("api_host: 'https://eu.i.posthog.com'") && an.includes("document.addEventListener('sl:wa'") && !/phx_/.test(an), 'analytics.js: cookieless config and sl:wa');
 assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנווד המהורהר', 'thoughtful-wanderer title matches the catalog');
+
+// Body-art gallery: a page per language, every referenced image exists, alt text everywhere, the contest sentence is the bio's own, lightbox hooks, links in.
+{
+  const BODY = ctx.window.BODY_ART;
+  assert.ok(BODY && BODY.items.length >= 20, 'body-art data');
+  const bio = read('../src/site/bio.md').split(/^={10,} .*$/m).slice(1);
+  for (const [i, l] of ['he', 'ru', 'en'].entries()) {
+    const pre = ['', 'ru/', 'en/'][i], page = pre + 'body-art/index.html';
+    assert.ok(exists(page), `${page} exists`);
+    const h = read(page), up = '../'.repeat(l === 'he' ? 1 : 2);
+    assert.ok(h.includes(`<html lang="${l}" dir="${l === 'he' ? 'rtl' : 'ltr'}"`), `${page}: lang and dir`);
+    assert.ok(h.includes(`<link rel="canonical" href="${SITE_URL}${pre}body-art/">`), `${page}: canonical`);
+    for (const k of ['he', 'ru', 'en', 'x-default']) assert.ok(h.includes(`hreflang="${k}"`), `${page}: hreflang ${k}`);
+    assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, `${page}: one h1`);
+    for (const [, j] of h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(j);
+    assert.ok(sitemap.includes(`<loc>${SITE_URL}${pre}body-art/</loc>`), `sitemap: ${pre}body-art/`);
+    const shown = BODY.items.filter(x => !BODY.hideReview.includes(x.review));
+    const imgs = [...h.matchAll(/<img src="([^"]+)"([^>]*)>/g)].filter(m => m[1].includes('assets/img/body-art/'));
+    assert.equal(imgs.length, shown.length, `${page}: one img per photo`);
+    for (const [, src, rest] of imgs) {
+      assert.ok(exists(`assets/img/body-art/${src.split('/').pop()}`), `${page}: missing ${src}`);
+      assert.ok(/ alt="[^"]{8,}"/.test(rest), `${page}: alt text on ${src}`);
+      assert.ok(/ width="\d+" height="\d+"/.test(rest) && rest.includes('loading="lazy"'), `${page}: size and lazy on ${src}`);
+    }
+    for (const it of shown) {
+      for (const s of [800, 1600]) assert.ok(fs.statSync(new URL(`assets/img/body-art/${it.id}-${s}.webp`, root)).size > 5000, `${it.id}-${s}`);
+      assert.ok(h.includes(`href="${up}assets/img/body-art/${it.id}-1600.webp"`), `${page}: link to ${it.id}-1600`);
+      if (it.review) assert.ok(h.includes('data-review="' + it.review + '"'), `${page}: ${it.id} tagged for review`);
+    }
+    // the group intro is the bio's sentence verbatim
+    const sentence = bio[['he', 'en', 'ru'].indexOf(l)].split('\n').map(x => x.trim()).find(x => /2025/.test(x) && !x.startsWith('#'));
+    assert.ok(sentence && h.includes(`<p class="ba-intro">${sentence.replace(/&/g, '&amp;')}</p>`), `${page}: contest sentence from the bio`);
+    assert.ok(h.includes('id="baLb"') && h.includes('body-art.js') && h.includes('<figcaption class="ba-credit">'), `${page}: lightbox and credit`);
+    assert.ok(/Susanna/.test(h), `${page}: photographer credit`);
+    assert.ok(read(pre + 'index.html').includes('data-body-link'), `${pre}index: link to the body-art page`);
+    const bw = read(`${pre}works/gaze/index.html`);
+    assert.ok(bw.includes('data-body-art-link') && bw.includes('body-art/"'), `${pre}works/gaze: link to the body-art page`);
+  }
+  assert.ok(exists('assets/css/body-art.css') && exists('assets/js/body-art.js'), 'body-art css and js');
+}
 
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
