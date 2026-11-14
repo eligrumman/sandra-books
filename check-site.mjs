@@ -232,4 +232,9 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.ok(read('museum/index.html').includes('href="../mirror-room/"'), 'museum: link to the mirror room');
 }
 
+// Information-architecture quick wins: closing blocks, no internal pages, series only once.
+assert.ok(!exists('concepts/'), 'concepts/ is removed');
+for (const page of ['about/', 'body-art/']) for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + page + 'index.html'); assert.ok(h.includes('class="closing') && h.includes('data-wa') && h.includes('#studio') && h.includes('#works'), `${pre}${page}: closing block`); }
+assert.ok(!read('book/index.html').includes('reviewBtn'), 'book: no editor-notes button');
+for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + 'index.html'); assert.ok(!h.includes('id="seriesRail"') && h.indexOf('id="studio"') > h.indexOf('id="works"') && h.indexOf('id="studio"') < h.indexOf('id="exhibition"'), `${pre}home: series once, workshops right after works`); }
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);

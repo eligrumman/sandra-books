@@ -61,7 +61,7 @@ function applyLang() {
   // switching language keeps you in the same section
   $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));
   store.set('sl-lang', lang);
-  renderSeries(); renderFilters(); renderGallery(); renderExhibition(); renderStudio();
+  renderFilters(); renderGallery(); renderExhibition(); renderStudio();
   if ($('lightbox').open) show(current);
 }
 $('moreWorks').addEventListener('click', () => { showAll = !showAll; renderGallery(); if (!showAll) $('works').scrollIntoView({behavior: 'smooth'}); });
@@ -115,19 +115,6 @@ window.EndlessWall($('hero'), S.works.map(w => w.id), {
   onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
 });
 
-/* ---------- series ---------- */
-function renderSeries() {
-  $('seriesRail').replaceChildren(...S.series.map((s, i) => {
-    const b = el('button', 'series-card reveal in'); b.type = 'button';
-    const count = S.works.filter(w => w.kind === s.id).length;
-    b.append(img(s.cover, {sizes: '(max-width:1100px) 40vw, 22vw', max: 800}), el('span', 'num', String(i + 1).padStart(2, '0')));
-    const body = el('span', 'body'); body.append(el('h3', '', s[lang][0]), el('p', '', s[lang][1]), el('span', 'count', `${count} ${t('works')} ${lang === 'he' ? '←' : '→'}`));
-    b.append(body);
-    b.addEventListener('click', () => { filter = s.id; renderFilters(); renderGallery(); $('works').scrollIntoView({behavior: reduced.matches ? 'auto' : 'smooth'}); });
-    return b;
-  }));
-}
-
 /* ---------- gallery ---------- */
 function renderFilters() {
   const opts = [{id: 'all', name: t('all'), n: S.works.length}, ...S.series.map(s => ({id: s.id, name: s[lang][0], n: S.works.filter(w => w.kind === s.id).length}))];
@@ -137,6 +124,9 @@ function renderFilters() {
     b.addEventListener('click', () => { filter = o.id; renderFilters(); renderGallery(); });
     return b;
   }));
+  // the chosen series' own line (existing series text), once, under the chips
+  const cur = S.series.find(x => x.id === filter), d = $('seriesDesc');
+  if (d) { d.textContent = cur ? cur[lang][1] : ''; d.hidden = !cur; }
 }
 // Masonry that keeps reading order: each work goes to the currently shortest column.
 function columnsFor() { const w = $('grid').clientWidth || window.innerWidth; return w < 700 ? 2 : w < 1100 ? 3 : 4; }
