@@ -26,6 +26,7 @@ window.BODY_ART = {
     {id: 'body-art-18', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-19', group: 'art', w: 1026, h: 1294, w8: 635, h8: 800},
     {id: 'body-art-20', group: 'art', w: 1270, h: 1600, w8: 635, h8: 800},
+    {id: 'body-art-21', group: 'art', w: 1068, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-event-01', group: 'events', w: 1200, h: 1600, w8: 600, h8: 800},
     {id: 'body-art-event-02', group: 'events', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-event-03', group: 'events', w: 1067, h: 1600, w8: 534, h8: 800},
