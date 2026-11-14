@@ -34,7 +34,7 @@ const t = (k, vars) => {
 const L = arr => arr[LANGS.indexOf(lang)] ?? arr[0];
 
 /* ---------- constants ---------- */
-const PAPER = '#fbf8f1';
+const PAPER = '#f4ead6'; // the cream of the sheet: canvas, unfilled spaces and the saved PNG (same as --paper-sheet in style.css)
 const COLORS = ['#1d1b24', '#2459c6', '#d23b3b', '#2f8f5b', '#e8862b', '#7a46c2', '#f2c11b']; // no metallic markers
 const PAINT = COLORS.concat(['#ef8fb1', '#7cc4ee', '#a5d77a', '#b8a1e8', '#a19fa8']); // colouring: the same markers and a few lighter ones, still no metallic
 const WIDTHS = [5, 9, 20]; // logical units on a 1000 x 1000 sheet
@@ -131,10 +131,10 @@ function events(sheet) {
     if (a === b && j < i + 6) continue;
     const key = ka * segs.length + kb; if (seen.has(key)) continue; seen.add(key);
     const A = I[a], B = I[b], c = segCross(A.geo[i], A.geo[i + 1], B.geo[j], B.geo[j + 1]);
-    if (!c || c.sin < 0.26) continue;
+    if (!c || c.sin < 0.03) continue; // shallow crossings count too (down to ~2 deg); only near-parallel overlaps are left out
     const la = A.cum[i] + c.u * (A.cum[i + 1] - A.cum[i]), lb = B.cum[j] + c.v * (B.cum[j + 1] - B.cum[j]);
     if (out.some(o => o.a === a && o.b === b && Math.hypot(o.p[0] - c.p[0], o.p[1] - c.p[1]) < 4)) continue;
-    out.push({a, b, p: c.p, la, lb});
+    out.push({a, b, p: c.p, la, lb, sin: c.sin});
   }
   // T-junctions: an end of a stroke that touches another stroke without crossing it
   for (const s of S) {
@@ -165,9 +165,13 @@ function junctions(sheet) {
   if (sheet.jxKey === key) return sheet.jx;
   const I = sheet.items, ev = events(sheet);
   const thr = e => Math.max(8, 1.2 * Math.max(I[e.a].w, I[e.b].w) + 4); // crossings this close make one knot of ink
+  // two lines that cross at a shallow angle overlap over a long stretch: their crossings there (a wobbly hand line can cross
+  // the other several times) are one knot, so the reach grows as the angle shrinks
+  const span = e => thr(e) * clamp(0.26 / (e.sin || 1), 1, 5);
+  const close = (e, f) => Math.hypot(f.p[0] - e.p[0], f.p[1] - e.p[1]) < (e.a === f.a && e.b === f.b ? Math.max(span(e), span(f)) : Math.max(thr(e), thr(f)));
   const nodes = [];
   for (const e of ev) { // complete-link clustering: an event joins a node only if it is close to all of its events
-    const n = nodes.find(nd => nd.ev.every(f => Math.hypot(f.p[0] - e.p[0], f.p[1] - e.p[1]) < Math.max(thr(e), thr(f))));
+    const n = nodes.find(nd => nd.ev.every(f => close(e, f)));
     if (n) n.ev.push(e); else nodes.push({ev: [e]});
   }
   const onStroke = new Map(); // stroke -> [{L, node}]
@@ -179,7 +183,7 @@ function junctions(sheet) {
     for (const e of nd.ev) for (const [n, L] of [[e.a, e.la], [e.b, e.lb]]) for (const sign of [1, -1]) {
       const it = I[n], w = it.w, avail = sign > 0 ? it.len - L : L;
       if (avail < 0.6 * w + 3) continue; // the line ends here (T-junction or a tiny stub)
-      const dup = rays.find(r => r.n === n && r.sign === sign && Math.abs(r.L - L) < 2 * thr(e) + w);
+      const dup = rays.find(r => r.n === n && r.sign === sign && Math.abs(r.L - L) < 2 * span(e) + w);
       if (dup) { if ((L - dup.L) * sign > 0) Object.assign(dup, {L, e, avail}); continue; }
       rays.push({n, L, sign, e, avail, w});
     }
@@ -200,10 +204,11 @@ function junctions(sheet) {
     const top = Math.max(...nd.ev.map(e => Math.max(e.a, e.b)));
     nd.top = top; nd.color = I[top].color;
     if (nd.ev.length > 2) nd.core = hull(nd.ev.map(e => e.p)); // the tiny cell between close crossings is inked in
+    const dense = rays.length >= 6 ? 0.8 : 1; // where three or more lines meet, slightly smaller fillets, so the knot stays light
     for (let k = 0; k < rays.length; k++) {
       const ra = rays[k], rb = rays[(k + 1) % rays.length];
       let th = rb.ang - ra.ang; if (th <= 0) th += 2 * Math.PI;
-      if (th >= 165 * DEG || th < 8 * DEG) continue;
+      if (th >= 165 * DEG || th < 1.5 * DEG) continue;
       const ev2 = ra.e === rb.e ? ra.e : nd.ev.find(e => (e.a === ra.n && e.b === rb.n) || (e.a === rb.n && e.b === ra.n));
       const P = ev2 ? ev2.p : nd.p;
       const ua = ra.u, ub = rb.u;
@@ -212,11 +217,15 @@ function junctions(sheet) {
       const ha = ra.w / 2, hb = rb.w / 2, maxW = Math.max(ra.w, rb.w);
       const id = [I[ra.n].id + (ra.sign > 0 ? '+' : '-'), I[rb.n].id + (rb.sign > 0 ? '+' : '-')].sort().join('|') + '@' + Math.round(P[0] / 2) + ',' + Math.round(P[1] / 2);
       const x = clamp((165 * DEG - th) / (45 * DEG), 0, 1);
-      let r = (2.6 * maxW + 5) * x * x * (3 - 2 * x) * (1 + 0.1 * jitter(id)); // full below 120 deg, fading out towards 165
+      let r = (2.6 * maxW + 5) * dense * x * x * (3 - 2 * x) * (1 + 0.1 * jitter(id)); // full below 120 deg, fading out towards 165
       const X0 = solveC(na, nb, ha, hb), X1 = solveC(na, nb, ha + 1, hb + 1), Xs = [X1[0] - X0[0], X1[1] - X0[1]];
       const ta0 = dot(X0, ua), tas = dot(Xs, ua), tb0 = dot(X0, ub), tbs = dot(Xs, ub);
-      const capOf = ray => Math.min(0.8 * ray.avail, 0.45 * ray.next, 7 * maxW + 12) * (ray.curved ? 0.7 : 1);
-      const ca = capOf(ra), cb = capOf(rb);
+      // how far along each line the ink may run. A shallow wedge (under 30 deg) is solid already where the two lines overlap
+      // (up to t0); past that it gets a long thin tongue of ink, still capped, so it never runs along the whole line
+      const shallow = th < 30 * DEG;
+      const capOf = (ray, t0) => shallow ? Math.min(0.8 * ray.avail, 0.45 * ray.next, t0 + (6 * maxW + 12) * (ray.curved ? 0.7 : 1))
+        : Math.min(0.8 * ray.avail, 0.45 * ray.next, (7 * maxW + 12) * dense) * (ray.curved ? 0.7 : 1);
+      const ca = capOf(ra, ta0), cb = capOf(rb, tb0);
       if (![ta0, tas, tb0, tbs].every(Number.isFinite) || tas <= 0 || tbs <= 0) continue;
       if (ta0 < 0 || tb0 < 0 || ta0 >= ca || tb0 >= cb) continue;
       r = Math.min(r, (ca - ta0) / tas, (cb - tb0) / tbs);
@@ -244,7 +253,7 @@ function junctions(sheet) {
       const c1 = [sa.T[0] - sa.d[0] * hl, sa.T[1] - sa.d[1] * hl], c2 = [sb.T[0] - sb.d[0] * hl, sb.T[1] - sb.d[1] * hl];
       const vc = unit([V[0] - C[0], V[1] - C[1]]), mid = [C[0] + vc[0] * r, C[1] + vc[1] * r];
       if (![...sa.T, ...sb.T, ...C].every(Number.isFinite)) continue;
-      const cn = {id, node: nd, P, V, C, r, Ta: sa.T, Tb: sb.T, c1, c2, A: sa.pts, B: sb.pts.reverse(), color: nd.color, order: top, anchor: [(V[0] + mid[0]) / 2, (V[1] + mid[1]) / 2], ang: [ra.ang, rb.ang]};
+      const cn = {id, node: nd, P, V, C, r, M: mid, Ta: sa.T, Tb: sb.T, c1, c2, A: sa.pts, B: sb.pts.reverse(), color: nd.color, order: top, anchor: [(V[0] + mid[0]) / 2, (V[1] + mid[1]) / 2], ang: [ra.ang, rb.ang]};
       nd.corners.push(cn); corners.push(cn);
     }
   }
@@ -318,16 +327,86 @@ function maskOf(sheet) { // barrier raster of the lines and their rounded corner
     }
     area.push(n);
   }
-  sheet.mask = {m, lab, area}; sheet.maskKey = key;
+  // thin spaces: a sliver whose widest point is about a line's width or less (chamfer distance to the ink, in mask pixels)
+  const dist = new Float32Array(N), INF = 1e6;
+  for (let i = 0; i < N; i++) dist[i] = m[i] ? 0 : INF;
+  for (let y = 0; y < MASK; y++) for (let x0 = 0; x0 < MASK; x0++) { const i = y * MASK + x0; if (!dist[i]) continue; let v = dist[i];
+    if (x0 > 0) v = Math.min(v, dist[i - 1] + 1); if (y > 0) { v = Math.min(v, dist[i - MASK] + 1); if (x0 > 0) v = Math.min(v, dist[i - MASK - 1] + 1.4); if (x0 < MASK - 1) v = Math.min(v, dist[i - MASK + 1] + 1.4); } dist[i] = v; }
+  for (let y = MASK - 1; y >= 0; y--) for (let x0 = MASK - 1; x0 >= 0; x0--) { const i = y * MASK + x0; if (!dist[i]) continue; let v = dist[i];
+    if (x0 < MASK - 1) v = Math.min(v, dist[i + 1] + 1); if (y < MASK - 1) { v = Math.min(v, dist[i + MASK] + 1); if (x0 < MASK - 1) v = Math.min(v, dist[i + MASK + 1] + 1.4); if (x0 > 0) v = Math.min(v, dist[i + MASK - 1] + 1.4); } dist[i] = v; }
+  const widest = new Float32Array(area.length), edge = new Uint8Array(area.length), cx = new Float64Array(area.length), cy = new Float64Array(area.length);
+  for (let i = 0; i < N; i++) { const l = lab[i]; if (l < 0) continue; if (dist[i] > widest[l]) widest[l] = dist[i]; const x0 = i % MASK; cx[l] += x0; cy[l] += (i - x0) / MASK; if (x0 === 0 || x0 === MASK - 1 || i < MASK || i >= N - MASK) edge[l] = 1; }
+  const thin = area.map((a, l) => !edge[l] && a < N * 0.02 && widest[l] <= 3.6);
+  const mid = area.map((a, l) => [cx[l] / a * 1000 / MASK, cy[l] / a * 1000 / MASK]); // centre of each space, in sheet units
+  sheet.mask = {m, lab, area, thin, mid}; sheet.maskKey = key;
   return sheet.mask;
 }
+// a thin sliver of paper right next to a rounded junction is inked in, as when inking by hand (its colour: the junction's)
+function slivers(sheet) {
+  const key = geomKey(sheet);
+  if (sheet.slKey === key) return sheet.sl;
+  const rs = roundedSet(sheet), byId = new Map();
+  const corners = rs.size ? junctions(sheet).corners.filter(c => rs.has(c.id)) : [];
+  if (corners.length) {
+    const {m, lab, thin} = maskOf(sheet);
+    for (const c of corners) {
+      const d = unit([c.M[0] - c.V[0], c.M[1] - c.V[1]]);
+      for (const s of [1.5, 3, 5, 8]) {
+        const px = Math.round((c.M[0] + d[0] * s) * MASK / 1000), py = Math.round((c.M[1] + d[1] * s) * MASK / 1000);
+        if (px < 0 || py < 0 || px >= MASK || py >= MASK) continue;
+        const i = py * MASK + px; if (m[i]) continue;
+        if (thin[lab[i]] && !byId.has(lab[i])) byId.set(lab[i], {color: c.color, node: c.node});
+        break;
+      }
+    }
+    // and the specks and slivers caught inside a rounded knot
+    const knots = [...new Set(corners.map(c => c.node))].map(nd => ({nd, ext: Math.max(...nd.corners.flatMap(c => [c.Ta, c.Tb, c.M].map(q => Math.hypot(q[0] - nd.p[0], q[1] - nd.p[1]))))}));
+    const {mid} = maskOf(sheet);
+    thin.forEach((on, l) => {
+      if (!on || byId.has(l)) return;
+      let best = null;
+      for (const k of knots) { const d = Math.hypot(mid[l][0] - k.nd.p[0], mid[l][1] - k.nd.p[1]) - k.ext; if (d <= 20 && (!best || d < best.d)) best = {d, nd: k.nd}; }
+      if (best) byId.set(l, {color: best.nd.color, node: best.nd});
+    });
+  }
+  sheet.sl = byId; sheet.slKey = key; sheet.slCanvas = null;
+  return byId;
+}
+function sliverLayer(sheet) { // the inked slivers as an image (not those whose junction is still growing in)
+  const sl = slivers(sheet);
+  if (!sl.size) return null;
+  const an = sheet.anim, ids = [...sl.keys()].filter(l => !(an && sl.get(l).node.corners.some(c => an.keys.has(c.id))));
+  const key = ids.join(',');
+  if (sheet.slCanvas && sheet.slCanvasKey === key) return sheet.slCanvas;
+  const {m, lab} = maskOf(sheet), N = MASK * MASK, own = new Int32Array(N).fill(-1), want = new Set(ids);
+  for (let i = 0; i < N; i++) if (!m[i] && want.has(lab[i])) own[i] = lab[i];
+  for (let pass = 0; pass < 3; pass++) { // under the lines' edges too, so no paper seam is left
+    const add = [];
+    for (let i = 0; i < N; i++) {
+      if (own[i] >= 0 || !m[i]) continue;
+      const px = i % MASK;
+      const q = (px > 0 && own[i - 1] >= 0) ? i - 1 : (px < MASK - 1 && own[i + 1] >= 0) ? i + 1 : (i >= MASK && own[i - MASK] >= 0) ? i - MASK : (i < N - MASK && own[i + MASK] >= 0) ? i + MASK : -1;
+      if (q >= 0) add.push(i, own[q]);
+    }
+    for (let k = 0; k < add.length; k += 2) own[add[k]] = add[k + 1];
+  }
+  const c = document.createElement('canvas'); c.width = c.height = MASK;
+  const x = c.getContext('2d'), img = x.createImageData(MASK, MASK), D = img.data, rgb = new Map();
+  for (let i = 0; i < N; i++) if (own[i] >= 0) {
+    const h = sl.get(own[i]).color; if (!rgb.has(h)) rgb.set(h, [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+    const v = rgb.get(h); D[i * 4] = v[0]; D[i * 4 + 1] = v[1]; D[i * 4 + 2] = v[2]; D[i * 4 + 3] = 255;
+  }
+  x.putImageData(img, 0, 0);
+  sheet.slCanvas = c; sheet.slCanvasKey = key;
+  return c;
+}
 function regionAt(sheet, x, y) { // the region under a point (or next to it, when the point is on a line's anti-aliased edge)
-  const {m, lab, area} = maskOf(sheet), sx = Math.round(x * MASK / 1000), sy = Math.round(y * MASK / 1000);
+  const {m, lab, area} = maskOf(sheet), ink = slivers(sheet), sx = Math.round(x * MASK / 1000), sy = Math.round(y * MASK / 1000);
   let id = -1; // on a line's edge, accept only when every free pixel nearby belongs to one space; on the line itself, none
   for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
     const px = sx + dx, py = sy + dy;
     if (px < 0 || py < 0 || px >= MASK || py >= MASK || m[py * MASK + px]) continue;
-    const l = lab[py * MASK + px]; if (id >= 0 && l !== id) return null; id = l;
+    const l = lab[py * MASK + px]; if (ink.has(l)) continue; if (id >= 0 && l !== id) return null; id = l;
   }
   return id >= 0 ? {id, area: area[id]} : null;
 }
@@ -362,6 +441,7 @@ function fillLayer(sheet) { // colour behind the lines: each region in the colou
 function paintBase(ctx, sheet, W) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, W);
   const fl = fillLayer(sheet); if (fl) { ctx.imageSmoothingEnabled = true; ctx.drawImage(fl, 0, 0, W, W); }
+  const sv = sliverLayer(sheet); if (sv) { ctx.imageSmoothingEnabled = true; ctx.drawImage(sv, 0, 0, W, W); }
   ctx.setTransform(W / 1000, 0, 0, W / 1000, 0, 0); ctx.lineCap = ctx.lineJoin = 'round';
   drawLines(ctx, sheet, sheet.anim ? sheet.anim.keys : null);
 }
@@ -419,6 +499,8 @@ function neurographFigure(fig, color) { // a free line that runs along the outli
 
 /* ---------- board: a sheet with tools ---------- */
 // o.round: rounding (button, and a tap or click on a corner); o.sharp: mark the sharp corners;
+// o.tapOnly: a tap never leaves a dot (it rounds a corner or shows a hint; dragging still draws);
+// o.extras: the "clear" and "sample line" buttons (on the drawing steps only);
 // o.fill: the "colour a small piece" tool; o.paint: colouring mode (any region, the colouring palette)
 function makeBoard(key, o = {}) {
   const sheet = state.sheets[key], tool = state.tool;
@@ -433,9 +515,10 @@ function makeBoard(key, o = {}) {
     onclick: () => { if (o.paint) tool.paint = i; else { tool.color = i; if (tool.mode === 'fill') tool.mode = 'pen'; } sync(); }}, h('i', {style: 'background:' + c}))));
   const widths = o.paint ? null : h('div', {class: 'tool-group', role: 'radiogroup', 'aria-label': t('ngWidth')}, [['ngThin', 4], ['ngMed', 8], ['ngThick', 14]].map(([k, px], i) => h('button', {type: 'button', class: 'wbtn', role: 'radio', 'aria-checked': String(tool.width === i), 'aria-label': t(k), title: t(k), 'data-w': i,
     onclick: () => { tool.width = i; if (tool.mode === 'fill') tool.mode = 'pen'; sync(); }}, h('i', {style: `height:${px}px`}))));
-  const undo = h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.pop(); changed(); }}, t('ngUndo'));
-  const clear = o.paint ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.length = 0; sheet.anim = null; changed(); }}, t('ngClear'));
-  const sample = o.paint ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: COLORS[tool.color], w: WIDTHS[Math.min(tool.width, 1)]}); changed(); }}, t('ngSample'));
+  const undo = h('button', {type: 'button', class: 'tbtn', onclick: () => { // one step back; a recolour gives the space its earlier colour back
+    const it = sheet.items.pop(); if (it && it.was) for (const [i, f] of it.was) sheet.items.splice(i, 0, f); changed(); }}, t('ngUndo'));
+  const clear = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.length = 0; sheet.anim = null; changed(); }}, t('ngClear'));
+  const sample = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: COLORS[tool.color], w: WIDTHS[Math.min(tool.width, 1)]}); changed(); }}, t('ngSample'));
   const fillBtn = o.fill ? h('button', {type: 'button', class: 'tbtn', 'aria-pressed': 'false', onclick: () => { tool.mode = tool.mode === 'fill' ? 'pen' : 'fill'; say(tool.mode === 'fill' ? t('ngFillOn') : ''); sync(); }}, t('ngFill')) : null;
   const roundBtn = o.round ? h('button', {type: 'button', class: 'tbtn round', onclick: () => roundKeys(sharpCorners(sheet).map(c => c.id))}, t('ngRoundBtn')) : null;
   const tools = h('div', {class: 'tools', role: 'group', 'aria-label': t('ngTools')}, swatches, widths, h('div', {class: 'tool-group'}, undo, clear, sample, fillBtn, roundBtn));
@@ -509,24 +592,28 @@ function makeBoard(key, o = {}) {
   }
   const pos = e => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 1000, (e.clientY - r.top) / r.height * 1000]; };
   const perCss = () => 1000 / (canvas.getBoundingClientRect().width || 1); // sheet units per CSS pixel
-  // the corner a tap or click means: on the junction itself, all its sharp corners; inside a wedge, that corner
+  // the corner a tap or click means: on the junction itself, all its sharp corners; elsewhere, the corner whose mark is
+  // nearest, preferring the corners whose wedge holds the point. In a tight knot the centre zone shrinks to half the distance
+  // to its nearest corner mark (touch and mouse alike), so a deliberate tap or click on one corner rounds just that corner.
   function cornerAt(p, touch) {
-    const k = perCss(), reach = 32 * k;
+    const k = perCss(), reach = 32 * k, jx = junctions(sheet);
+    if (!jx.nodes.length) return null;
+    const rs = roundedSet(sheet), dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+    let nb = null;
+    for (const nd of jx.nodes) { const d = dist(p, nd.p); if (!nb || d < nb.d) nb = {nd, d}; }
+    const near = Math.min(...nb.nd.corners.map(c => dist(c.anchor, nb.nd.p)));
+    const centre = Math.min((touch ? 14 : 8) * k, 0.5 * near);
+    if (nb.d <= centre) return {node: nb.nd, keys: nb.nd.corners.filter(c => !rs.has(c.id)).map(c => c.id)};
+    const inWedge = c => { let x = Math.atan2(p[1] - c.P[1], p[0] - c.P[0]) - c.ang[0], y = c.ang[1] - c.ang[0]; x = (x + 4 * Math.PI) % (2 * Math.PI); y = (y + 4 * Math.PI) % (2 * Math.PI); return x <= y; };
     let best = null;
-    for (const nd of junctions(sheet).nodes) {
-      const d = Math.hypot(p[0] - nd.p[0], p[1] - nd.p[1]), far = Math.max(...nd.corners.map(c => Math.hypot(c.anchor[0] - nd.p[0], c.anchor[1] - nd.p[1])));
-      if (d <= reach + far && (!best || d < best.d)) best = {nd, d};
+    for (const c of jx.corners) {
+      const dA = dist(p, c.anchor), inside = inWedge(c);
+      if (!(inside ? dist(p, c.P) <= reach + 1.3 * dist(c.anchor, c.P) : dA <= 0.75 * reach)) continue;
+      const score = dA * (inside ? 1 : 1.6);
+      if (!best || score < best.score) best = {c, score};
     }
     if (!best) return null;
-    const {nd, d} = best, rs = roundedSet(sheet);
-    const near = Math.min(...nd.corners.map(c => Math.hypot(c.anchor[0] - nd.p[0], c.anchor[1] - nd.p[1])));
-    const centre = touch ? 14 * k : Math.max(3 * k, 0.6 * near);
-    if (d <= centre) return {node: nd, keys: nd.corners.filter(c => !rs.has(c.id)).map(c => c.id)};
-    const a = Math.atan2(p[1] - nd.p[1], p[0] - nd.p[0]);
-    const inWedge = c => { let x = a - c.ang[0], y = c.ang[1] - c.ang[0]; x = (x + 4 * Math.PI) % (2 * Math.PI); y = (y + 4 * Math.PI) % (2 * Math.PI); return x <= y; };
-    const c = nd.corners.find(inWedge) || nd.corners.reduce((m, c2) => Math.hypot(p[0] - c2.anchor[0], p[1] - c2.anchor[1]) < Math.hypot(p[0] - m.anchor[0], p[1] - m.anchor[1]) ? c2 : m);
-    if (Math.hypot(p[0] - c.anchor[0], p[1] - c.anchor[1]) > reach + 0.5 * Math.hypot(c.anchor[0] - nd.p[0], c.anchor[1] - nd.p[1]) && !inWedge(c)) return null;
-    return {node: nd, keys: rs.has(c.id) ? [] : [c.id]};
+    return {node: best.c.node, keys: rs.has(best.c.id) ? [] : [best.c.id]};
   }
   let pid = null, down = null;
   canvas.addEventListener('pointerdown', e => {
@@ -555,11 +642,13 @@ function makeBoard(key, o = {}) {
     if (!live) return;
     const s = live; live = null;
     if (down) down.travel = Math.max(down.travel, Math.hypot(e.clientX - down.x, e.clientY - down.y));
-    if (o.round && down && e.type === 'pointerup' && performance.now() - down.t < 350 && down.travel < 8) { // a tap: round the corner under it
+    if (o.round && down && e.type === 'pointerup' && down.travel < 8 && (o.tapOnly || performance.now() - down.t < 350)) { // a tap: round the corner under it
       const hit = cornerAt(s.pts[0], down.touch);
-      if (hit && hit.keys.length) { say(''); roundKeys(hit.keys); down = null; return; } // nothing left to round there: a dot, as usual
+      if (hit && hit.keys.length) { say(''); roundKeys(hit.keys); down = null; return; }
+      if (o.tapOnly) { say(t('ngTapMiss')); down = null; paint(); return; } // a miss leaves no dot, only a hint
     }
     down = null;
+    if (o.tapOnly && status.textContent === t('ngTapMiss')) say('');
     if (e.type === 'pointercancel' && s.pts.length < 2) { paint(); return; }
     sheet.items.push({t: 's', pts: s.pts, color: s.color, w: s.w}); changed(); if (o.onStroke) o.onStroke(sheet);
   };
@@ -569,9 +658,12 @@ function makeBoard(key, o = {}) {
     const g = regionAt(sheet, p[0], p[1]);
     if (!g) return say(o.paint ? t('ngColorOnLine') : t('ngFillOpen'));
     if (!o.paint && g.area > MASK * MASK * 0.12) return say(t('ngFillBig'));
-    const color = PAL[cur()], last = [...sheet.items].reverse().find(it => it.t === 'f' && (regionAt(sheet, it.x, it.y) || {}).id === g.id);
-    if (last && last.color === color) return;
-    sheet.items.push({t: 'f', x: p[0], y: p[1], color}); say(''); changed();
+    // a space holds one colour: a new colour replaces the earlier ones there (kept on the item, so one undo brings them back)
+    const color = PAL[cur()], same = [];
+    sheet.items.forEach((it, i) => { if (it.t === 'f' && (regionAt(sheet, it.x, it.y) || {}).id === g.id) same.push([i, it]); });
+    if (same.length && same[same.length - 1][1].color === color) return;
+    for (let k = same.length - 1; k >= 0; k--) sheet.items.splice(same[k][0], 1);
+    sheet.items.push({t: 'f', x: p[0], y: p[1], color, was: same.length ? same : null}); say(''); changed();
   }
   new ResizeObserver(() => { baseKey = ''; paint(); }).observe(canvas);
   const api = {el: wrap, paint, sync, say, changed, sheet, color: () => COLORS[tool.color], addItem: it => { sheet.items.push(it); changed(); }, loop};
@@ -637,26 +729,24 @@ const STEPS = [
     h('p', {class: 'ng-muted'}, t('ngPrivate'))),
   // 6. neuro-lines over the sheet: the one drawing
   () => {
-    const board = makeBoard('main', {fill: false});
+    const board = makeBoard('main', {extras: true});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS8Title'), h('p', {class: 'ng-lead'}, t('ngS8Text')), h('p', {class: 'ng-muted'}, t('ngS3Text')), breathing(), changedField()), board.el);
   },
   // 7. rounding the corners of that same drawing
   () => {
     const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
+    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS4Title'), h('p', {class: 'ng-lead'}, t('ngS4Text')), h('p', {class: 'ng-muted'}, t('ngS4Text2')), info), board.el);
   },
   // 8. rules
   () => {
     const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {fill: true, round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
+    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))}); // colouring belongs to step 11
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS9Title'), h('p', {class: 'ng-lead'}, t('ngS9Text')), h('ul', {class: 'ng-list rules'}, [1, 2, 3, 4, 5, 6].map(i => h('li', {}, t('ngRule' + i)))), info), board.el);
   },
   // 9. figure of choice
   () => {
-    const msg = {el: null};
-    const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {fill: true, round: true, sharp: true, onChange: sh => roundInfo(info, sh, '')});
+    const board = makeBoard('main', {extras: true}); // the figure and its lines; their corners are rounded in step 10
     const sheet = state.sheets.main;
     const add = kind => board.addItem({t: 's', pts: shapePts(kind), color: COLORS[state.tool.color === 0 ? 0 : state.tool.color], w: WIDTHS[2], fig: true});
     const shapes = ['Circle', 'Triangle', 'Square', 'Ellipse'].map(k => h('button', {type: 'button', class: 'tbtn', onclick: () => add(k.toLowerCase())}, t('ngShape' + k)));
@@ -669,12 +759,12 @@ const STEPS = [
     }}, t('ngAutoNeuro'));
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS10Title'), h('p', {class: 'ng-lead'}, t('ngS10Text')),
       h('span', {class: 'ng-label'}, t('ngShapes')), h('div', {class: 'shape-row'}, shapes, own),
-      h('p', {class: 'ng-lead'}, t('ngS10Text2')), h('div', {class: 'shape-row'}, auto), info, changedField()), board.el);
+      h('p', {class: 'ng-lead'}, t('ngS10Text2')), h('div', {class: 'shape-row'}, auto), changedField()), board.el);
   },
   // 10. over the drawing again: connect the figure and round the new corners (draft text for Sandra's approval)
   () => {
     const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
+    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS11aTitle'), h('p', {class: 'ng-lead'}, t('ngS11aText')), info), board.el);
   },
   // 11. colouring by feeling: any enclosed space, any colour, tap again to change it (draft text for Sandra's approval)
@@ -817,5 +907,5 @@ document.querySelectorAll('[data-lang-link]').forEach(a => a.addEventListener('c
 $('backBtn').addEventListener('click', () => go(state.step - 1));
 $('nextBtn').addEventListener('click', () => go(state.step + 1));
 applyLang(); renderStep(false);
-window.__ng = {state, go, get lang() { return lang; }};
+window.__ng = {state, go, get lang() { return lang; }, jx: () => junctions(state.sheets.main)}; // jx: for the browser tests
 })();
