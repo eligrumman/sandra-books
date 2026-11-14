@@ -37,3 +37,11 @@
 .ba-room{margin:-6px 0 26px}
 .ba-room a{display:inline-flex;align-items:center;min-height:44px;padding:10px 22px;border-radius:40px;border:1px solid var(--gold-soft, #ecd4ad);color:inherit;text-decoration:none;font-size:15px;transition:background .3s var(--ease, ease),color .3s var(--ease, ease)}
 .ba-room a:hover,.ba-room a:focus-visible{background:var(--gold-soft, #ecd4ad);color:#17141f}
+/* the catalog's body-art works: cards to their work pages, above the photos */
+.ba-works{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);margin:0 0 clamp(10px,1.4vw,18px)}
+.ba-work{display:block;border-radius:8px;overflow:hidden;background:var(--ink-2)}
+.ba-work img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--bg,var(--ink-2));transition:transform .5s var(--ease)}
+.ba-work:hover img{transform:scale(1.03)}
+.ba-work-t{display:block;padding:8px 10px 10px;font-size:14px;line-height:1.35;color:var(--text)}
+@media (max-width:1100px){.ba-works{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:700px){.ba-works{grid-template-columns:repeat(2,minmax(0,1fr))}.ba-work-t{font-size:13px}}
