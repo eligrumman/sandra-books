@@ -8,6 +8,8 @@
 .ba-group{margin-top:clamp(36px,6vw,72px)}
 .ba-group:first-of-type{margin-top:clamp(20px,3vw,36px)}
 .ba-group h2{font-family:var(--serif);font-weight:700;font-size:clamp(32px,4vw,52px);line-height:1;margin:0 0 12px;color:var(--gold-soft)}
+.ba-year{font-family:var(--serif);font-weight:700;font-size:clamp(20px,2.4vw,28px);line-height:1.1;margin:clamp(18px,3vw,32px) 0 12px;color:var(--text)}
+.ba-year:first-of-type{margin-top:0}
 .ba-intro{margin:0 0 clamp(16px,2.4vw,28px);max-width:62ch;line-height:1.8;color:var(--text)}
 .ba-grid{column-count:4;column-gap:clamp(10px,1.4vw,18px)}
 .ba-item{margin:0 0 clamp(10px,1.4vw,18px);break-inside:avoid;position:relative;border-radius:8px;overflow:hidden;background:var(--ink-2)}
