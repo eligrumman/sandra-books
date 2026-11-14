@@ -1,5 +1,5 @@
 /* Neurographics guide: dark page of the site, white sheet to draw on */
-.ng-page{background:var(--ink);font-family:var(--sans);--paper-sheet:#fbf8f1;--ok:#8fd3a8;--hot:#e0455a}
+.ng-page{background:var(--ink);font-family:var(--sans);--paper-sheet:#f4ead6;--ok:#8fd3a8;--hot:#e0455a}
 .wp-head{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:14px var(--pad-x);border-bottom:1px solid var(--line)}
 .ng-head-tools{display:flex;align-items:center;gap:18px}
 .ng-home{font-size:14.5px;color:var(--muted);border-bottom:1px solid transparent}

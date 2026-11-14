@@ -328,6 +328,8 @@ window.SITE = {
     ngCol7: ['ורוד', 'Розовый', 'Pink'], ngCol8: ['תכלת', 'Голубой', 'Light blue'], ngCol9: ['ירוק בהיר', 'Светло-зелёный', 'Light green'], ngCol10: ['לילך', 'Сиреневый', 'Lilac'], ngCol11: ['אפור', 'Серый', 'Grey'],
     // tap-to-round and the closing steps (rounding again, colouring, check-in again): new, draft for Sandra's approval
     ngTapRound: ['הקישו על פינה חדה כדי למלא ולעגל אותה, או על החיתוך עצמו כדי לעגל את כל הפינות שלו.', 'Нажмите на острый угол, чтобы заполнить и скруглить его, или на само пересечение, чтобы скруглить все его углы.', 'Tap a sharp corner to fill and round it, or tap the crossing itself to round all its corners.'],
+    // a tap that hits no sharp corner on the rounding steps (7, 8, 10): new, draft for Sandra's approval
+    ngTapMiss: ['אין כאן פינה חדה. הקישו ליד נקודה אדומה, או גררו כדי לצייר קו.', 'Здесь нет острого угла. Нажмите рядом с красной точкой или проведите, чтобы нарисовать линию.', 'No sharp corner here. Tap near a red dot, or drag to draw a line.'],
     ngWidth: ['עובי הקו', 'Толщина линии', 'Stroke width'],
     ngThin: ['דק', 'Тонкая', 'Thin'], ngMed: ['בינוני', 'Средняя', 'Medium'], ngThick: ['עבה', 'Толстая', 'Thick'],
     ngUndo: ['ביטול', 'Отменить', 'Undo'],
