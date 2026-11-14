@@ -4,15 +4,14 @@
 // Review-tagged files: those entries below carry review: 'nudity'.
 // year: the contest year (Owner, 2026-11-14: body-art-13 is the 2025 contest, the event-* photos the 2026 one); a group with years shows one h3 sub-section per year, oldest first.
 // credit: the photographer's name where it is visible on the photo.
+// Dropped as duplicates of catalog works (same shoot and model, shown on /body-art/ through the catalog cards): body-art-01 = smoke, body-art-14 and body-art-15 = gaze, body-art-06 = chromatic-reverie; body-art-event-03 = near-identical frame of event-02.
 window.BODY_ART = {
   hideReview: [],
   items: [
-    {id: 'body-art-01', group: 'art', w: 1268, h: 1600, w8: 634, h8: 800},
     {id: 'body-art-02', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-03', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-04', group: 'art', w: 912, h: 1600, w8: 456, h8: 800},
     {id: 'body-art-05', group: 'art', w: 1058, h: 1600, w8: 529, h8: 800, review: 'nudity'},
-    {id: 'body-art-06', group: 'art', w: 1066, h: 1600, w8: 533, h8: 800},
     {id: 'body-art-07', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800, review: 'nudity'},
     {id: 'body-art-08', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800, review: 'nudity'},
     {id: 'body-art-09', group: 'art', w: 1600, h: 1067, w8: 800, h8: 534},
@@ -20,8 +19,6 @@ window.BODY_ART = {
     {id: 'body-art-11', group: 'art', w: 1600, h: 1065, w8: 800, h8: 533, credit: 'Susanna'},
     {id: 'body-art-12', group: 'art', w: 1106, h: 1600, w8: 553, h8: 800, review: 'nudity'},
     {id: 'body-art-13', group: 'events', year: '2025', w: 1067, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-14', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-15', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-16', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-17', group: 'art', w: 1078, h: 1600, w8: 539, h8: 800},
     {id: 'body-art-18', group: 'art', w: 1067, h: 1600, w8: 534, h8: 800},
@@ -30,7 +27,6 @@ window.BODY_ART = {
     {id: 'body-art-21', group: 'art', w: 1068, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-event-01', group: 'events', year: '2026', w: 1200, h: 1600, w8: 600, h8: 800},
     {id: 'body-art-event-02', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800},
-    {id: 'body-art-event-03', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800},
     {id: 'body-art-event-04', group: 'events', year: '2026', w: 1067, h: 1600, w8: 534, h8: 800, review: 'nudity'}
   ]
 };
