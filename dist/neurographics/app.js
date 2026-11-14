@@ -39,10 +39,10 @@ const COLORS = ['#1d1b24', '#2459c6', '#d23b3b', '#2f8f5b', '#e8862b', '#7a46c2'
 const PAINT = COLORS.concat(['#ef8fb1', '#7cc4ee', '#a5d77a', '#b8a1e8', '#a19fa8']); // colouring: the same markers and a few lighter ones, still no metallic
 const WIDTHS = [5, 9, 20]; // logical units on a 1000 x 1000 sheet
 const WORDS = /[\p{L}\p{N}][\p{L}\p{N}'’\-־]*/gu;
-const TOTAL = 14;
+const TOTAL = 13;
 const state = {
   step: 0,
-  sheets: {train: newSheet(), main: newSheet()},
+  sheets: {main: newSheet()},
   tool: {color: 1, width: 1, mode: 'pen', paint: 8},
   theme: '',
   words: {text: '', phase: 'idle', end: 0, surprised: new Set(), id: 0},
@@ -623,42 +623,36 @@ const STEPS = [
       h('div', {class: 'ng-anim', role: 'img', 'aria-label': t('ngLineAlt')}, svg('habit', hp, t('ngLineHabit'), 'a'), svg('neuro', npath, t('ngLineNeuro'), 'b')),
       h('p', {class: 'ng-muted'}, t('ngS2Nature')));
   },
-  // 3. training
-  () => {
-    const prompt = h('p', {class: 'prompt', 'aria-live': 'polite'}, t('ngP1'));
-    const board = makeBoard('train', {onStroke: sh => { prompt.textContent = t('ngP' + (2 + ((sh.items.length - 1) % 4))); }});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS3Title'), h('p', {class: 'ng-lead'}, t('ngS3Text')), prompt, breathing()), board.el);
-  },
-  // 4. rounding the corners
-  () => {
-    const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('train', {round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS4Title'), h('p', {class: 'ng-lead'}, t('ngS4Text')), h('p', {class: 'ng-muted'}, t('ngS4Text2')), info), board.el);
-  },
-  // 5. request / theme
+  // 3. request / theme
   () => h('div', {class: 'ng-single'}, title('ngS5Title'), h('p', {class: 'ng-lead'}, t('ngS5Text')),
     h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'theme'}, t('ngThemeLabel')),
       h('input', {class: 'ng-input', id: 'theme', type: 'text', maxlength: '60', autocomplete: 'off', placeholder: t('ngThemePh'), value: state.theme, oninput: e => { state.theme = e.target.value; }})),
     h('p', {class: 'ng-muted'}, t('ngPrivate'))),
-  // 6. 20 words in 2 minutes
+  // 4. 20 words in 2 minutes
   () => wordsStep(),
-  // 7. check-in
+  // 5. check-in
   () => h('div', {class: 'ng-single'}, title('ngS7Title'), h('p', {class: 'ng-lead'}, t('ngS7Text')),
     [1, 2, 3, 4].map(i => h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'f' + i}, t('ngF' + i)),
       h('textarea', {class: 'ng-text', id: 'f' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check[i - 1] = e.target.value; }}, state.check[i - 1]))),
     h('p', {class: 'ng-muted'}, t('ngPrivate'))),
-  // 8. neuro-lines over the sheet
+  // 6. neuro-lines over the sheet: the one drawing
   () => {
     const board = makeBoard('main', {fill: false});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS8Title'), h('p', {class: 'ng-lead'}, t('ngS8Text')), breathing(), changedField()), board.el);
+    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS8Title'), h('p', {class: 'ng-lead'}, t('ngS8Text')), h('p', {class: 'ng-muted'}, t('ngS3Text')), breathing(), changedField()), board.el);
   },
-  // 9. rules
+  // 7. rounding the corners of that same drawing
+  () => {
+    const info = h('p', {class: 'ng-info', role: 'status'});
+    const board = makeBoard('main', {round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
+    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS4Title'), h('p', {class: 'ng-lead'}, t('ngS4Text')), h('p', {class: 'ng-muted'}, t('ngS4Text2')), info), board.el);
+  },
+  // 8. rules
   () => {
     const info = h('p', {class: 'ng-info', role: 'status'});
     const board = makeBoard('main', {fill: true, round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS9Title'), h('p', {class: 'ng-lead'}, t('ngS9Text')), h('ul', {class: 'ng-list rules'}, [1, 2, 3, 4, 5, 6].map(i => h('li', {}, t('ngRule' + i)))), info), board.el);
   },
-  // 10. figure of choice
+  // 9. figure of choice
   () => {
     const msg = {el: null};
     const info = h('p', {class: 'ng-info', role: 'status'});
@@ -677,29 +671,29 @@ const STEPS = [
       h('span', {class: 'ng-label'}, t('ngShapes')), h('div', {class: 'shape-row'}, shapes, own),
       h('p', {class: 'ng-lead'}, t('ngS10Text2')), h('div', {class: 'shape-row'}, auto), info, changedField()), board.el);
   },
-  // 11. over the drawing again: connect the figure and round the new corners (draft text for Sandra's approval)
+  // 10. over the drawing again: connect the figure and round the new corners (draft text for Sandra's approval)
   () => {
     const info = h('p', {class: 'ng-info', role: 'status'});
     const board = makeBoard('main', {round: true, sharp: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS11aTitle'), h('p', {class: 'ng-lead'}, t('ngS11aText')), info), board.el);
   },
-  // 12. colouring by feeling: any enclosed space, any colour, tap again to change it (draft text for Sandra's approval)
+  // 11. colouring by feeling: any enclosed space, any colour, tap again to change it (draft text for Sandra's approval)
   () => {
     const board = makeBoard('main', {paint: true});
     return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS12Title'), h('p', {class: 'ng-lead'}, t('ngS12Text')), h('p', {class: 'ng-muted'}, t('ngS12Text2'))), board.el);
   },
-  // 13. check in again: what do I feel now (draft text for Sandra's approval)
+  // 12. check in again: what do I feel now (draft text for Sandra's approval)
   () => h('div', {class: 'ng-single'}, title('ngS13Title'), h('p', {class: 'ng-lead'}, t('ngS13Text')),
     [1, 2, 3, 4].map(i => h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'g' + i}, t('ngF' + i)),
       state.check[i - 1].trim() ? h('p', {class: 'ng-muted ng-before'}, t('ngBefore') + ' ' + state.check[i - 1].trim()) : null,
       h('textarea', {class: 'ng-text', id: 'g' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check2[i - 1] = e.target.value; }}, state.check2[i - 1]))),
     h('p', {class: 'ng-muted'}, t('ngPrivate'))),
-  // 14. final
+  // 13. final
   () => {
     const sheet = state.sheets.main, cv = h('canvas', {class: 'final-sheet', role: 'img', 'aria-label': t('ngFinalAlt')});
     cv.width = cv.height = 1000; paintFull(cv.getContext('2d'), sheet, 1000);
     const dl = h('button', {type: 'button', class: 'btn btn-solid', onclick: download}, t('ngDownload'));
-    const keep = h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => go(10)}, t('ngKeepDrawing'));
+    const keep = h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => go(9)}, t('ngKeepDrawing'));
     const again = h('button', {type: 'button', class: 'btn btn-ghost', onclick: restart}, t('ngRestart'));
     const cta = h('div', {class: 'cta'}, h('h3', {}, t('ngCtaTitle')), h('p', {class: 'ng-lead'}, t('ngCtaText')),
       h('a', {class: 'btn btn-solid gold', id: 'ctaBtn', href: S.waNeuro(lang), target: '_blank', rel: 'noopener', onclick: () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'book', slug: 'neurographics'}}))}, t('ngCtaBtn')), h('p', {class: 'ng-muted'}, t('ngCtaNote')));
@@ -789,7 +783,7 @@ function renderStep(focus = true) {
   clearTimers();
   const stage = $('stage'), n = state.step;
   stage.replaceChildren(STEPS[n]());
-  if (n === 5 && state.words.phase === 'run') { /* returning to a running timer is not possible: it was closed */ }
+  if (n === 3 && state.words.phase === 'run') { /* returning to a running timer is not possible: it was closed */ }
   $('stepOf').textContent = t('ngStepOf', {n: n + 1, m: TOTAL});
   const bar = $('bar'); bar.setAttribute('aria-valuenow', n + 1); bar.setAttribute('aria-valuemax', TOTAL); bar.setAttribute('aria-valuetext', t('ngStepOf', {n: n + 1, m: TOTAL})); bar.setAttribute('aria-label', t('ngSteps'));
   $('barFill').style.width = ((n + 1) / TOTAL * 100) + '%';
@@ -799,7 +793,7 @@ function renderStep(focus = true) {
   if (focus) { const ti = document.getElementById('stepTitle'); if (ti) ti.focus({preventScroll: true}); window.scrollTo({top: 0, behavior: reduced() ? 'auto' : 'smooth'}); }
 }
 function go(n) { stopWordsIfRunning(); state.step = Math.max(0, Math.min(TOTAL - 1, n)); renderStep(); }
-function restart() { stopWordsIfRunning(); state.sheets = {train: newSheet(), main: newSheet()}; state.theme = ''; state.words = {text: '', phase: 'idle', end: 0, surprised: new Set()}; state.check = ['', '', '', '']; state.check2 = ['', '', '', '']; state.changed = ''; go(0); }
+function restart() { stopWordsIfRunning(); state.sheets = {main: newSheet()}; state.theme = ''; state.words = {text: '', phase: 'idle', end: 0, surprised: new Set()}; state.check = ['', '', '', '']; state.check2 = ['', '', '', '']; state.changed = ''; go(0); }
 
 /* ---------- language ---------- */
 function applyLang() {
