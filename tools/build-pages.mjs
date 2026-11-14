@@ -329,6 +329,8 @@ const bodyItems = BODY_ART.items.filter(i => !BODY_ART.hideReview.includes(i.rev
 const bioSections = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
 // the bio's own sentence about the first places in contests, verbatim, per language
 const contestSentence = lang => bioSections[BIO_ORDER.indexOf(lang)].split('\n').map(l => l.trim()).find(l => /2025/.test(l) && !l.startsWith('#'));
+// The 3D mirror room (mirror-room/), linked from the top of the body-art page.
+const ROOM_LINK = {he: 'כניסה לחדר המראות ←', ru: 'Войти в зеркальный зал →', en: 'Enter the mirror room →'};
 function bodyPage(lang) {
   const S = SEO[lang], T = SITE.text[lang], B = BA[lang], up = '../'.repeat(lang === 'he' ? 1 : 2);
   const url = SITE_URL + bodyPath(lang);
@@ -385,6 +387,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'Imag
 <main class="ba" id="main">
 <nav class="ba-crumbs" aria-label="${esc(S.allWorks)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <a href="${up}${prefix(lang)}#works">${esc(B.back)}</a></nav>
 <h1>${esc(B.title)}</h1>
+<p class="ba-room"><a href="${up}mirror-room/?lang=${lang}" data-mirror-room-link>${esc(ROOM_LINK[lang])}</a></p>
 ${sections}</main>
 <footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
 <dialog class="ba-lb" id="baLb" aria-label="${esc(B.gallery)}">
@@ -416,6 +419,7 @@ ${works.map(w => entry(l => workPath(w.id, l), '0.8')).join('\n')}
 ${entry(bioPath, '0.7')}
 ${entry(bodyPath, '0.7')}
 ${single('museum/', '0.7')}
+${single('mirror-room/', '0.6')}
 ${single('neurographics/', '0.7')}
 ${single('book/', '0.6')}
 </urlset>
