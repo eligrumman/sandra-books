@@ -60,6 +60,7 @@ function applyLang() {
   $$('[data-wa-book]').forEach(a => a.href = S.waBook(lang));
   // switching language keeps you in the same section
   $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { a.href = home(a.dataset.langLink) + location.hash; }));
+  $$('[data-lang-link]').forEach(a => a.addEventListener('click', () => { try { localStorage.setItem('sl_lang', a.dataset.langLink); } catch (e) {} })); // a manual choice is remembered; the first-visit suggestion on / never overrides it
   store.set('sl-lang', lang);
   renderFilters(); renderGallery(); renderExhibition(); renderStudio();
   if ($('lightbox').open) show(current);
