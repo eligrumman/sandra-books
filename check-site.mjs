@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -78,7 +78,15 @@ for (const w of SITE.works) assert.ok(homeHe.includes(`href="works/${w.id}/"`), 
 for (const n of ['סנדרה לייפר', 'Сандра Лейфер', 'Sandra Leifer']) assert.ok(homeHe.includes(n), `name ${n} in the structured data`);
 const museum = read('museum/index.html');
 assert.ok(museum.includes('catalog.js') && /Object\.keys\(CATALOG\)/.test(museum), 'museum hangs the whole catalog');
-for (const r of museum.matchAll(/kind: '(\w+)', wall:/g)) assert.ok(series.has(r[1]), `museum room ${r[1]}`);
+// The rooms open off a lobby: one doorway each, in a different lobby wall, each reachable by ?room=<key> (and ?room=hub: the lobby)
+const rooms = [...museum.matchAll(/kind: '(\w+)', key: '(\w+)', at: '(\w+)', wall:/g)];
+assert.equal(rooms.length, 4, 'museum: four rooms');
+for (const [, kind] of rooms) assert.ok(series.has(kind), `museum room ${kind}`);
+assert.equal(new Set(rooms.map(r => r[3])).size, 4, 'museum: each room off its own lobby wall');
+for (const k of ['back', 'right', 'left', 'front']) assert.ok(rooms.some(r => r[3] === k) && museum.includes(`${k}: [`), `museum: a room through the lobby's ${k} wall`);
+for (const [, , key] of rooms) assert.ok(museum.includes(`data-room="${key}" href="?room=${key}"`) || museum.includes(`href="?room=${key}" data-mirror-room-link data-room="${key}"`), `museum: loading screen links to room ${key}`);
+assert.ok(museum.includes("key === 'hub' ? LOBBY") && museum.includes('function goToHub()') && museum.includes('<button class="back lobby" id="lobby" type="button" hidden>') && museum.includes("$('lobby').onclick = goToHub"), 'museum: ?room=hub and a back-to-the-lobby button');
+assert.equal([...museum.matchAll(/lobby: '[^']+', backTo: '[^']+', toLobby: '[^']+'/g)].length, 3, 'museum: the lobby words in Hebrew, Russian and English');
 
 // Dragon tale: same reader format as the unicorn, 29 pages in both languages.
 const dragon = ['book.json', 'book-ru.json'].map(f => JSON.parse(read('dragon/' + f)));
@@ -148,7 +156,7 @@ assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
 assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
 assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts in the HTML (PostHog loads from assets/js/analytics.js)');
 // Analytics: every public page loads the shared PostHog file; the unpublished dragon tale does not.
-const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html'];
+const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html'];
 for (const page of publicPages) assert.ok(/<script src="(\.\.\/)*assets\/js\/analytics\.js" defer><\/script>/.test(read(page)), `${page}: analytics.js`);
 assert.ok(!read('dragon/index.html').includes('analytics.js'), 'dragon: no analytics');
 const an = read('assets/js/analytics.js');
@@ -207,7 +215,48 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   // the gallery's body-art chip is a link to the body-art page in the current language, not a grid filter
   const siteJs = read('assets/js/site.js');
   assert.ok(/o\.id === 'body'[\s\S]{0,200}a\.href = home\(lang\) \+ 'body-art\/'[\s\S]{0,120}dataset\.bodyChip/.test(siteJs), 'site.js: the body-art filter chip links to the body-art page');
-  assert.ok(/toPage[\s\S]{0,160}home\(lang\) \+ 'body-art\/'/.test(siteJs), 'site.js: the body series card links to the body-art page');
 }
 
+// The mirror room: a white backstage makeup room, the last room of the museum (museum/makeup-room.js).
+// Each makeup chair holds a whole body-art photo, framed (no cut-out figures); the contest photos hang on the end wall;
+// a tap opens the body-art gallery's own lightbox (assets/js/body-art.js). The vanity mirrors use the vendored Reflector
+// (three@0.160.0, MIT). No walking Sandra; /mirror-room/ only redirects into the museum room; the links into the room.
+{
+  const m = read('museum/index.html'), js = read('museum/makeup-room.js'), r = read('mirror-room/index.html');
+  assert.ok(m.includes("from './makeup-room.js'") && m.includes('makeup: true') && m.includes('id="lroom" href="?room=mirror"'), 'museum: the mirror room is its last room, with a link to it');
+  assert.ok(js.includes("from '../assets/vendor/Reflector.js'") && js.includes("from 'three'"), 'makeup-room.js: three and the vendored Reflector');
+  assert.ok(!exists('mirror-room/room.js') && !/sandra|trail|walker/i.test(js.replace(/\/\/.*$/gm, '').replace(/Sandra Leifer/g, '')), 'mirror room: no walking Sandra and no paint trail');
+  assert.ok(r.includes('<meta name="robots" content="noindex">') && r.includes(`<link rel="canonical" href="${SITE_URL}museum/">`) && r.includes("location.replace('../museum/?room=mirror'") && r.includes('url=../museum/?room=mirror'), 'mirror-room/: redirects into the museum room');
+  // the photos: whole, from the body-art folder or the catalog, never the old cut-outs
+  const list = name => { const b = js.match(new RegExp(`export const ${name} = \\[([\\s\\S]*?)\\];`)); assert.ok(b, `makeup-room.js: ${name}`); return [...b[1].matchAll(/\{id: '([\w-]+)'(?:, work: '([\w-]+)')?\}/g)].map(x => ({id: x[1], work: x[2] || null})); };
+  const seats = list('SEATS'), prints = list('PRINTS'), all = [...seats, ...prints];
+  assert.ok(seats.length >= 12 && seats.length % 2 === 0 && prints.length >= 1, 'mirror room: a photo on every chair, and the end wall');
+  assert.ok(!exists('assets/img/mirror-room') && !/mirror-room\/mr-|backMask|hairTone/.test(js), 'mirror room: no cut-out figures');
+  assert.equal(new Set(all.map(x => x.id)).size, all.length, 'mirror room: no photo twice');
+  assert.ok(all.filter(x => x.work).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => seats.some(x => x.work === n) && SITE.works.some(w => w.id === n)), 'mirror room: the three catalog shoots show the catalog work (its card and the way to buy it)');
+  for (const x of all) if (!x.work) for (const s of [800, 1600]) assert.ok(exists(`assets/img/body-art/body-art-${x.id}-${s}.webp`), `mirror room: body-art-${x.id}-${s}.webp`);
+  // nothing tagged for review (the nudity-tagged photos) is in the room; the contest photos the Owner asked for are (Owner, 2026-11-15: body-art-13, event-01, event-02)
+  const BA = ctx.window.BODY_ART.items, inRoom = all.filter(x => !x.work).map(x => 'body-art-' + x.id);
+  for (const id of inRoom) { const x = BA.find(b => b.id === id); assert.ok(x && !x.review, `mirror room: ${id} is a body-art photo with no review tag`); }
+  for (const x of BA.filter(b => b.review)) assert.ok(!inRoom.includes(x.id) && !js.includes(`'${x.id.replace('body-art-', '')}'`), `mirror room: ${x.id} (tagged ${x.review}) stays out`);
+  for (const id of ['body-art-13', 'body-art-event-01', 'body-art-event-02']) assert.ok(inRoom.includes(id), `mirror room: ${id} (contest) is in the room`);
+  assert.ok(inRoom.filter(id => BA.find(b => b.id === id).group === 'events').every(id => ['body-art-13', 'body-art-event-01', 'body-art-event-02'].includes(id)), 'mirror room: only the approved contest photos');
+  assert.ok(m.includes('if (!b || b.review) return null;'), 'museum: the room never shows a review-tagged photo');
+  // the lightbox is the gallery's own
+  const lb = read('assets/js/body-art.js');
+  assert.ok(lb.includes('window.baLightbox = {open: open') && lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox, open to the museum');
+  assert.ok(m.includes('<dialog class="ba-lb" id="baLb"') && m.includes('assets/css/body-art.css') && m.includes('assets/js/body-art.js') && m.includes('assets/js/body-art-data.js') && m.includes('window.baLightbox.open('), 'museum: the mirror room opens photos in the gallery lightbox');
+  const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
+  assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
+  assert.ok(/The MIT License/.test(lic) && /three\.js authors/.test(lic), 'Reflector.LICENSE.txt: MIT');
+  assert.ok(/(?:REVISION|t)="160"/.test(read('assets/vendor/three.module.min.js')), 'vendored three.js is r160');
+  assert.ok(!sitemap.includes(`<loc>${SITE_URL}mirror-room/</loc>`), 'sitemap: no mirror-room/ (it redirects)');
+  for (const pre of ['', 'ru/', 'en/']) assert.ok(read(pre + 'body-art/index.html').includes(`museum/?room=mirror&amp;lang=${pre ? pre.slice(0, 2) : 'he'}" data-mirror-room-link`), `${pre}body-art: link to the mirror room in the museum`);
+}
+
+// Information-architecture quick wins: closing blocks, no internal pages, series only once.
+assert.ok(!exists('concepts/'), 'concepts/ is removed');
+for (const page of ['about/', 'body-art/']) for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + page + 'index.html'); assert.ok(h.includes('class="closing') && h.includes('data-wa') && h.includes('#studio') && h.includes('#works'), `${pre}${page}: closing block`); }
+assert.ok(!read('book/index.html').includes('reviewBtn'), 'book: no editor-notes button');
+for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + 'index.html'); assert.ok(!h.includes('id="seriesRail"') && h.indexOf('id="studio"') > h.indexOf('id="works"') && h.indexOf('id="studio"') < h.indexOf('id="exhibition"'), `${pre}home: series once, workshops right after works`); }
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
