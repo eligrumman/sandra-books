@@ -3,9 +3,13 @@
    It drifts slowly by itself, follows the mouse gently (capped speed), slows down over a work
    and near the buttons, and can be dragged with a finger or the mouse. */
 window.EndlessWall = function (root, ids, opts) {
-  const IMG = window.IMAGES.works, MAX = opts.maxSpeed || 2.6, DRIFT = opts.drift || .45;
-  const src = id => { const m = IMG[id]; return `${opts.base}assets/img/works/${id}-${m.s.includes(800) ? 800 : m.s[0]}.webp`; };
-  const ratio = id => IMG[id].w / IMG[id].h;
+  // images.js can fail to load (a dropped request): then works without a known size are left out, and the wall never throws
+  const IMG = (window.IMAGES || {}).works || {}, MAX = opts.maxSpeed || 2.6, DRIFT = opts.drift || .45;
+  // ids: work ids (strings) or body-art tiles {id, body: true, w, h} built by EndlessWall.bodyArtTiles
+  const meta = {}; ids = ids.map(x => { if (typeof x === 'string') return x; meta[x.id] = x; return x.id; });
+  ids = ids.filter(id => meta[id] || IMG[id]);
+  const src = id => meta[id] ? `${opts.base}assets/img/body-art/${id}-800.webp` : `${opts.base}assets/img/works/${id}-${IMG[id].s.includes(800) ? 800 : IMG[id].s[0]}.webp`;
+  const ratio = id => meta[id] ? meta[id].w8 / meta[id].h8 : IMG[id].w / IMG[id].h;
   const world = document.createElement('div'); world.className = 'wall-world'; root.prepend(world);
   const mobile = innerWidth < 700, colW = mobile ? 165 : 290, gap = mobile ? 16 : 34, cols = mobile ? 5 : 7;
 
@@ -29,7 +33,7 @@ window.EndlessWall = function (root, ids, opts) {
       const first = a === 0 && b === 0 && it.y === 0 && c < 3;
       im.loading = first ? 'eager' : 'lazy'; if (first && c === 0) im.fetchPriority = 'high';
       im.src = src(it.id); el.append(im);
-      el.dataset.id = it.id; world.append(el);
+      el.dataset.id = it.id; if (meta[it.id]) el.dataset.body = ''; world.append(el);
       tiles.push({el, x: c * (colW + gap) + (colW - it.w) / 2 + a * BW, y: it.y + b * col.h, w: it.w, h: it.h, W: copiesX * BW, H: copiesY * col.h});
     });
   });
@@ -70,9 +74,18 @@ window.EndlessWall = function (root, ids, opts) {
   addEventListener('pointermove', e => { if (!down) return; const dx = e.clientX - lx, dy = e.clientY - ly; ox += dx; oy += dy; vx = Math.max(-12, Math.min(12, dx)); vy = Math.max(-12, Math.min(12, dy)); moved += Math.abs(dx) + Math.abs(dy); lx = e.clientX; ly = e.clientY; });
   addEventListener('pointerup', e => {
     if (!down) return; down = false; world.classList.remove('drag');
-    if (moved < 6) { const t = e.target.closest && e.target.closest('.wall-tile'); if (t && opts.onOpen) opts.onOpen(t.dataset.id); }
+    if (moved < 6) { const t = e.target.closest && e.target.closest('.wall-tile'); if (t && opts.onOpen) opts.onOpen(t.dataset.id, t.hasAttribute('data-body')); }
   });
   root.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { e.preventDefault(); vx -= e.deltaX * .05; } }, {passive: false});
   new IntersectionObserver(([en]) => visible = en.isIntersecting).observe(root);
   loop();
+};
+
+// Body-art photos for the wall: BODY_ART items, minus anything carrying a review tag (e.g. 'nudity') while skipReview is on,
+// spread evenly among the work ids (not in one clump). Returns the mixed list for EndlessWall.
+window.EndlessWall.mix = function (workIds, bodyArt, skipReview) {
+  const photos = ((bodyArt && bodyArt.items) || []).filter(i => !(skipReview && i.review)).map(i => ({id: i.id, body: true, w8: i.w8, h8: i.h8}));
+  const out = workIds.slice(), n = workIds.length, m = photos.length;
+  photos.forEach((p, j) => out.splice(Math.floor((j + .5) * n / m) + j, 0, p));
+  return out;
 };

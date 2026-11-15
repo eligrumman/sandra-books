@@ -27,6 +27,12 @@
   links.forEach(function (a, i) {
     a.addEventListener('click', function (e) { e.preventDefault(); open(photos, i, a); });
   });
+  // #<photo id> (from the home-page wall) opens the lightbox at that photo
+  var hashId = decodeURIComponent(location.hash.slice(1));
+  if (hashId) links.some(function (a, i) {
+    if (a.getAttribute('href').indexOf('/' + hashId + '-') < 0) return false;
+    open(photos, i, a); return true;
+  });
   document.getElementById('baLbPrev').addEventListener('click', function () { show(cur - 1); });
   document.getElementById('baLbNext').addEventListener('click', function () { show(cur + 1); });
   document.getElementById('baLbClose').addEventListener('click', function () { dlg.close(); });

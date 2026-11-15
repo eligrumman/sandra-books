@@ -10,15 +10,16 @@ import {Reflector} from '../assets/vendor/Reflector.js';
 // The chairs, in walking order: down the right-hand wall as you come in, then back up the left.
 // id: the body-art photo (assets/img/body-art/body-art-<id>-*.webp; its size, credit and tags come from body-art-data.js).
 // work: the catalog work this shoot is: the chair shows the catalog image, and the card its title and the way to buy it.
+// One photo per model (Owner, 2026-11-15): 7 chairs a wall; the 15th photo (body-art-11, landscape) hangs on the end wall.
 export const SEATS = [
-  {id: '06', work: 'chromatic-reverie'}, {id: '02'}, {id: '10'}, {id: '14', work: 'gaze'}, {id: '19'}, {id: '11'}, {id: '04'},
-  {id: '20'}, {id: '09'}, {id: '16'}, {id: '03'}, {id: '17'}, {id: '21'}, {id: '01', work: 'smoke'}
+  {id: '06', work: 'chromatic-reverie'}, {id: '02'}, {id: '05'}, {id: '10'}, {id: '14', work: 'gaze'}, {id: '19'}, {id: '04'},
+  {id: '08'}, {id: '09'}, {id: '12'}, {id: '03'}, {id: '17'}, {id: '21'}, {id: '01', work: 'smoke'}
 ];
-// the end wall: the contest photos, 2025 then 2026 (body-art-data.js gives each its year)
-export const PRINTS = [{id: '13'}, {id: 'event-01'}, {id: 'event-02'}];
+// the end wall: the contest photos, 2025 then 2026 (body-art-data.js gives each its year), then body-art-11
+export const PRINTS = [{id: '13'}, {id: 'event-02'}, {id: '11'}];
 
-export const HW = 4.2, D = 14; // half the room's width, its depth
 const N = SEATS.length / 2, PITCH = 1.6, ROW = N * PITCH; // stations per wall, their spacing
+export const HW = 4.2, D = ROW + 2.8; // half the room's width, its depth (the row plus the entrance and the end wall)
 const COUNTER = {h: .8, d: .5}, MIR = {w: 1, h: 1.1, y: .88 + .55}, BOARD = {w: 1.4, h: 1.5};
 const CHAIR = {x: 1.0, seat: .5, top: 1.06, w: .5}; // x: the seat's distance from the mirror wall
 const ARM = CHAIR.seat + .245, LONG = .95, MAT = .035, FR = .025, LEAN = .17; // the arms' top; a photo's long side, its white mat, its frame, its lean
@@ -264,7 +265,7 @@ export function makeupRoom(ctx) {
   /* ---------- the end wall: the room's sign and the contest photos ---------- */
   PRINTS.forEach((pr, k) => {
     const p = photo(pr.id); if (!p) return;
-    const x = (1 - k) * 2.1, g = new THREE.Group(); g.position.set(x, 1.0, zb + .02); add(g);
+    const x = ((PRINTS.length - 1) / 2 - k) * 1.9, g = new THREE.Group(); g.position.set(x, 1.0, zb + .02); add(g);
     const f = framed(p, g, 1.3);
     const glow = new THREE.Mesh(new THREE.PlaneGeometry(f.fw * 3 + .4, 2.8), flat(poolTex, true)); glow.position.set(0, f.fh / 2 + .2, -.012); g.add(glow);
     if (p.year) { // the contest's year on a card under the photo
