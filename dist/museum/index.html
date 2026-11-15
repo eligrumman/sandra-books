@@ -14,9 +14,12 @@ canvas{display:block;touch-action:none;cursor:grab}
 canvas.drag{cursor:grabbing}
 .loading{position:fixed;inset:0;display:grid;place-items:center;z-index:50;background:#0c0b0f;transition:opacity .8s}
 .loading div{text-align:center}
+.loading>div{box-sizing:border-box;max-width:100%;padding:0 16px}
 .loading h1{font-family:var(--serif);font-size:clamp(56px,9vw,120px);margin:0;line-height:.9}
 .loading p{color:#aaa}
-.loading .ltitles{font-size:13px;max-width:34em;margin:14px auto 0;color:#bbb}
+.loading .ltitles{font-size:13px;max-width:min(34em,100%);margin:14px auto 0;color:#bbb;overflow-wrap:break-word}
+.loading .lrooms{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;max-width:34em;margin:10px auto 0}
+.loading .lrooms a{margin-top:0}
 .loading .lbio{display:inline-block;margin-top:8px;font-size:14px;color:var(--gold);text-decoration:underline;text-underline-offset:4px}
 .loading .bar{width:220px;height:3px;background:#333;margin:18px auto 0;border-radius:3px;overflow:hidden}
 .loading .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
@@ -115,6 +118,9 @@ canvas.drag{cursor:grabbing}
 .cbar{mix-blend-mode:normal}
 .cbar .name,.cbar .back{background:rgba(14,12,18,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:6px 16px;border:1px solid rgba(255,255,255,.2)}
 .cbar .right{display:flex;gap:10px;align-items:center}
+.cbar .lft{display:flex;gap:8px;align-items:center}
+.cbar .lobby{font:inherit;font-size:13px;cursor:pointer}
+.cbar .lobby[hidden]{display:none}
 .langs{display:flex;background:rgba(14,12,18,.82);border:1px solid rgba(255,255,255,.2);border-radius:30px;padding:3px}
 .langs button{font:inherit;font-size:12.5px;color:#ddd;background:none;border:0;border-radius:30px;padding:5px 10px;cursor:pointer}
 .langs button[aria-pressed=true]{background:var(--paper);color:var(--ink)}
@@ -130,8 +136,8 @@ body,.ui,.joy,.help,button{-webkit-user-select:none;user-select:none;-webkit-tou
 <script type="importmap">{"imports":{"three":"../assets/vendor/three.module.min.js"}}</script>
 <script src="../assets/js/analytics.js" defer></script>
 </head><body>
-<header class="cbar"><a class="back" id="back" href="../"></a><span class="right"><span class="langs"><button type="button" data-lang="he">עב</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="en">EN</button></span><span class="name">Sandra <b>Leifer</b></span></span></header>
-<div class="loading" id="loading"><div><h1 id="ltitle"></h1><p id="lsub"></p><p class="ltitles" id="ltitles"></p><a class="lbio" id="lbio"></a><br><a class="lbio" id="lroom" href="?room=mirror" data-mirror-room-link></a><div class="bar"><i id="bar"></i></div><button id="enter" hidden></button></div></div>
+<header class="cbar"><span class="lft"><a class="back" id="back" href="../"></a><button class="back lobby" id="lobby" type="button" hidden></button></span><span class="right"><span class="langs"><button type="button" data-lang="he">עב</button><button type="button" data-lang="ru">RU</button><button type="button" data-lang="en">EN</button></span><span class="name">Sandra <b>Leifer</b></span></span></header>
+<div class="loading" id="loading"><div><h1 id="ltitle"></h1><p id="lsub"></p><p class="ltitles" id="ltitles"></p><a class="lbio" id="lbio"></a><nav class="lrooms" id="lrooms"><a class="lbio" data-room="paint" href="?room=paint"></a><a class="lbio" data-room="hidden" href="?room=hidden"></a><a class="lbio" data-room="neuro" href="?room=neuro"></a><a class="lbio" id="lroom" href="?room=mirror" data-mirror-room-link data-room="mirror"></a></nav><div class="bar"><i id="bar"></i></div><button id="enter" hidden></button></div></div>
 <div class="dock" id="dock">
 <div class="label" id="label" aria-live="polite"><span class="room" id="lr"></span><b id="lt"></b><span class="lm" id="lm"></span><span class="lp" id="lp"></span><span class="lh" id="lh"></span><div class="ldesc" id="ld"></div><div class="lrow"><button type="button" class="lmore" id="lmore" aria-expanded="false" aria-controls="ld"></button><button type="button" id="lzoom"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg><span class="txt"></span></button><a id="lask" href="../#contact"><span class="long"></span><span class="short"></span></a></div></div>
 <div class="ui"><button id="left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><button id="tour"><span class="ico" aria-hidden="true"></span><span class="txt"></span></button><button id="right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
@@ -152,19 +158,19 @@ body,.ui,.joy,.help,button{-webkit-user-select:none;user-select:none;-webkit-tou
 <script src="../assets/js/body-art-data.js"></script><script src="../assets/js/body-art.js"></script><script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script><script src="../assets/js/catalog.js"></script><script>window.C_BASE = "../";</script><script src="../assets/js/shared.js"></script>
 <script type="module">
 import * as THREE from 'three';
-import {makeupRoom, D as MAKEUP_D} from './makeup-room.js';
+import {makeupRoom, D as MAKEUP_D, HW as MAKEUP_HW} from './makeup-room.js';
 
 /* ---------- language ---------- */
 const T = {
   he: {back: '← חזרה לאתר', title: 'התערוכה של<br>סנדרה', loading: 'תולים את היצירות על הקירות…', enter: 'להיכנס לתערוכה', tour: 'סיור מודרך', stop: 'עצירה',
     help: 'גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה', about: 'על היצירה', ask: 'לפרטים ולרכישה',
-    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', zoom: 'הגדלה', zoomHint: 'גלגלת או צביטה כדי להגדיל · גררו כדי לזוז · לחיצה כפולה לאיפוס', close: 'סגירה', more: 'פרטים', askShort: 'לרכישה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר', mirror: 'חדר המראות', enterMirror: 'להיכנס לחדר המראות', gallery: 'לגלריית הבודי־ארט', galleryShort: 'לגלריה', credit: 'צילום', events: 'תחרויות ואירועים', lbPrev: 'התמונה הקודמת', lbNext: 'התמונה הבאה', lbName: 'גלריית תמונות'},
+    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', zoom: 'הגדלה', zoomHint: 'גלגלת או צביטה כדי להגדיל · גררו כדי לזוז · לחיצה כפולה לאיפוס', close: 'סגירה', more: 'פרטים', askShort: 'לרכישה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר', mirror: 'חדר המראות', enterMirror: 'להיכנס לחדר המראות', gallery: 'לגלריית הבודי־ארט', galleryShort: 'לגלריה', credit: 'צילום', events: 'תחרויות ואירועים', lbPrev: 'התמונה הקודמת', lbNext: 'התמונה הבאה', lbName: 'גלריית תמונות', lobby: 'הלובי', backTo: 'חזרה אל', toLobby: 'ללובי'},
   ru: {back: '← На сайт', title: 'Выставка<br>Сандры', loading: 'Развешиваем работы…', enter: 'Войти на выставку', tour: 'Экскурсия', stop: 'Стоп',
     help: 'Тяните, чтобы осмотреться · стрелки или W A S D, чтобы идти · нажмите на работу, чтобы подойти к ней', about: 'О работе', ask: 'Узнать о покупке',
-    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', zoom: 'Увеличить', zoomHint: 'Колёсико или щипок — увеличить · тяните, чтобы двигать · двойной щелчок — сброс', close: 'Закрыть', more: 'Подробнее', askShort: 'Купить', cm: 'см', name: 'Сандра Лейфер', room: 'Зал', mirror: 'Зеркальный зал', enterMirror: 'Войти в зеркальный зал', gallery: 'К галерее боди-арта', galleryShort: 'Галерея', credit: 'Фото', events: 'Конкурсы и мероприятия', lbPrev: 'Предыдущее фото', lbNext: 'Следующее фото', lbName: 'Галерея фотографий'},
+    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', zoom: 'Увеличить', zoomHint: 'Колёсико или щипок — увеличить · тяните, чтобы двигать · двойной щелчок — сброс', close: 'Закрыть', more: 'Подробнее', askShort: 'Купить', cm: 'см', name: 'Сандра Лейфер', room: 'Зал', mirror: 'Зеркальный зал', enterMirror: 'Войти в зеркальный зал', gallery: 'К галерее боди-арта', galleryShort: 'Галерея', credit: 'Фото', events: 'Конкурсы и мероприятия', lbPrev: 'Предыдущее фото', lbNext: 'Следующее фото', lbName: 'Галерея фотографий', lobby: 'Холл', backTo: 'Назад в', toLobby: 'В холл'},
   en: {back: '← Back to the site', title: 'Sandra’s<br>exhibition', loading: 'Hanging the works…', enter: 'Enter the exhibition', tour: 'Guided tour', stop: 'Stop',
     help: 'Drag to look around · arrows or W A S D to walk · click a work to go to it', about: 'About the work', ask: 'Details and purchase',
-    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', zoom: 'Zoom in', zoomHint: 'Wheel or pinch to zoom · drag to move · double-click to reset', close: 'Close', more: 'Details', askShort: 'Buy', cm: 'cm', name: 'Sandra Leifer', room: 'Room', mirror: 'The mirror room', enterMirror: 'Enter the mirror room', gallery: 'Body-art gallery', galleryShort: 'Gallery', credit: 'Photo', events: 'Contests & events', lbPrev: 'Previous photo', lbNext: 'Next photo', lbName: 'Photo gallery'}
+    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', zoom: 'Zoom in', zoomHint: 'Wheel or pinch to zoom · drag to move · double-click to reset', close: 'Close', more: 'Details', askShort: 'Buy', cm: 'cm', name: 'Sandra Leifer', room: 'Room', mirror: 'The mirror room', enterMirror: 'Enter the mirror room', gallery: 'Body-art gallery', galleryShort: 'Gallery', credit: 'Photo', events: 'Contests & events', lbPrev: 'Previous photo', lbNext: 'Next photo', lbName: 'Photo gallery', lobby: 'Lobby', backTo: 'Back to the', toLobby: 'Lobby'}
 };
 const LANGS = ['he', 'ru', 'en'];
 const store = {get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }};
@@ -187,35 +193,40 @@ const size = id => work(id).s.split('×').map(n => parseFloat(n) / 100); // cata
 const MAT = .08, BORDER = .025, LABEL = {w: .3, h: .15, gap: .08}, SPACE = .7;
 const frameOf = id => { const [w, h] = size(id), k = onCanvas(id) ? .025 : MAT + BORDER; return {w, h, fw: w + 2 * k, fh: h + 2 * k, canvas: onCanvas(id)}; };
 const unit = id => frameOf(id).fw + LABEL.gap + LABEL.w;
-// rooms in visiting order; each has its own wall colour and light
+// rooms in visiting order; each has its own wall colour and light, and opens off the lobby:
+// at: the lobby wall its doorway is in (back = straight ahead as you come in, front = behind you); key: its ?room= name
 const ROOMS = [
-  {kind: 'paint', wall: '#ece6dc', ink: '#2a2420', sub: '#7a6a5a', light: '#fff4e2'},
-  {kind: 'hidden', wall: '#454b7e', ink: '#f1e9dc', sub: '#b9b3d6', light: '#e6e2ff'},
-  {kind: 'neuro', wall: '#f4f3ef', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff'},
-  // the mirror room: a white backstage makeup room with the body-art figures (museum/makeup-room.js)
-  {kind: 'body', wall: '#f3f0eb', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff', makeup: true}
+  {kind: 'paint', key: 'paint', at: 'back', wall: '#ece6dc', ink: '#2a2420', sub: '#7a6a5a', light: '#fff4e2'},
+  {kind: 'hidden', key: 'hidden', at: 'right', wall: '#454b7e', ink: '#f1e9dc', sub: '#b9b3d6', light: '#e6e2ff'},
+  {kind: 'neuro', key: 'neuro', at: 'left', wall: '#f4f3ef', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff'},
+  // the mirror room: a white backstage makeup room with the body-art photos (museum/makeup-room.js)
+  {kind: 'body', key: 'mirror', at: 'front', wall: '#f3f0eb', ink: '#1b1b1f', sub: '#6b6b74', light: '#ffffff', makeup: true}
 ];
 const W = 12, H = 4.6, DOOR = {w: 2.2, h: 3}, WALL = .2, EDGE = .8;
+// the lobby: a hall around the origin with a doorway in each wall; HUB.x, HUB.z: half its width and depth. The side doorways sit towards the
+// far wall (HUB.side), so that from where you come in (HUB.spot, by the near wall) the doorways of rooms 1, 2 and 3 are all ahead of you
+const HUB = {x: 6.5, z: 7, side: -3.4, spot: 5.2, wall: '#ece5d9', ink: '#2a2420', sub: '#6e5e4e', light: '#fff4e2'}, LOBBY = -1;
+// each room is built in its own frame (doorway at z = 0, the room running to -z, x across) and placed at its doorway
+const PLACE = {back: [0, -HUB.z, 0], right: [HUB.x, HUB.side, -Math.PI / 2], left: [-HUB.x, HUB.side, Math.PI / 2], front: [0, HUB.z, Math.PI]};
 // a wall's stretches for works on either side of its doorway (x in the wall's own coordinates; none for a wall without one)
 function split(solid, dx) {
   const s = W / 2 - EDGE, gap = DOOR.w / 2 + .5;
   return (solid ? [[-s, s]] : [[-s, dx - gap], [dx + gap, s]]).filter(([a0, a1]) => a1 - a0 >= .8);
 }
 const all = Object.keys(CATALOG).sort((a, b) => CATALOG[a].no - CATALOG[b].no).filter(id => C.IMG[id]);
-let z = 0;
 ROOMS.forEach((r, i) => {
   // canvases first, so the big works face you as you come in
   r.works = all.filter(id => work(id).kind === r.kind).sort((a, b) => onCanvas(b) - onCanvas(a));
-  // doorways alternate between the sides, so each one frames a wall of works in the next room, not the next doorway
-  const last = i === ROOMS.length - 1;
-  // the doorway into the mirror room is in the middle, on the aisle between its mirrors
-  r.doorX = last ? null : ROOMS[i + 1].makeup ? 0 : (i % 2 ? -3 : 3); r.frontDoorX = i ? ROOMS[i - 1].doorX : 0;
-  if (r.makeup) { r.d = MAKEUP_D; r.front = z; r.back = z - r.d; r.zc = z - r.d / 2; r.last = last; z = r.back; return; }
-  r.segs = {back: split(r.last = last, r.doorX), front: split(false, -r.frontDoorX)};
-  const backFront = [...r.segs.back, ...r.segs.front].reduce((a, [a0, a1]) => a + a1 - a0, 0);
-  const need = r.works.reduce((a, id) => a + unit(id) + SPACE, 0);
-  r.d = Math.max(7, Math.ceil((need - backFront) / 2 + 2 * EDGE));
-  r.front = z; r.back = z - r.d; r.zc = z - r.d / 2; r.last = last; z = r.back;
+  // one doorway, in the middle of the front wall, from the lobby; the back wall is whole
+  r.doorX = null; r.frontDoorX = 0; r.last = true;
+  if (r.makeup) { r.d = MAKEUP_D; r.w = 2 * MAKEUP_HW; }
+  else {
+    r.segs = {back: split(true), front: split(false, 0)};
+    const backFront = [...r.segs.back, ...r.segs.front].reduce((a, [a0, a1]) => a + a1 - a0, 0);
+    const need = r.works.reduce((a, id) => a + unit(id) + SPACE, 0);
+    r.d = Math.max(7, Math.ceil((need - backFront) / 2 + 2 * EDGE)); r.w = W;
+  }
+  r.front = 0; r.back = -r.d; r.zc = -r.d / 2;
 });
 
 /* ---------- scene ---------- */
@@ -227,7 +238,6 @@ const scene = new THREE.Scene(); scene.background = new THREE.Color('#0c0b0f'); 
 const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, .05, 80);
 camera.rotation.order = 'YXZ';
 let yaw = 0, pitch = 0;
-camera.position.set(0, 1.65, ROOMS[0].front - 2);
 scene.add(new THREE.HemisphereLight('#fff7ea', '#3a3028', .9));
 const sun = new THREE.DirectionalLight('#ffffff', .35); sun.position.set(3, 8, 4); scene.add(sun);
 
@@ -243,57 +253,105 @@ function textTex(w, h, draw) { const tx = canvasTex(w, h, () => {}); live.push((
 const fontOf = () => lang === 'ru' ? 'Comfortaa' : 'Fredoka';
 function fit(c, text, weight, size, family, max, min) { do { c.font = `${weight} ${size}px ${family}`; } while (c.measureText(text).width > max && --size > min); }
 
-const length = -z;
 const floorTex = canvasTex(1024, 1024, (g, w, h) => {
   for (let i = 0; i < 8; i++) { const y = i * h / 8; g.fillStyle = `hsl(28,${30 + (i * 7) % 10}%,${26 + (i * 13) % 8}%)`; g.fillRect(0, y, w, h / 8);
     for (let k = 0; k < 60; k++) { g.strokeStyle = `rgba(0,0,0,${Math.random() * .12})`; g.beginPath(); const yy = y + Math.random() * h / 8; g.moveTo(0, yy); g.bezierCurveTo(w / 3, yy + 4, w * 2 / 3, yy - 4, w, yy); g.stroke(); }
     g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(0, y, w, 2); g.fillRect((i % 2) * w / 2, y, 2, h / 8); }
-}, [W / 4, length / 4]);
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, length), new THREE.MeshStandardMaterial({map: floorTex, roughness: .55, metalness: .05}));
-floor.rotation.x = -Math.PI / 2; floor.position.z = z / 2; scene.add(floor);
+});
+// a wooden floor w x d, its boards running along the room
+function floorOf(w, d, parent, x, z) {
+  const tx = floorTex.clone(); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(w / 4, d / 4); tx.needsUpdate = true;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({map: tx, roughness: .55, metalness: .05}));
+  m.rotation.x = -Math.PI / 2; m.position.set(x, 0, z); parent.add(m); return m;
+}
 const plaster = hex => canvasTex(512, 512, (g, w, h) => { g.fillStyle = hex; g.fillRect(0, 0, w, h); for (let k = 0; k < 4000; k++) { g.fillStyle = `rgba(${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},${Math.random() < .5 ? 0 : 255},.03)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } }, [4, 2]);
 const pool = hex => canvasTex(256, 256, (g, w, h) => { const c = new THREE.Color(hex), rgb = `${c.r * 255 | 0},${c.g * 255 | 0},${c.b * 255 | 0}`; const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, `rgba(${rgb},.55)`); r.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = r; g.fillRect(0, 0, w, h); });
 const trim = new THREE.MeshLambertMaterial({color: '#2b2622'});
 
 // one face of a wall, with an optional doorway in the middle
-function face(mat, pos, rot, len, door) {
-  const add = (w, h, x, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(...pos); m.rotation.y = rot; m.translateX(x); m.position.y = y; scene.add(m); };
-  const base = (w, x) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, .12, .04), trim); b.position.set(...pos); b.rotation.y = rot; b.translateX(x); b.position.y = .06; b.translateZ(.02); scene.add(b); };
+function face(parent, mat, pos, rot, len, door) {
+  const add = (w, h, x, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat); m.position.set(...pos); m.rotation.y = rot; m.translateX(x); m.position.y = y; parent.add(m); };
+  const base = (w, x) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, .12, .04), trim); b.position.set(...pos); b.rotation.y = rot; b.translateX(x); b.position.y = .06; b.translateZ(.02); parent.add(b); };
   if (door == null) { add(len, H, 0, H / 2); base(len, 0); return; } // door: the doorway's centre along the wall
   for (const [a0, a1] of [[-len / 2, door - DOOR.w / 2], [door + DOOR.w / 2, len / 2]]) if (a1 > a0) { add(a1 - a0, H, (a0 + a1) / 2, H / 2); base(a1 - a0, (a0 + a1) / 2); }
   add(DOOR.w, H - DOOR.h, door, (H + DOOR.h) / 2);
 }
+// a room's name, as on the signs: its number, its name, its series line
+const roomName = i => ROOMS[i].makeup ? t('mirror') : seriesText(ROOMS[i].kind, 0);
+const roomLine = i => ROOMS[i].makeup ? seriesText('body', 0) + ': ' + seriesText('body', 1) : seriesText(ROOMS[i].kind, 1);
+// board: on a pale board edged in bronze, sized to the words (the lobby's signs over the doorways)
+const drawRoomSign = (i, ink, sub, board) => (g, w, h) => {
+  g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
+  const top = `${t('room')} ${i + 1}`, name = roomName(i), line = roomLine(i), max = w - (board ? 160 : 80), lines = [];
+  fit(g, top, 500, 64, fontOf(), max, 20); lines.push([g.font, top, 78, sub]);
+  fit(g, name, 700, 190, '"Amatic SC"', max, 60); lines.push([g.font, name, 252, ink]);
+  fit(g, line, 400, 46, fontOf(), max, 16); lines.push([g.font, line, 345, sub]);
+  if (board) {
+    const bw = Math.min(w - 8, Math.max(...lines.map(([f, s]) => (g.font = f, g.measureText(s).width))) + 140);
+    g.fillStyle = '#f8f4ec'; g.strokeStyle = '#a8865a'; g.lineWidth = 8; g.beginPath(); g.roundRect((w - bw) / 2, 6, bw, h - 12, 28); g.fill(); g.stroke();
+  }
+  for (const [f, s, y, c] of lines) { g.font = f; g.fillStyle = c; g.fillText(s, w / 2, y); }
+};
+// over a room's doorway, inside: the way back to the lobby
+const drawBack = (ink, sub) => (g, w) => {
+  g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
+  g.fillStyle = sub; fit(g, t('backTo'), 400, 54, fontOf(), w - 80, 20); g.fillText(t('backTo'), w / 2, 90);
+  g.fillStyle = ink; fit(g, t('lobby'), 700, 210, '"Amatic SC"', w - 80, 60); g.fillText(t('lobby'), w / 2, 290);
+};
+const signMesh = (draw, scale) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, draw)})); m.scale.setScalar(scale); return m; };
+
+/* ---------- the lobby: a doorway in the middle of each wall, the room's name over it ---------- */
+const hub = new THREE.Group(); scene.add(hub);
+floorOf(2 * HUB.x, 2 * HUB.z, hub, 0, 0);
+{ const mat = new THREE.MeshLambertMaterial({map: plaster(HUB.wall), emissive: '#3c372f'}), hx = HUB.x - WALL / 2, hz = HUB.z - WALL / 2;
+  face(hub, mat, [0, 0, -hz], 0, 2 * HUB.x, 0); face(hub, mat, [0, 0, hz], Math.PI, 2 * HUB.x, 0);
+  face(hub, mat, [hx, 0, 0], -Math.PI / 2, 2 * HUB.z, HUB.side); face(hub, mat, [-hx, 0, 0], Math.PI / 2, 2 * HUB.z, -HUB.side);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(2 * HUB.x, 2 * HUB.z), new THREE.MeshBasicMaterial({color: '#d6cfc4'})); ceil.rotation.x = Math.PI / 2; ceil.position.y = H; hub.add(ceil);
+  // a square of light strips on the ceiling
+  const lm = new THREE.MeshBasicMaterial({color: HUB.light});
+  for (const s of [-1, 1]) { const a = new THREE.Mesh(new THREE.BoxGeometry(2 * HUB.x - 5, .05, .2), lm); a.position.set(0, H - .03, s * (HUB.z - 2.5)); hub.add(a);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(.2, .05, 2 * HUB.z - 5), lm); b.position.set(s * (HUB.x - 2.5), H - .03, 0); hub.add(b); }
+  // the artist's name, inlaid in the middle of the floor, read as you come in
+  const inlay = new THREE.Mesh(new THREE.CircleGeometry(1.7, 72), new THREE.MeshStandardMaterial({roughness: .5, map: textTex(1024, 1024, (g, w, h) => {
+    g.fillStyle = '#e8dfd0'; g.beginPath(); g.arc(w / 2, h / 2, w / 2, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = '#8a6a3c'; g.lineWidth = 10; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 22, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 3; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 46, 0, Math.PI * 2); g.stroke();
+    g.textAlign = 'center'; g.fillStyle = '#2a2420'; fit(g, t('name'), 700, 210, '"Amatic SC"', w - 220, 80); g.fillText(t('name'), w / 2, h / 2 + 70);
+  })}));
+  inlay.rotation.x = -Math.PI / 2; inlay.position.y = .004; hub.add(inlay); }
+const hubSpot = {pos: new THREE.Vector3(0, 1.65, HUB.spot), yaw: 0, pitch: -.02}; // where you stand in the lobby: looking at room 1's doorway, the others to the sides and behind
+camera.position.copy(hubSpot.pos);
+
+/* ---------- the rooms, each off its doorway in the lobby ---------- */
+const doorPicks = []; // a tap on a doorway (or its sign) in the lobby walks into that room
 for (const [i, r] of ROOMS.entries()) {
+  const [px, pz, rot] = PLACE[r.at]; r.g = new THREE.Group(); r.g.position.set(px, 0, pz); r.g.rotation.y = rot; scene.add(r.g); r.g.updateMatrixWorld(true);
+  // the doorway's sides through the wall, and the room's name over it on the lobby side
+  for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.PlaneGeometry(WALL, DOOR.h), trim); j.position.set(sx * DOOR.w / 2, DOOR.h / 2, 0); j.rotation.y = -sx * Math.PI / 2; r.g.add(j); }
+  { const top = new THREE.Mesh(new THREE.PlaneGeometry(DOOR.w, WALL), trim); top.position.set(0, DOOR.h, 0); top.rotation.x = Math.PI / 2; r.g.add(top); }
+  const over = signMesh(drawRoomSign(i, HUB.ink, HUB.sub, true), .86); over.position.set(0, 3.78, WALL / 2 + .01); r.g.add(over);
+  const gap = new THREE.Mesh(new THREE.PlaneGeometry(DOOR.w, DOOR.h), new THREE.MeshBasicMaterial({visible: false})); gap.position.set(0, DOOR.h / 2, WALL / 2 + .02); r.g.add(gap);
+  for (const m of [over, gap]) { m.userData.room = i; doorPicks.push(m); }
   if (r.makeup) continue; // built by makeup-room.js
+  floorOf(W, r.d, r.g, 0, r.zc);
   const mat = new THREE.MeshLambertMaterial({map: plaster(r.wall)});
   // local x of a face runs to the right of a visitor facing it
   r.faces = {
-    back: {pos: [0, 0, r.back + (r.last ? 0 : WALL / 2)], rot: 0, len: W, door: r.doorX},
+    back: {pos: [0, 0, r.back], rot: 0, len: W, door: null},
     right: {pos: [W / 2, 0, r.zc], rot: -Math.PI / 2, len: r.d},
-    front: {pos: [0, 0, r.front - (i ? WALL / 2 : 0)], rot: Math.PI, len: W, door: -r.frontDoorX},
+    front: {pos: [0, 0, r.front - WALL / 2], rot: Math.PI, len: W, door: 0},
     left: {pos: [-W / 2, 0, r.zc], rot: Math.PI / 2, len: r.d}
   };
-  for (const f of Object.values(r.faces)) face(mat, f.pos, f.rot, f.len, f.door);
-  if (!r.last) for (const sx of [-1, 1]) { const j = new THREE.Mesh(new THREE.PlaneGeometry(WALL, DOOR.h), trim); j.position.set(r.doorX + sx * DOOR.w / 2, DOOR.h / 2, r.back); j.rotation.y = -sx * Math.PI / 2; scene.add(j); }
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, r.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'})); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, r.zc); scene.add(ceil);
-  for (const x of [-3.5, 3.5]) { const l = new THREE.Mesh(new THREE.BoxGeometry(.2, .05, r.d - 2), new THREE.MeshBasicMaterial({color: r.light})); l.position.set(x, H - .03, r.zc); scene.add(l); }
+  for (const f of Object.values(r.faces)) face(r.g, mat, f.pos, f.rot, f.len, f.door);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, r.d), new THREE.MeshBasicMaterial({color: '#cfc8bd'})); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, H, r.zc); r.g.add(ceil);
+  for (const x of [-3.5, 3.5]) { const l = new THREE.Mesh(new THREE.BoxGeometry(.2, .05, r.d - 2), new THREE.MeshBasicMaterial({color: r.light})); l.position.set(x, H - .03, r.zc); r.g.add(l); }
   r.pool = pool(r.light);
-  // the room's name over the doorway ahead of you (in the last room, on the end wall)
-  // the room's name over the doorways, facing in: ahead of you as you come in, and over the doorway back
-  const sign = () => new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
-    g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
-    const top = `${t('room')} ${i + 1}`, name = seriesText(r.kind, 0), line = seriesText(r.kind, 1);
-    g.fillStyle = r.sub; fit(g, top, 400, 54, fontOf(), w - 80, 20); g.fillText(top, w / 2, 70);
-    g.fillStyle = r.ink; fit(g, name, 700, 190, '"Amatic SC"', w - 80, 60); g.fillText(name, w / 2, 250);
-    g.fillStyle = r.sub; fit(g, line, 400, 46, fontOf(), w - 80, 18); g.fillText(line, w / 2, 345);
-  })}));
-  const ahead = sign(); ahead.scale.setScalar(r.last ? 1 : .78); ahead.position.set(r.last ? 0 : r.doorX, r.last ? 3.45 : 3.82, r.faces.back.pos[2] + .01); scene.add(ahead);
-  if (i) { const back = sign(); back.scale.setScalar(.78); back.position.set(r.frontDoorX, 3.82, r.faces.front.pos[2] - .01); back.rotation.y = Math.PI; scene.add(back); }
+  // the room's name on the wall ahead of you as you come in, and the way back to the lobby over the doorway
+  const ahead = signMesh(drawRoomSign(i, r.ink, r.sub), 1); ahead.position.set(0, 3.45, r.back + .01); r.g.add(ahead);
+  const back = signMesh(drawBack(r.ink, r.sub), .78); back.position.set(0, 3.82, r.front - WALL / 2 - .01); back.rotation.y = Math.PI; r.g.add(back);
+  // standing just inside the doorway, looking in
+  r.entrance = {pos: r.g.localToWorld(new THREE.Vector3(0, 1.65, -1.6)), yaw: rot, pitch: -.03};
 }
-// the artist's name over the entrance, seen when you turn around in the first room
-{ const r = ROOMS[0], nm = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, (g, w) => {
-    g.textAlign = 'center'; g.fillStyle = r.ink; fit(g, t('name'), 700, 230, '"Amatic SC"', w - 80, 80); g.fillText(t('name'), w / 2, 260);
-  })})); nm.scale.setScalar(.78); nm.position.set(0, 3.82, r.front - .01); nm.rotation.y = Math.PI; scene.add(nm); }
 
 /* ---------- hang every work ---------- */
 function drawLabel(c, cw, chh, id) {
@@ -329,8 +387,9 @@ function hang(id, ri, fc, x) {
   const off = f.fw / 2 + LABEL.gap + LABEL.w / 2;
   const plaque = new THREE.Mesh(new THREE.PlaneGeometry(LABEL.w, LABEL.h), new THREE.MeshBasicMaterial({map: textTex(640, 320, (c, cw, chh) => drawLabel(c, cw, chh, id))}));
   plaque.position.set(off, -f.fh / 2 + LABEL.h / 2, .005); g.add(plaque);
-  scene.add(g); pic.userData.index = i;
-  hung.push({id, room: ri, pic, center: g.position.clone(), normal: new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion), right: new THREE.Vector3(1, 0, 0).applyQuaternion(g.quaternion), h: f.fh, fw: f.fw, iw: f.w, ih: f.h, off});
+  r.g.add(g); g.updateMatrixWorld(true); pic.userData.index = i;
+  const q = g.getWorldQuaternion(new THREE.Quaternion());
+  hung.push({id, room: ri, pic, center: g.getWorldPosition(new THREE.Vector3()), normal: new THREE.Vector3(0, 0, 1).applyQuaternion(q), right: new THREE.Vector3(1, 0, 0).applyQuaternion(q), h: f.fh, fw: f.fw, iw: f.w, ih: f.h, off});
 }
 for (const [ri, r] of ROOMS.entries()) {
   if (r.makeup) continue;
@@ -365,20 +424,20 @@ function photo(id, wid) {
   const f = n => `../assets/img/body-art/${b.id}-${n}.webp`;
   return {src: f(800), hi: f(1600), big: f(1600), w: b.w, h: b.h, credit: b.credit || null, year: b.group === 'events' ? b.year : null};
 }
-const mk = makeupRoom({scene, renderer, camera, room: rm, H, WALL, DOOR, low: !hiRes || Math.min(innerWidth, innerHeight) < 600, textTex, canvasTex, fit, fontOf, drawSign, photo,
+const mk = makeupRoom({scene, parent: rm.g, drawBack: drawBack(rm.ink, rm.sub), renderer, camera, room: rm, H, WALL, DOOR, low: !hiRes || Math.min(innerWidth, innerHeight) < 600, textTex, canvasTex, fit, fontOf, drawSign, photo,
   title: id => L(work(id).t), events: () => t('events'), rtl: () => lang === 'he', onLoad: () => { loaded++; progress(); }});
 for (const it of mk.items) { const i = hung.length; it.room = MR; for (const m of it.picks) m.userData.index = i; hung.push(it); }
-const firstStation = hung.findIndex(h => h.station);
-// the mirrors show this room and the one before it (seen through the doorway): those objects, the floor and the lights join layer 1
+// the mirrors show this room (makeup-room.js) and the lobby seen through its doorway: the lobby and the lights join layer 1
 scene.updateMatrixWorld(true);
-{ const v = new THREE.Vector3(), edge = ROOMS[MR - 1].front;
-  scene.traverse(o => { if (o.isLight || o === floor || ((o.isMesh || o.isInstancedMesh) && o.getWorldPosition(v).z < edge)) o.layers.enable(1); }); }
+hub.traverse(o => o.layers.enable(1)); scene.traverse(o => { if (o.isLight) o.layers.enable(1); });
 function progress() { $('bar').style.width = (loaded / hung.length * 100) + '%'; if (loaded >= Math.min(6, hung.length)) $('enter').hidden = false; }
-// a work's page links here with ?work=<id>: walk straight to it; ?room=mirror (the body-art page, the old /mirror-room/ address) walks into the mirror room
+// a work's page links here with ?work=<id>: walk straight to it; ?room=<key> walks into that room (?room=mirror: the body-art page, the old /mirror-room/ address),
+// ?room=hub stays in the lobby
 const startAt = hung.findIndex(h => !h.station && h.id === new URLSearchParams(location.search).get('work'));
-let toMirror = new URLSearchParams(location.search).get('room') === 'mirror';
-$('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; l.style.pointerEvents = 'none'; setTimeout(() => l.remove(), 800); if (toMirror) goToRoom(); else if (startAt >= 0) goTo(startAt); };
-$('lroom').onclick = e => { e.preventDefault(); toMirror = true; if (!$('enter').hidden) $('enter').click(); else applyLang(); };
+const roomOf = key => { const k = key === 'hub' ? LOBBY : ROOMS.findIndex(r => r.key === key); return k >= 0 || key === 'hub' ? k : null; }; // null: not a room
+let toRoom = roomOf(new URLSearchParams(location.search).get('room'));
+$('enter').onclick = () => { const l = $('loading'); l.style.opacity = 0; l.style.pointerEvents = 'none'; setTimeout(() => l.remove(), 800); if (toRoom === LOBBY) goToHub(); else if (toRoom != null) goToRoom(toRoom); else if (startAt >= 0) goTo(startAt); };
+document.querySelectorAll('#lrooms a').forEach(a => a.onclick = e => { e.preventDefault(); toRoom = roomOf(a.dataset.room); if (!$('enter').hidden) $('enter').click(); else applyLang(); });
 
 /* ---------- the card ---------- */
 const label = $('label'), desc = $('ld'), dock = $('dock');
@@ -468,7 +527,13 @@ zoom.addEventListener('pointermove', e => {
 }));
 
 /* ---------- moving around ---------- */
-const roomAt = zz => Math.max(0, ROOMS.findIndex(r => zz <= r.front && zz >= r.back));
+// where a point is: a room's index, or LOBBY
+const lp = new THREE.Vector3();
+function regionOf(p) {
+  if (Math.abs(p.x) <= HUB.x && Math.abs(p.z) <= HUB.z) return LOBBY;
+  for (const [i, r] of ROOMS.entries()) { r.g.worldToLocal(lp.copy(p)); if (lp.z <= 0 && lp.z >= r.back - 1 && Math.abs(lp.x) <= r.w / 2 + 1) return i; }
+  return LOBBY;
+}
 const keys = {};
 addEventListener('keydown', e => { if ($('baLb').open) return; keys[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow')) e.preventDefault(); stopTour(); });
 addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -485,7 +550,10 @@ cv.addEventListener('pointermove', e => { if (!drag) return; const dx = e.client
 cv.addEventListener('pointerup', e => { cv.classList.remove('drag'); drag = null; if (moved < 6) pick(e); });
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 // clicking a work brings it into focus in front of you; only a work in focus opens up close
-function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects(hung.flatMap(h => h.picks || [h.pic]))[0]; if (!hit) return; stopTour(); const i = hit.object.userData.index; if (hung[i].station) { if (i !== focused) goTo(i); openZoom(i); } else if (i === focused) openZoom(i); else goTo(i); }
+// a doorway (or the room's name over it) walks into that room; from inside, back to the lobby
+function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects([...hung.flatMap(h => h.picks || [h.pic]), ...doorPicks])[0]; if (!hit) return; stopTour();
+  const room = hit.object.userData.room; if (room != null) return regionOf(camera.position) === room ? goToHub() : goToRoom(room);
+  const i = hit.object.userData.index; if (hung[i].station) { if (i !== focused) goTo(i); openZoom(i); } else if (i === focused) openZoom(i); else goTo(i); }
 
 // going to a work: show its card first, then frame the work and its label in the part of the screen the card leaves free
 let glide = null, current = -1, focused = -1, zoomAfter = -1; // focused: the work the camera has arrived in front of
@@ -510,18 +578,30 @@ function goTo(i) {
   travel(target, Math.atan2(h.normal.x, h.normal.z), 0, h.room);
 }
 // walk to a spot and turn to a view: through the doorways when it is in another room
+// to = a room's index or LOBBY; between rooms the way runs out through one doorway, across the lobby and in through the other
+const wrap = a => ((a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+const doorPt = (k, z) => ROOMS[k].g.localToWorld(new THREE.Vector3(0, 1.65, z)); // z < 0: inside room k, z > 0: in the lobby in front of its doorway
 function travel(target, look, pitch1, to) {
-  const pts = [camera.position.clone()], from = roomAt(camera.position.z);
-  for (let k = from; k !== to; k += Math.sign(to - from)) { const zz = to > from ? ROOMS[k].back : ROOMS[k].front, dir = to > from ? -1 : 1, dx = to > from ? ROOMS[k].doorX : ROOMS[k - 1].doorX; pts.push(new THREE.Vector3(dx, 1.65, zz - dir * 1.2), new THREE.Vector3(dx, 1.65, zz + dir * 1.2)); }
+  const pts = [camera.position.clone()], from = regionOf(camera.position);
+  if (from !== to) {
+    if (from !== LOBBY) pts.push(doorPt(from, -1.3), doorPt(from, 1.3));
+    if (to !== LOBBY) pts.push(doorPt(to, 1.3), doorPt(to, -1.3));
+  }
   pts.push(target);
   const lens = pts.slice(1).map((p, k) => p.distanceTo(pts[k])), len = lens.reduce((a, b) => a + b, 0);
-  glide = {pts, lens, len, yaw0: yaw, yaw1: yaw + ((look - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI), p0: pitch, p1: pitch1, t: 0, dur: 1.4 + len / 5, walk: pts.length > 2};
-  if (glide.walk) glide.yawWalk = yaw + (((to > from ? 0 : Math.PI) - yaw + Math.PI * 3) % (Math.PI * 2) - Math.PI);
+  glide = {pts, lens, len, yaw0: yaw, yaw1: yaw + wrap(look - yaw), p0: pitch, p1: pitch1, t: 0, dur: 1.4 + len / 5, walk: pts.length > 2};
   $('help').classList.add('hide');
 }
-// into the mirror room, at its doorway, looking down the aisle between the mirrors
-function goToRoom() { stopTour(); showLabel(-1); glide = null; focused = -1; current = firstStation - 1; travel(mk.entrance.pos.clone(), mk.entrance.yaw, mk.entrance.pitch, MR); glide.spot = true; viewing(false); }
-function along(gl, e) { let d = e * gl.len; for (let k = 0; k < gl.lens.length; k++) { if (d <= gl.lens[k] || k === gl.lens.length - 1) return gl.pts[k].clone().lerp(gl.pts[k + 1], gl.lens[k] ? Math.min(1, d / gl.lens[k]) : 1); d -= gl.lens[k]; } }
+// into a room, just inside its doorway, looking in (the mirror room: down the aisle between the mirrors)
+function goToRoom(k = MR) {
+  stopTour(); showLabel(-1); glide = null; focused = -1; const e = ROOMS[k].makeup ? mk.entrance : ROOMS[k].entrance;
+  current = hung.findIndex(h => h.room === k) - 1; travel(e.pos.clone(), e.yaw, e.pitch, k); glide.spot = true; viewing(false);
+}
+// back to the lobby, looking at room 1's doorway
+function goToHub() { stopTour(); showLabel(-1); glide = null; focused = -1; travel(hubSpot.pos.clone(), hubSpot.yaw, hubSpot.pitch, LOBBY); glide.spot = true; viewing(false); }
+$('lobby').onclick = goToHub;
+// where along the way a glide is: the point, and the stretch it is on
+function along(gl, e) { let d = e * gl.len; for (let k = 0; k < gl.lens.length; k++) { if (d <= gl.lens[k] || k === gl.lens.length - 1) { gl.seg = k; gl.segE = gl.lens[k] ? Math.min(1, d / gl.lens[k]) : 1; return gl.pts[k].clone().lerp(gl.pts[k + 1], gl.segE); } d -= gl.lens[k]; } }
 // the arrows follow the hanging order, which runs to the right along the walls
 $('right').onclick = () => { stopTour(); goTo(current + 1); };
 $('left').onclick = () => { stopTour(); goTo(current - 1); };
@@ -537,17 +617,21 @@ function facing() {
   hung.forEach((h, i) => { toCam.subVectors(h.center, camera.position); toCam.y = 0; const d = toCam.length(), dot = toCam.normalize().dot(fwd); if (d < 4.2 && dot > bd && h.normal.dot(fwd) < -.5) { best = i; bd = dot; } });
   return best;
 }
-// stay inside the rooms and pass between them only through the doorways
-function collide(p, prevZ) {
-  p.x = Math.max(-W / 2 + .5, Math.min(W / 2 - .5, p.x));
-  p.z = Math.min(ROOMS[0].front - .5, Math.max(ROOMS[ROOMS.length - 1].back + .5, p.z));
-  for (const r of ROOMS.slice(0, -1)) {
-    const wz = r.back, reach = WALL / 2 + .45;
-    if (Math.abs(p.x - r.doorX) > DOOR.w / 2 - .35 && Math.abs(p.z - wz) < reach) p.z = prevZ > wz ? wz + reach : wz - reach;
-  }
-  mk.collide(p);
+// stay on the floor of the lobby and the rooms, and pass between them only through the doorways: where you may stand, in each room's own frame
+const walkable = ROOMS.map(r => [[-(DOOR.w / 2 - .35), -.8, DOOR.w / 2 - .35, .8], ...(r.makeup ? mk.walk : [[-W / 2 + .5, r.back + .5, W / 2 - .5, -.5]])]);
+function inside(p) {
+  if (Math.abs(p.x) <= HUB.x - .5 && Math.abs(p.z) <= HUB.z - .5) return true;
+  return ROOMS.some((r, i) => { r.g.worldToLocal(lp.copy(p)); return walkable[i].some(([x0, z0, x1, z1]) => lp.x >= x0 && lp.x <= x1 && lp.z >= z0 && lp.z <= z1); });
 }
-const clock = new THREE.Clock();
+// a step that would leave the floor slides along the wall, or stops
+function collide(p, prev) {
+  if (inside(p)) return;
+  const x = p.x, z = p.z;
+  p.z = prev.z; if (inside(p)) return;
+  p.x = prev.x; p.z = z; if (inside(p)) return;
+  p.x = prev.x; p.z = prev.z;
+}
+const clock = new THREE.Clock(), prevP = new THREE.Vector3(); let region = LOBBY;
 function turn(a, b, e) { return a + (b - a) * e; }
 function tick() {
   const dt = Math.min(.05, clock.getDelta());
@@ -555,22 +639,25 @@ function tick() {
   if (keys.arrowleft) yaw += 1.8 * dt; if (keys.arrowright) yaw -= 1.8 * dt;
   if (Math.abs(mv) > .05 || Math.abs(st) > .05 || keys.arrowleft || keys.arrowright) { glide = null; focused = -1; zoomAfter = -1; viewing(false); }
   fwd.set(-Math.sin(yaw), 0, -Math.cos(yaw)); side.set(Math.cos(yaw), 0, -Math.sin(yaw));
-  const prevZ = camera.position.z;
+  prevP.copy(camera.position);
   if (glide) {
     glide.t = Math.min(1, glide.t + dt / glide.dur); const g = glide, e = g.t < .5 ? 2 * g.t * g.t : 1 - Math.pow(-2 * g.t + 2, 2) / 2;
     camera.position.copy(along(g, e));
     // walking through rooms: face the way you go, then turn to the work
-    if (g.walk) yaw = e < .25 ? turn(g.yaw0, g.yawWalk, e / .25) : e < .75 ? g.yawWalk : turn(g.yawWalk, g.yawWalk + ((g.yaw1 - g.yawWalk + Math.PI * 3) % (Math.PI * 2) - Math.PI), (e - .75) / .25);
+    // walking through doorways: face the way you go, and on the last stretch turn to the view
+    if (g.walk) { const last = g.seg === g.lens.length - 1, a = g.pts[g.seg], b = g.pts[g.seg + 1], want = last && g.segE > .35 ? g.yaw1 : Math.atan2(-(b.x - a.x), -(b.z - a.z));
+      yaw += wrap(want - yaw) * Math.min(1, dt * (last ? 4 : 5)); if (g.t >= 1) yaw = g.yaw1; }
     else yaw = turn(g.yaw0, g.yaw1, e);
     pitch = g.p0 + (g.p1 - g.p0) * e;
-    if (g.t >= 1) { glide = null; focused = g.spot ? -1 : current; if (zoomAfter === current) { zoomAfter = -1; openZoom(current); } }
+    if (g.t >= 1) { glide = null; focused = g.spot ? -1 : current; if (zoomAfter >= 0 && zoomAfter === current) { zoomAfter = -1; openZoom(current); } }
   } else {
     camera.position.addScaledVector(fwd, mv * 3.2 * dt).addScaledVector(side, st * 2.6 * dt);
-    collide(camera.position, prevZ);
+    collide(camera.position, prevP);
     if (Math.abs(mv) > .05 || Math.abs(st) > .05) camera.position.y += (1.65 - camera.position.y) * Math.min(1, dt * 3); // back to eye height only when walking
     const f = facing(); if (f !== shown) { showLabel(f); if (f >= 0) current = f; }
   }
   camera.rotation.set(pitch, yaw, 0);
+  const here = regionOf(camera.position); if (here !== region) { region = here; $('lobby').hidden = region === LOBBY; }
   mk.update(dt);
   renderer.render(scene, camera); frames++; requestAnimationFrame(tick);
 }
@@ -582,7 +669,8 @@ function applyLang() {
   document.documentElement.lang = lang; document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
   document.title = {he: 'התערוכה של סנדרה לייפר', ru: 'Выставка Сандры Лейфер', en: 'Sandra Leifer · Exhibition'}[lang];
   $('back').textContent = t('back'); $('back').href = '../' + (lang === 'he' ? '' : lang + '/');
-  if ($('loading')) { $('ltitle').innerHTML = t('title'); $('lsub').textContent = t('loading'); $('ltitles').textContent = window.SITE.text[lang].footTitles; $('lbio').textContent = window.SITE.text[lang].navAbout; $('lbio').href = '../' + (lang === 'he' ? '' : lang + '/') + 'about/'; $('lroom').textContent = {he: 'חדר המראות: בודי־ארט', ru: 'Зеркальный зал: боди-арт', en: 'The mirror room: body art'}[lang]; $('lroom').href = '?room=mirror&lang=' + lang; $('enter').textContent = toMirror ? t('enterMirror') : t('enter'); }
+  if ($('loading')) { $('ltitle').innerHTML = t('title'); $('lsub').textContent = t('loading'); $('ltitles').textContent = window.SITE.text[lang].footTitles; $('lbio').textContent = window.SITE.text[lang].navAbout; $('lbio').href = '../' + (lang === 'he' ? '' : lang + '/') + 'about/'; document.querySelectorAll('#lrooms a').forEach(a => { const k = roomOf(a.dataset.room); a.textContent = `${k + 1} · ` + (ROOMS[k].makeup ? {he: 'חדר המראות: בודי־ארט', ru: 'Зеркальный зал: боди-арт', en: 'The mirror room: body art'}[lang] : roomName(k)); a.href = `?room=${a.dataset.room}&lang=${lang}`; }); $('enter').textContent = toRoom === MR ? t('enterMirror') : t('enter'); }
+  $('lobby').textContent = '⌂ ' + t('toLobby'); $('lobby').setAttribute('aria-label', t('backTo') + ' ' + t('lobby'));
   $('help').textContent = t('help'); setTour();
   $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));
   $('lzoom').querySelector('.txt').textContent = t('zoom'); $('lzoom').setAttribute('aria-label', t('zoom')); $('lmore').textContent = t('more'); $('zhint').textContent = t('zoomHint'); $('zclose').setAttribute('aria-label', t('close'));
@@ -599,7 +687,8 @@ applyLang();
 tick();
 // a small hook for automated checks: frames drawn, the mirror room's stations, walking to one, standing somewhere
 window.__museum = {frames: () => frames, loaded: () => loaded, total: () => hung.length, stations: () => hung.map((h, i) => h.station ? i : -1).filter(i => i >= 0),
-  goTo, goToRoom, place(x, z, y = 0, p = 0) { glide = null; camera.position.set(x, 1.65, z); yaw = y; pitch = p; }, room: () => roomAt(camera.position.z), pos: () => camera.position.toArray(), rooms: () => ROOMS.map(r => [r.kind, r.front, r.back]),
+  goTo, goToRoom, goToHub, place(x, z, y = 0, p = 0) { glide = null; camera.position.set(x, 1.65, z); yaw = y; pitch = p; }, room: () => regionOf(camera.position), pos: () => camera.position.toArray(), yaw: () => yaw, gliding: () => !!glide,
+  rooms: () => ROOMS.map(r => [r.kind, r.key, r.at, r.d]),
   // where a work or photo is on screen (CSS px): its picture's corners, projected
   rect(i) { const p = hung[i].pic, b = (p.geometry.boundingBox || (p.geometry.computeBoundingBox(), p.geometry.boundingBox)), v = new THREE.Vector3(), xs = [], ys = []; p.updateMatrixWorld();
     for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) { v.set(x, y, 0).applyMatrix4(p.matrixWorld).project(camera); xs.push((v.x + 1) / 2 * innerWidth); ys.push((1 - v.y) / 2 * innerHeight); }

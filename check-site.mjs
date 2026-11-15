@@ -78,7 +78,15 @@ for (const w of SITE.works) assert.ok(homeHe.includes(`href="works/${w.id}/"`), 
 for (const n of ['סנדרה לייפר', 'Сандра Лейфер', 'Sandra Leifer']) assert.ok(homeHe.includes(n), `name ${n} in the structured data`);
 const museum = read('museum/index.html');
 assert.ok(museum.includes('catalog.js') && /Object\.keys\(CATALOG\)/.test(museum), 'museum hangs the whole catalog');
-for (const r of museum.matchAll(/kind: '(\w+)', wall:/g)) assert.ok(series.has(r[1]), `museum room ${r[1]}`);
+// The rooms open off a lobby: one doorway each, in a different lobby wall, each reachable by ?room=<key> (and ?room=hub: the lobby)
+const rooms = [...museum.matchAll(/kind: '(\w+)', key: '(\w+)', at: '(\w+)', wall:/g)];
+assert.equal(rooms.length, 4, 'museum: four rooms');
+for (const [, kind] of rooms) assert.ok(series.has(kind), `museum room ${kind}`);
+assert.equal(new Set(rooms.map(r => r[3])).size, 4, 'museum: each room off its own lobby wall');
+for (const k of ['back', 'right', 'left', 'front']) assert.ok(rooms.some(r => r[3] === k) && museum.includes(`${k}: [`), `museum: a room through the lobby's ${k} wall`);
+for (const [, , key] of rooms) assert.ok(museum.includes(`data-room="${key}" href="?room=${key}"`) || museum.includes(`href="?room=${key}" data-mirror-room-link data-room="${key}"`), `museum: loading screen links to room ${key}`);
+assert.ok(museum.includes("key === 'hub' ? LOBBY") && museum.includes('function goToHub()') && museum.includes('<button class="back lobby" id="lobby" type="button" hidden>') && museum.includes("$('lobby').onclick = goToHub"), 'museum: ?room=hub and a back-to-the-lobby button');
+assert.equal([...museum.matchAll(/lobby: '[^']+', backTo: '[^']+', toLobby: '[^']+'/g)].length, 3, 'museum: the lobby words in Hebrew, Russian and English');
 
 // Dragon tale: same reader format as the unicorn, 29 pages in both languages.
 const dragon = ['book.json', 'book-ru.json'].map(f => JSON.parse(read('dragon/' + f)));

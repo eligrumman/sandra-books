@@ -2,7 +2,8 @@
 // along both long walls; each makeup chair is turned to the aisle and holds one of Sandra Leifer's body-art
 // photos, whole and framed, propped on its arms against the backrest. The contest photos hang on the end wall.
 // A tap on a photo opens it in the body-art gallery's lightbox (assets/js/body-art.js, set up in museum/index.html).
-// Built into the museum scene (museum/index.html), so the same walk, joystick, card, tour and arrows apply.
+// Built into the museum scene (museum/index.html), so the same walk, joystick, card, tour and arrows apply. The room is built
+// in its own frame (its doorway at z = room.front, x across) inside ctx.parent, which places it off the lobby; items are in world space.
 import * as THREE from 'three';
 import {Reflector} from '../assets/vendor/Reflector.js';
 
@@ -24,7 +25,8 @@ const ARM = CHAIR.seat + .245, LONG = .95, MAT = .035, FR = .025, LEAN = .17; //
 
 export function makeupRoom(ctx) {
   const {scene, renderer, camera, room, H, WALL, DOOR, low, textTex, canvasTex, fit, fontOf, onLoad, photo} = ctx;
-  const group = new THREE.Group(); scene.add(group);
+  const group = new THREE.Group(); (ctx.parent || scene).add(group); group.updateMatrixWorld(true);
+  const wq = group.getWorldQuaternion(new THREE.Quaternion()), W = v => v.applyQuaternion(wq), tmp = new THREE.Vector3(); // W: a room direction in world space
   const zf = room.front, zb = room.back, zc = (zf + zb) / 2, z0 = zf - 2.2; // z0: the first station
   const sz = k => z0 - k * PITCH, rowZ = z0 - (N - 1) * PITCH / 2;
   const rnd = (() => { let s = 11; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
@@ -160,7 +162,7 @@ export function makeupRoom(ctx) {
     m.camera.layers.set(1); // the reflection draws only this room and the room before it
     const own = m.onBeforeRender;
     m.onBeforeRender = function (r, sc, cam) {
-      if (reflecting || cam.position.z > zf + 8) return;
+      if (reflecting || group.worldToLocal(tmp.copy(cam.position)).z > zf + 8) return;
       reflecting = true; for (const o of mirrors) if (o !== m) o.material.uniforms.seen.value = 1;
       own.call(this, r, sc, cam);
       for (const o of mirrors) o.material.uniforms.seen.value = 0; reflecting = false;
@@ -245,14 +247,14 @@ export function makeupRoom(ctx) {
     const f = framed(p, lean, LONG);
     g.updateMatrixWorld(true);
     const center = f.pic.getWorldPosition(new THREE.Vector3()), tilt = new THREE.Vector3(0, 0, 1).applyQuaternion(f.pic.getWorldQuaternion(new THREE.Quaternion()));
-    const normal = new THREE.Vector3(-st.s, 0, 0);
+    const normal = W(new THREE.Vector3(-st.s, 0, 0));
     if (st.seat.work) { // the catalog title on a card at the foot of the frame
       const card = new THREE.Mesh(new THREE.PlaneGeometry(.36, .09), new THREE.MeshBasicMaterial({map: plaqueTex((c, cw, ch) => {
         const title = ctx.title(st.seat.work); c.textAlign = 'center'; c.fillStyle = '#1e1a17'; fit(c, title, 700, 104, '"Amatic SC"', cw - 50, 40); c.fillText(title, cw / 2, ch / 2 + 34);
       })}));
       card.position.set(0, .018, .036); card.rotation.z = st.s * .03; lean.add(card);
     }
-    items.push(itemOf(p, st.seat, f, center, normal, new THREE.Vector3(0, 0, st.s), fr => {
+    items.push(itemOf(p, st.seat, f, center, normal, W(new THREE.Vector3(0, 0, st.s)), fr => {
       // square on to the photo, as close as the screen needs: the photo fills the part of the screen the card leaves free
       const m = fr.wide ? .5 : .03, dist = Math.max(1.05, (f.fh + m) / (fr.fhN * fr.tanV), (f.fw + m) / (fr.fwN * fr.tanH));
       return aimFrom(center.clone().addScaledVector(tilt, dist), center, fr);
@@ -272,15 +274,16 @@ export function makeupRoom(ctx) {
       card.position.set(0, -.12, .01); g.add(card);
     }
     g.updateMatrixWorld(true);
-    const center = f.pic.getWorldPosition(new THREE.Vector3()), normal = new THREE.Vector3(0, 0, 1);
-    items.splice(N + k, 0, itemOf(p, pr, f, center, normal, new THREE.Vector3(-1, 0, 0), fr => {
+    const center = f.pic.getWorldPosition(new THREE.Vector3()), normal = W(new THREE.Vector3(0, 0, 1));
+    items.splice(N + k, 0, itemOf(p, pr, f, center, normal, W(new THREE.Vector3(-1, 0, 0)), fr => {
       const m = fr.wide ? .5 : .1, dist = Math.max(1.3, (f.fh + m) / (fr.fhN * fr.tanV), (f.fw + m) / (fr.fwN * fr.tanH));
       return aimFrom(center.clone().addScaledVector(normal, dist), center, fr);
     }));
   });
   const sign = (s, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, ctx.drawSign)})); m.scale.setScalar(s); m.position.set(x, y, z); m.rotation.y = ry; add(m); };
   sign(1, 0, 3.55, zb + .02, 0);
-  sign(.78, 0, 3.82, zf - WALL / 2 - .01, Math.PI);
+  // over the doorway, inside: the way back to the lobby
+  { const m = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, ctx.drawBack || ctx.drawSign)})); m.scale.setScalar(.78); m.position.set(0, 3.82, zf - WALL / 2 - .01); m.rotation.y = Math.PI; add(m); }
 
   // turn towards a point and frame it in the part of the screen the card leaves free
   function aimFrom(pos, aim, fr) {
@@ -294,13 +297,10 @@ export function makeupRoom(ctx) {
 
   return {
     items, mirrors, group,
-    // stay in the aisle: in front of the chairs along the counters, in front of the end wall
-    collide(p) {
-      if (p.z > zf - .2) return;
-      const inRow = p.z < z0 + 1 && p.z > sz(N - 1) - 1, lim = inRow ? HW - CHAIR.x - .75 : HW - .45;
-      p.x = Math.max(-lim, Math.min(lim, p.x)); p.z = Math.max(zb + .6, p.z);
-    },
-    entrance: {pos: new THREE.Vector3(0, 1.65, zf - 1.2), yaw: 0, pitch: -.04},
+    // where you can walk, in the room's own frame [x0, z0, x1, z1]: the aisle between the chairs, and in front of the end wall
+    walk: [[-(HW - CHAIR.x - .75), sz(N - 1) - 1, HW - CHAIR.x - .75, z0 + 1], [-(HW - .45), zb + .6, HW - .45, sz(N - 1) - 1], [-(HW - .45), z0 + 1, HW - .45, zf - .5]],
+    // at the doorway, looking down the aisle
+    entrance: (() => { const d = W(new THREE.Vector3(0, 0, -1)); return {pos: group.localToWorld(new THREE.Vector3(0, 1.65, zf - 1.2)), yaw: Math.atan2(-d.x, -d.z), pitch: -.04}; })(),
     update() {},
     resize() { const [w, h] = rtSize(); for (const m of mirrors) m.getRenderTarget().setSize(w, h); }
   };
