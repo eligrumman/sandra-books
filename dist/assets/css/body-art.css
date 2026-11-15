@@ -25,6 +25,7 @@
 .ba-lb:not([open]){display:none}
 .ba-lb::backdrop{background:rgba(0,0,0,.7)}
 .ba-lb-top{display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad-x) 6px;font-size:13px;color:var(--muted)}
+.ba-lb-top span{direction:ltr;unicode-bidi:isolate} /* "3 / 17" reads the same in Hebrew */
 .ba-lb-btn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;border:1px solid var(--line);transition:background .25s,border-color .25s}
 .ba-lb-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3)}
 .ba-lb-stage{display:flex;align-items:center;justify-content:center;gap:clamp(6px,2vw,24px);padding:6px clamp(8px,3vw,40px);min-height:0}
@@ -33,6 +34,10 @@
 [dir=rtl] .ba-lb-nav span{display:inline-block;transform:scaleX(-1)}
 .ba-lb-cap{padding:8px var(--pad-x) calc(14px + env(safe-area-inset-bottom));text-align:center;font-size:13px;color:var(--muted);min-height:1.8em}
 @media (max-width:600px){.ba-lb-btn{width:40px;height:40px}.ba-lb-stage{padding:6px 4px;gap:4px}}
+/* the way into the 3D mirror room, under the page title */
+.ba-room{margin:-6px 0 26px}
+.ba-room a{display:inline-flex;align-items:center;min-height:44px;padding:10px 22px;border-radius:40px;border:1px solid var(--gold-soft, #ecd4ad);color:inherit;text-decoration:none;font-size:15px;transition:background .3s var(--ease, ease),color .3s var(--ease, ease)}
+.ba-room a:hover,.ba-room a:focus-visible{background:var(--gold-soft, #ecd4ad);color:#17141f}
 /* the catalog's body-art works: cards to their work pages, above the photos */
 .ba-works{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);margin:0 0 clamp(10px,1.4vw,18px)}
 .ba-work{display:block;border-radius:8px;overflow:hidden;background:var(--ink-2)}
