@@ -31,7 +31,7 @@
   var hashId = decodeURIComponent(location.hash.slice(1));
   if (hashId) links.some(function (a, i) {
     if (a.getAttribute('href').indexOf('/' + hashId + '-') < 0) return false;
-    opener = a; show(i); dlg.showModal(); document.getElementById('baLbClose').focus(); return true;
+    open(photos, i, a); return true;
   });
   document.getElementById('baLbPrev').addEventListener('click', function () { show(cur - 1); });
   document.getElementById('baLbNext').addEventListener('click', function () { show(cur + 1); });

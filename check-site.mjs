@@ -178,6 +178,7 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.equal(mixed.filter(x => typeof x === 'string').join(), ids.join(), 'hero wall: works unchanged and in order');
   assert.ok(mixed.slice(0, 12).filter(x => typeof x !== 'string').length <= 4, 'hero wall: body-art photos spread, not clumped');
   assert.equal(wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, true).filter(x => typeof x !== 'string').length, BA.filter(x => !x.review).length, 'hero wall: the skip flag still works');
+  assert.ok(read('assets/js/body-art.js').includes('location.hash') && read('assets/js/site.js').includes("'body-art/#' + id"), 'hero wall: a photo tile opens the body-art lightbox at that photo (#id)');
   assert.ok(/const HERO_SKIP_REVIEW = false;/.test(read('assets/js/site.js')), 'hero wall: nudity-tagged photos on (flag off)');
   for (const p of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(p).includes('assets/js/body-art-data.js'), `${p}: body-art-data.js for the wall`);
 }
