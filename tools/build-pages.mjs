@@ -344,7 +344,7 @@ const bioSections = read('src/site/bio.md').split(/^={10,} .*$/m).slice(1);
 // the bio's own sentence about the first places in contests, verbatim, per language
 const contestSentence = lang => bioSections[BIO_ORDER.indexOf(lang)].split('\n').map(l => l.trim()).find(l => /2025/.test(l) && !l.startsWith('#'));
 // The 3D mirror room (mirror-room/), linked from the top of the body-art page.
-const ROOM_LINK = {he: 'כניסה לחדר המראות ←', ru: 'Войти в зеркальный зал →', en: 'Enter the mirror room →'};
+const ROOM_LINK = {he: 'כניסה לחדר הבודי־ארט ←', ru: 'Войти в зал боди-арта →', en: 'Enter the body art room →'}; // the room's name: בודי־ארט (Owner, 2026-11-15)
 function bodyPage(lang) {
   const S = SEO[lang], T = SITE.text[lang], B = BA[lang], up = '../'.repeat(lang === 'he' ? 1 : 2);
   const url = SITE_URL + bodyPath(lang);
