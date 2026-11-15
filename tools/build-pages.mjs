@@ -413,7 +413,7 @@ ${ld({'@context': 'https://schema.org', '@graph': [person(lang), {'@type': 'Imag
 ${sections}${closingBlock(lang, up, 'body-art')}</main>
 <footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
 <dialog class="ba-lb" id="baLb" aria-label="${esc(B.gallery)}">
-  <div class="ba-lb-top"><span id="baLbCount"></span><button type="button" class="ba-lb-btn" id="baLbClose" aria-label="${esc(B.close)}">✕</button></div>
+  <div class="ba-lb-top"><span id="baLbCount" dir="ltr"></span><button type="button" class="ba-lb-btn" id="baLbClose" aria-label="${esc(B.close)}">✕</button></div>
   <div class="ba-lb-stage">
     <button type="button" class="ba-lb-btn ba-lb-nav" id="baLbPrev" aria-label="${esc(B.prev)}"><span aria-hidden="true">‹</span></button>
     <img id="baLbImg" alt="" draggable="false">
