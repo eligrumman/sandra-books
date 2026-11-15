@@ -1,5 +1,5 @@
 // Minimal accessible lightbox for /body-art/: a native <dialog>, arrows and Esc, focus returns to the photo that opened it.
-// The museum's mirror room opens the same dialog through window.baLightbox.open(photos, index, opener, onClose).
+// window.baLightbox.open(photos, index, opener, onClose) opens the same dialog for a given list of photos.
 (function () {
   var dlg = document.getElementById('baLb');
   if (!dlg || typeof dlg.showModal !== 'function') return; // without it the links simply open the large photo

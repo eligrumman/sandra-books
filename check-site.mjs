@@ -249,7 +249,7 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
 
 // The mirror room: a white backstage makeup room, the last room of the museum (museum/makeup-room.js).
 // Each makeup chair holds a whole body-art photo, framed (no cut-out figures); the contest photos hang on the end wall;
-// a tap opens the body-art gallery's own lightbox (assets/js/body-art.js). The vanity mirrors use the vendored Reflector
+// a tap, the arrows, the tour, the card and the zoom work exactly as in rooms 1-3 (Owner, 2026-11-15: no full-screen lightbox). The vanity mirrors use the vendored Reflector
 // (three@0.160.0, MIT). No walking Sandra; /mirror-room/ only redirects into the museum room; the links into the room.
 {
   const m = read('museum/index.html'), js = read('museum/makeup-room.js'), r = read('mirror-room/index.html');
@@ -274,10 +274,14 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.equal(inRoom.slice().sort().join(), BA.map(x => x.id).sort().join(), 'mirror room: every kept body-art photo once, none left out');
   assert.ok(!m.includes('b.review'), 'museum: the room no longer filters review-tagged photos');
   assert.ok(/D = ROW \+ /.test(js), 'mirror room: the depth follows the number of chairs');
-  // the lightbox is the gallery's own
+  // navigation and taps as in rooms 1-3 (Owner, 2026-11-15): a tap walks to the photo and shows the card, a tap on the photo you stand at zooms;
+  // the zoom is the museum's own; a catalog work on a chair gets that work's full card (and the way to buy it), a photo the card without a price or buy button
   const lb = read('assets/js/body-art.js');
-  assert.ok(lb.includes('window.baLightbox = {open: open') && lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox, open to the museum');
-  assert.ok(m.includes('<dialog class="ba-lb" id="baLb"') && m.includes('assets/css/body-art.css') && m.includes('assets/js/body-art.js') && m.includes('assets/js/body-art-data.js') && m.includes('window.baLightbox.open('), 'museum: the mirror room opens photos in the gallery lightbox');
+  assert.ok(lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox on /body-art/');
+  assert.ok(!/baLb|ba-lb|baLightbox|assets\/js\/body-art\.js|assets\/css\/body-art\.css|openPhoto/.test(m) && m.includes('assets/js/body-art-data.js'), 'museum: no full-screen body-art lightbox in the mirror room');
+  assert.ok(m.includes("const i = hit.object.userData.index; if (i === focused) openZoom(i); else goTo(i); }") && !/hung\[\w+\]\.station\) \{ if/.test(m), 'museum: a tap in the mirror room works as in the other rooms (walk, then zoom)');
+  assert.ok(m.includes("if (shown === focused) openZoom(shown); else") && m.includes('zimg.src = h.zoomSrc ||') && js.includes('zoomSrc: p.big'), 'museum: the mirror room zooms with the museum zoom');
+  assert.ok(m.includes('id = h.station ? h.work : h.id;') && m.includes('if (!id) return showStation(h);') && /function showStation\(h\) \{[\s\S]*?\$\('lask'\)\.hidden = true;[\s\S]*?\n\}/.test(m), 'museum: catalog works on chairs get the work card; photos get the card without a buy button');
   const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
   assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
   assert.ok(/The MIT License/.test(lic) && /three\.js authors/.test(lic), 'Reflector.LICENSE.txt: MIT');
