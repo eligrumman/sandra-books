@@ -118,12 +118,12 @@ window.EndlessWall($('hero'), S.works.map(w => w.id), {
 /* ---------- series ---------- */
 function renderSeries() {
   $('seriesRail').replaceChildren(...S.series.map((s, i) => {
-    const b = el('button', 'series-card reveal in'); b.type = 'button';
+    const toPage = s.id === 'body', b = el(toPage ? 'a' : 'button', 'series-card reveal in'); if (toPage) b.href = home(lang) + 'body-art/'; else b.type = 'button';
     const count = S.works.filter(w => w.kind === s.id).length;
     b.append(img(s.cover, {sizes: '(max-width:1100px) 40vw, 22vw', max: 800}), el('span', 'num', String(i + 1).padStart(2, '0')));
     const body = el('span', 'body'); body.append(el('h3', '', s[lang][0]), el('p', '', s[lang][1]), el('span', 'count', `${count} ${t('works')} ${lang === 'he' ? '←' : '→'}`));
     b.append(body);
-    b.addEventListener('click', () => { filter = s.id; renderFilters(); renderGallery(); $('works').scrollIntoView({behavior: reduced.matches ? 'auto' : 'smooth'}); });
+    if (!toPage) b.addEventListener('click', () => { filter = s.id; renderFilters(); renderGallery(); $('works').scrollIntoView({behavior: reduced.matches ? 'auto' : 'smooth'}); });
     return b;
   }));
 }
@@ -132,6 +132,11 @@ function renderSeries() {
 function renderFilters() {
   const opts = [{id: 'all', name: t('all'), n: S.works.length}, ...S.series.map(s => ({id: s.id, name: s[lang][0], n: S.works.filter(w => w.kind === s.id).length}))];
   $('filters').replaceChildren(...opts.map(o => {
+    if (o.id === 'body') { // body art lives on its own page, not as a filter of the grid
+      const a = el('a', 'filter-link'); a.href = home(lang) + 'body-art/'; a.dataset.bodyChip = '';
+      a.append(o.name, ' ', el('span', 'arr', lang === 'he' ? '←' : '→')); a.lastChild.setAttribute('aria-hidden', 'true');
+      return a;
+    }
     const b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(o.id === filter));
     b.append(o.name); b.append(el('sup', '', o.n));
     b.addEventListener('click', () => { filter = o.id; renderFilters(); renderGallery(); });
