@@ -113,6 +113,7 @@ document.addEventListener('click', e => {
 // Body-art photos mixed into the wall. Photos tagged review:'nudity' are in (Owner, 2026-11-15); set to true to keep them off the first screen.
 const HERO_SKIP_REVIEW = false;
 const bodyName = (S.series.find(s => s.id === 'body') || {[lang]: ['']})[lang][0];
+try { // a wall failure must never stop the gallery below from rendering
 window.EndlessWall($('hero'), window.EndlessWall.mix(S.works.map(w => w.id), window.BODY_ART, HERO_SKIP_REVIEW), {
   base: BASE, title: id => id.startsWith('body-art-') ? bodyName : L(work(id).t), reduced: reduced.matches,
   calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum'), document.querySelector('.wall-copy')],
@@ -121,6 +122,8 @@ window.EndlessWall($('hero'), window.EndlessWall.mix(S.works.map(w => w.id), win
     filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id));
   }
 });
+} catch (e) { console.warn('hero wall:', e); }
+
 
 /* ---------- gallery ---------- */
 function renderFilters() {

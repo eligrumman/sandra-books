@@ -3,9 +3,11 @@
    It drifts slowly by itself, follows the mouse gently (capped speed), slows down over a work
    and near the buttons, and can be dragged with a finger or the mouse. */
 window.EndlessWall = function (root, ids, opts) {
-  const IMG = window.IMAGES.works, MAX = opts.maxSpeed || 2.6, DRIFT = opts.drift || .45;
+  // images.js can fail to load (a dropped request): then works without a known size are left out, and the wall never throws
+  const IMG = (window.IMAGES || {}).works || {}, MAX = opts.maxSpeed || 2.6, DRIFT = opts.drift || .45;
   // ids: work ids (strings) or body-art tiles {id, body: true, w, h} built by EndlessWall.bodyArtTiles
   const meta = {}; ids = ids.map(x => { if (typeof x === 'string') return x; meta[x.id] = x; return x.id; });
+  ids = ids.filter(id => meta[id] || IMG[id]);
   const src = id => meta[id] ? `${opts.base}assets/img/body-art/${id}-800.webp` : `${opts.base}assets/img/works/${id}-${IMG[id].s.includes(800) ? 800 : IMG[id].s[0]}.webp`;
   const ratio = id => meta[id] ? meta[id].w8 / meta[id].h8 : IMG[id].w / IMG[id].h;
   const world = document.createElement('div'); world.className = 'wall-world'; root.prepend(world);

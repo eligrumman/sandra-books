@@ -10,12 +10,13 @@ import {Reflector} from '../assets/vendor/Reflector.js';
 // The chairs, in walking order: down the right-hand wall as you come in, then back up the left.
 // id: the body-art photo (assets/img/body-art/body-art-<id>-*.webp; its size, credit and tags come from body-art-data.js).
 // work: the catalog work this shoot is: the chair shows the catalog image, and the card its title and the way to buy it.
+// One photo per model (Owner, 2026-11-15): 7 chairs a wall; the 15th photo (body-art-11, landscape) hangs on the end wall.
 export const SEATS = [
-  {id: '06', work: 'chromatic-reverie'}, {id: '02'}, {id: '05'}, {id: '10'}, {id: '14', work: 'gaze'}, {id: '19'}, {id: '07'}, {id: '11'}, {id: '04'},
-  {id: '20'}, {id: '08'}, {id: '09'}, {id: '16'}, {id: '12'}, {id: '03'}, {id: '17'}, {id: '21'}, {id: '01', work: 'smoke'}
+  {id: '06', work: 'chromatic-reverie'}, {id: '02'}, {id: '05'}, {id: '10'}, {id: '14', work: 'gaze'}, {id: '19'}, {id: '04'},
+  {id: '08'}, {id: '09'}, {id: '12'}, {id: '03'}, {id: '17'}, {id: '21'}, {id: '01', work: 'smoke'}
 ];
-// the end wall: the contest photos, 2025 then 2026 (body-art-data.js gives each its year)
-export const PRINTS = [{id: '13'}, {id: 'event-01'}, {id: 'event-02'}, {id: 'event-04'}];
+// the end wall: the contest photos, 2025 then 2026 (body-art-data.js gives each its year), then body-art-11
+export const PRINTS = [{id: '13'}, {id: 'event-02'}, {id: '11'}];
 
 const N = SEATS.length / 2, PITCH = 1.6, ROW = N * PITCH; // stations per wall, their spacing
 export const HW = 4.2, D = ROW + 2.8; // half the room's width, its depth (the row plus the entrance and the end wall)

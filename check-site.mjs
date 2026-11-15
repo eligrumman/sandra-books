@@ -167,26 +167,35 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
 // HERO_SKIP_REVIEW flips them off again (the mix then drops anything review-tagged).
 {
   const wctx = vm.createContext({window: {}, document: {}});
+  // One photo per model (Owner, 2026-11-15): these six were second photos of a model already shown and are gone everywhere.
+  var DROPPED = ['body-art-event-01', 'body-art-event-04', 'body-art-07', 'body-art-18', 'body-art-16', 'body-art-20'];
+  for (const id of DROPPED) {
+    assert.ok(!ctx.window.BODY_ART.items.some(x => x.id === id), `body-art-data.js: ${id} is dropped`);
+    for (const s of [800, 1600]) assert.ok(!exists(`assets/img/body-art/${id}-${s}.webp`), `${id}-${s}.webp is deleted`);
+  }
   vm.runInContext(read('assets/js/wall.js'), wctx);
   const BA = ctx.window.BODY_ART.items;
   const mixed = wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, false), tiles = mixed.filter(x => typeof x !== 'string');
   assert.equal(tiles.map(x => x.id).sort().join(), BA.map(x => x.id).sort().join(), 'hero wall: every body-art photo, once');
-  for (const id of ['body-art-05', 'body-art-07', 'body-art-08', 'body-art-12', 'body-art-event-04']) assert.ok(tiles.some(x => x.id === id), `hero wall: ${id} (nudity-tagged, approved) is on the wall`);
+  for (const id of ['body-art-05', 'body-art-08', 'body-art-12']) assert.ok(tiles.some(x => x.id === id), `hero wall: ${id} (nudity-tagged, approved) is on the wall`);
+  assert.equal(BA.filter(x => x.review === 'nudity').map(x => x.id).sort().join(), 'body-art-05,body-art-08,body-art-12', 'body-art: the nudity-tagged photos are 05, 08 and 12');
+  for (const id of DROPPED) assert.ok(!tiles.some(x => x.id === id), `hero wall: ${id} (second photo of a model) is off the wall`);
   for (const t of tiles) for (const f of ['800']) assert.ok(exists(`assets/img/body-art/${t.id}-${f}.webp`), `hero wall: ${t.id}-${f}`);
-  assert.ok(tiles.some(x => x.id === 'body-art-13') && tiles.some(x => x.id === 'body-art-event-01'), 'hero wall: contest photos in');
+  assert.ok(tiles.some(x => x.id === 'body-art-13') && tiles.some(x => x.id === 'body-art-event-02'), 'hero wall: contest photos in');
   assert.equal(mixed.filter(x => typeof x !== 'string').length, BA.length);
   assert.equal(mixed.filter(x => typeof x === 'string').join(), ids.join(), 'hero wall: works unchanged and in order');
   assert.ok(mixed.slice(0, 12).filter(x => typeof x !== 'string').length <= 4, 'hero wall: body-art photos spread, not clumped');
   assert.equal(wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, true).filter(x => typeof x !== 'string').length, BA.filter(x => !x.review).length, 'hero wall: the skip flag still works');
   assert.ok(read('assets/js/body-art.js').includes('location.hash') && read('assets/js/site.js').includes("'body-art/#' + id"), 'hero wall: a photo tile opens the body-art lightbox at that photo (#id)');
   assert.ok(/const HERO_SKIP_REVIEW = false;/.test(read('assets/js/site.js')), 'hero wall: nudity-tagged photos on (flag off)');
+  assert.ok(read('assets/js/wall.js').includes('(window.IMAGES || {}).works || {}') && /try \{[^\n]*\nwindow\.EndlessWall\(\$\('hero'\)/.test(read('assets/js/site.js')), 'hero wall: a failed images.js never throws (wall.js:6) and never stops the gallery');
   for (const p of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(p).includes('assets/js/body-art-data.js'), `${p}: body-art-data.js for the wall`);
 }
 
 // Body-art gallery: a page per language, every referenced image exists, alt text everywhere, the contest sentence is the bio's own, lightbox hooks, links in.
 {
   const BODY = ctx.window.BODY_ART;
-  assert.ok(BODY && BODY.items.length >= 20, 'body-art data');
+  assert.ok(BODY && BODY.items.length === 14, 'body-art data: 14 photos (one per model; with the 5 catalog body works, 19 people)');
   const bio = read('../src/site/bio.md').split(/^={10,} .*$/m).slice(1);
   for (const [i, l] of ['he', 'ru', 'en'].entries()) {
     const pre = ['', 'ru/', 'en/'][i], page = pre + 'body-art/index.html';
@@ -215,9 +224,10 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     const sentence = bio[['he', 'en', 'ru'].indexOf(l)].split('\n').map(x => x.trim()).find(x => /2025/.test(x) && !x.startsWith('#'));
     assert.ok(sentence && h.includes(`<p class="ba-intro">${sentence.replace(/&/g, '&amp;')}</p>`), `${page}: contest sentence from the bio`);
     // contests: 2025 (body-art-13) then 2026 (events), as h3 year headings in page order
-    const i25 = h.indexOf('<h3 class="ba-year">2025</h3>'), i26 = h.indexOf('<h3 class="ba-year">2026</h3>'), i13 = h.indexOf('/body-art-13-1600.webp" data-w'), iE1 = h.indexOf('/body-art-event-01-1600.webp" data-w');
+    const i25 = h.indexOf('<h3 class="ba-year">2025</h3>'), i26 = h.indexOf('<h3 class="ba-year">2026</h3>'), i13 = h.indexOf('/body-art-13-1600.webp" data-w'), iE1 = h.indexOf('/body-art-event-02-1600.webp" data-w');
     assert.ok(i25 > h.indexOf('id="events"') && i25 < i13 && i13 < i26 && i26 < iE1, `${page}: 2025 heading above body-art-13, 2026 heading above the events`);
-    assert.ok(h.indexOf('/body-art-16-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    assert.ok(h.indexOf('/body-art-17-1600.webp" data-w') < h.indexOf('id="events"'), `${page}: body-art-13 is no longer in the art group`);
+    for (const id of DROPPED) assert.ok(!h.includes(`/${id}-`) && !h.includes(`/${id}.`), `${page}: ${id} (second photo of a model) is gone`);
     // one home, no doubles: the 5 catalog body works come first as cards to their work pages (titles as in the catalog); the photos that duplicated them are gone
     const cat = SITE.works.filter(w => w.kind === 'body');
     assert.equal(cat.length, 5, 'five catalog body works');
@@ -258,8 +268,10 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   // every body-art photo is in the room once (Owner, 2026-11-15: the nudity-tagged ones too), the catalog shoots through their works
   const BA = ctx.window.BODY_ART.items, inRoom = all.filter(x => !x.work).map(x => 'body-art-' + x.id);
   for (const id of inRoom) assert.ok(BA.find(b => b.id === id), `mirror room: ${id} is a body-art photo`);
-  for (const id of ['body-art-05', 'body-art-07', 'body-art-08', 'body-art-12', 'body-art-event-04']) assert.ok(inRoom.includes(id), `mirror room: ${id} (approved nudity-tagged photo) is in the room`);
-  for (const id of ['body-art-13', 'body-art-event-01', 'body-art-event-02']) assert.ok(inRoom.includes(id), `mirror room: ${id} (contest) is in the room`);
+  for (const id of ['body-art-05', 'body-art-08', 'body-art-12']) assert.ok(inRoom.includes(id), `mirror room: ${id} (approved nudity-tagged photo) is in the room`);
+  for (const id of ['body-art-13', 'body-art-event-02']) assert.ok(inRoom.includes(id), `mirror room: ${id} (contest) is in the room`);
+  for (const id of DROPPED) assert.ok(!inRoom.includes(id), `mirror room: ${id} (second photo of a model) is not in the room`);
+  assert.equal(inRoom.slice().sort().join(), BA.map(x => x.id).sort().join(), 'mirror room: every kept body-art photo once, none left out');
   assert.ok(!m.includes('b.review'), 'museum: the room no longer filters review-tagged photos');
   assert.ok(/D = ROW \+ /.test(js), 'mirror room: the depth follows the number of chairs');
   // the lightbox is the gallery's own
