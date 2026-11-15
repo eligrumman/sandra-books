@@ -163,22 +163,22 @@ const an = read('assets/js/analytics.js');
 assert.ok(an.includes("persistence: 'memory'") && an.includes('disable_session_recording: true') && an.includes("api_host: 'https://eu.i.posthog.com'") && an.includes("document.addEventListener('sl:wa'") && !/phx_/.test(an), 'analytics.js: cookieless config and sl:wa');
 assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנווד המהורהר', 'thoughtful-wanderer title matches the catalog');
 
-// Home hero wall: body-art photos are mixed in, none of them review-tagged (nudity), none duplicated, and the flag is on.
+// Home hero wall: every body-art photo is mixed in once, including the nudity-tagged ones (Owner, 2026-11-15: no problem with them anywhere).
+// HERO_SKIP_REVIEW flips them off again (the mix then drops anything review-tagged).
 {
   const wctx = vm.createContext({window: {}, document: {}});
   vm.runInContext(read('assets/js/wall.js'), wctx);
-  const mixed = wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, true), tiles = mixed.filter(x => typeof x !== 'string');
-  const wantIds = ctx.window.BODY_ART.items.filter(x => !x.review).map(x => x.id);
-  assert.equal(tiles.map(x => x.id).sort().join(), [...wantIds].sort().join(), 'hero wall: every non-review body-art photo, once');
-  for (const t of tiles) {
-    assert.ok(!ctx.window.BODY_ART.items.find(x => x.id === t.id).review, `hero wall: ${t.id} is review-tagged`);
-    for (const f of ['800']) assert.ok(exists(`assets/img/body-art/${t.id}-${f}.webp`), `hero wall: ${t.id}-${f}`);
-  }
-  assert.ok(tiles.length >= 5 && tiles.some(x => x.id === 'body-art-13') && tiles.some(x => x.id === 'body-art-event-01'), 'hero wall: contest photos in');
+  const BA = ctx.window.BODY_ART.items;
+  const mixed = wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, false), tiles = mixed.filter(x => typeof x !== 'string');
+  assert.equal(tiles.map(x => x.id).sort().join(), BA.map(x => x.id).sort().join(), 'hero wall: every body-art photo, once');
+  for (const id of ['body-art-05', 'body-art-07', 'body-art-08', 'body-art-12', 'body-art-event-04']) assert.ok(tiles.some(x => x.id === id), `hero wall: ${id} (nudity-tagged, approved) is on the wall`);
+  for (const t of tiles) for (const f of ['800']) assert.ok(exists(`assets/img/body-art/${t.id}-${f}.webp`), `hero wall: ${t.id}-${f}`);
+  assert.ok(tiles.some(x => x.id === 'body-art-13') && tiles.some(x => x.id === 'body-art-event-01'), 'hero wall: contest photos in');
+  assert.equal(mixed.filter(x => typeof x !== 'string').length, BA.length);
   assert.equal(mixed.filter(x => typeof x === 'string').join(), ids.join(), 'hero wall: works unchanged and in order');
-  const firstClump = mixed.slice(0, 12).filter(x => typeof x !== 'string').length;
-  assert.ok(firstClump <= 4, 'hero wall: body-art photos spread, not clumped');
-  assert.ok(/const HERO_SKIP_REVIEW = true;/.test(read('assets/js/site.js')), 'hero wall: nudity skip flag on');
+  assert.ok(mixed.slice(0, 12).filter(x => typeof x !== 'string').length <= 4, 'hero wall: body-art photos spread, not clumped');
+  assert.equal(wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, true).filter(x => typeof x !== 'string').length, BA.filter(x => !x.review).length, 'hero wall: the skip flag still works');
+  assert.ok(/const HERO_SKIP_REVIEW = false;/.test(read('assets/js/site.js')), 'hero wall: nudity-tagged photos on (flag off)');
   for (const p of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(p).includes('assets/js/body-art-data.js'), `${p}: body-art-data.js for the wall`);
 }
 
@@ -254,13 +254,13 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.equal(new Set(all.map(x => x.id)).size, all.length, 'mirror room: no photo twice');
   assert.ok(all.filter(x => x.work).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => seats.some(x => x.work === n) && SITE.works.some(w => w.id === n)), 'mirror room: the three catalog shoots show the catalog work (its card and the way to buy it)');
   for (const x of all) if (!x.work) for (const s of [800, 1600]) assert.ok(exists(`assets/img/body-art/body-art-${x.id}-${s}.webp`), `mirror room: body-art-${x.id}-${s}.webp`);
-  // nothing tagged for review (the nudity-tagged photos) is in the room; the contest photos the Owner asked for are (Owner, 2026-11-15: body-art-13, event-01, event-02)
+  // every body-art photo is in the room once (Owner, 2026-11-15: the nudity-tagged ones too), the catalog shoots through their works
   const BA = ctx.window.BODY_ART.items, inRoom = all.filter(x => !x.work).map(x => 'body-art-' + x.id);
-  for (const id of inRoom) { const x = BA.find(b => b.id === id); assert.ok(x && !x.review, `mirror room: ${id} is a body-art photo with no review tag`); }
-  for (const x of BA.filter(b => b.review)) assert.ok(!inRoom.includes(x.id) && !js.includes(`'${x.id.replace('body-art-', '')}'`), `mirror room: ${x.id} (tagged ${x.review}) stays out`);
+  for (const id of inRoom) assert.ok(BA.find(b => b.id === id), `mirror room: ${id} is a body-art photo`);
+  for (const id of ['body-art-05', 'body-art-07', 'body-art-08', 'body-art-12', 'body-art-event-04']) assert.ok(inRoom.includes(id), `mirror room: ${id} (approved nudity-tagged photo) is in the room`);
   for (const id of ['body-art-13', 'body-art-event-01', 'body-art-event-02']) assert.ok(inRoom.includes(id), `mirror room: ${id} (contest) is in the room`);
-  assert.ok(inRoom.filter(id => BA.find(b => b.id === id).group === 'events').every(id => ['body-art-13', 'body-art-event-01', 'body-art-event-02'].includes(id)), 'mirror room: only the approved contest photos');
-  assert.ok(m.includes('if (!b || b.review) return null;'), 'museum: the room never shows a review-tagged photo');
+  assert.ok(!m.includes('b.review'), 'museum: the room no longer filters review-tagged photos');
+  assert.ok(/D = ROW \+ /.test(js), 'mirror room: the depth follows the number of chairs');
   // the lightbox is the gallery's own
   const lb = read('assets/js/body-art.js');
   assert.ok(lb.includes('window.baLightbox = {open: open') && lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox, open to the museum');
