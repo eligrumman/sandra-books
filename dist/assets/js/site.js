@@ -109,10 +109,16 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- hero: endless wall ---------- */
-window.EndlessWall($('hero'), S.works.map(w => w.id), {
-  base: BASE, title: id => L(work(id).t), reduced: reduced.matches,
+// Body-art photos mixed into the wall. Photos tagged review:'nudity' stay off the first screen; set to false to let them in.
+const HERO_SKIP_REVIEW = true;
+const bodyName = (S.series.find(s => s.id === 'body') || {[lang]: ['']})[lang][0];
+window.EndlessWall($('hero'), window.EndlessWall.mix(S.works.map(w => w.id), window.BODY_ART, HERO_SKIP_REVIEW), {
+  base: BASE, title: id => id.startsWith('body-art-') ? bodyName : L(work(id).t), reduced: reduced.matches,
   calmZones: [document.querySelector('.wall-down'), document.querySelector('.wall-museum'), document.querySelector('.wall-copy')],
-  onOpen: id => { filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id)); }
+  onOpen: (id, body) => {
+    if (body) { location.href = home(lang) + 'body-art/#' + id; return; } // the body-art page opens its lightbox at that photo
+    filter = 'all'; renderFilters(); renderGallery(); openArt(visible.findIndex(w => w.id === id));
+  }
 });
 
 /* ---------- gallery ---------- */
