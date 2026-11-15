@@ -285,6 +285,9 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.ok(!/baLb|ba-lb|baLightbox|assets\/js\/body-art\.js|assets\/css\/body-art\.css|openPhoto/.test(m) && m.includes('assets/js/body-art-data.js'), 'museum: no full-screen body-art lightbox in the mirror room');
   assert.ok(m.includes("const i = hit.object.userData.index; if (i === focused) openZoom(i); else goTo(i); }") && !/hung\[\w+\]\.station\) \{ if/.test(m), 'museum: a tap in the mirror room works as in the other rooms (walk, then zoom)');
   assert.ok(m.includes("if (shown === focused) openZoom(shown); else") && m.includes('zimg.src = h.zoomSrc ||') && js.includes('zoomSrc: p.big'), 'museum: the mirror room zooms with the museum zoom');
+  // a catalog body work on a chair has only a title: its card falls back to the body-art line; no buy button where hidden (phone grid); no empty details toggle
+  assert.ok(m.includes("medium: w.med ? L(w.med) : w.kind === 'body' ? SITE.text[lang].body : ''") && m.includes("desc: w.d ? L(w.d) : []"), 'museum: the card of a catalog body work on a chair');
+  assert.ok(m.includes('#lask[hidden]{display:none}') && m.includes(".label.nodesc .lmore{display:none}"), 'museum: hidden buy button and empty details toggle stay hidden on the phone');
   assert.ok(m.includes('id = h.station ? h.work : h.id;') && m.includes('if (!id) return showStation(h);') && /function showStation\(h\) \{[\s\S]*?\$\('lask'\)\.hidden = true;[\s\S]*?\n\}/.test(m), 'museum: catalog works on chairs get the work card; photos get the card without a buy button');
   const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
   assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
