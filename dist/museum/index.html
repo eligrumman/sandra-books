@@ -83,6 +83,7 @@ canvas.drag{cursor:grabbing}
   .ldesc{grid-area:desc;display:none;margin:4px 0;max-height:min(30vh,240px);font-size:14.5px;line-height:1.6}
   .label.open .ldesc{display:block}
   .lmore{display:inline-flex;grid-area:more}
+  .label.nodesc .lmore{display:none} /* nothing to unfold: a body-art photo, or a work without a text */
   #lzoom{grid-area:zoom;justify-content:center;padding:0}
   #lzoom .txt,#lask .long{display:none}
   #lask .short{display:inline}
@@ -105,6 +106,7 @@ canvas.drag{cursor:grabbing}
 /* looking closely: the work full screen, zoom with the wheel or a pinch, drag to move */
 .zoom{position:fixed;inset:0;z-index:200;background:rgba(8,7,10,.97);overflow:hidden;touch-action:none;cursor:zoom-in}
 .zoom[hidden]{display:none}
+#lask[hidden]{display:none} /* a sold work or a body-art photo has no way to buy; the phone layout's grid would show it otherwise */
 .zoom.zoomed{cursor:grab}
 .zoom img{position:absolute;left:50%;top:50%;max-width:92vw;max-height:88vh;transform-origin:0 0;will-change:transform;user-select:none;-webkit-user-select:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .zclose{position:absolute;top:16px;inset-inline-end:16px;width:48px;height:48px;border-radius:50%;font-size:20px;color:#fff;background:rgba(20,18,26,.8);border:1px solid rgba(255,255,255,.35);cursor:pointer}
@@ -172,8 +174,9 @@ const seriesText = (kind, k) => { const s = SITE.series.find(x => x.id === kind)
 const ltr = x => '⁦' + x + '⁩';
 function info(id) {
   const w = work(id);
-  return {title: L(w.t), medium: L(w.med), size: [ltr(w.s) + ' ' + t('cm'), ltr(String(w.y))].join(' · '),
-    price: w.status ? L(w.status) : (w.price || ''), sold: !!w.status, desc: L(w.d)};
+  // the body-art works on the mirror room's chairs have only a title in the catalog: their line is the site's body-art label
+  return {title: L(w.t), medium: w.med ? L(w.med) : w.kind === 'body' ? SITE.text[lang].body : '', size: [w.s ? ltr(w.s) + ' ' + t('cm') : '', w.y ? ltr(String(w.y)) : ''].filter(Boolean).join(' · '),
+    price: w.status ? L(w.status) : (w.price || ''), sold: !!w.status, desc: w.d ? L(w.d) : []};
 }
 const onCanvas = id => /холст/i.test(CATALOG[id].med[1]);
 const size = id => work(id).s.split('×').map(n => parseFloat(n) / 100); // catalog "W × H" in cm
@@ -444,7 +447,7 @@ function showLabel(i, keep) {
   if (!id) return showStation(h);
   const f = info(id);
   $('lr').textContent = `${t('room')} ${h.room + 1} · ${roomName(h.room)}`;
-  $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
+  $('lt').textContent = f.title; $('lm').textContent = [f.medium, f.size].filter(Boolean).join(' · ');
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
   // a WhatsApp message to Sandra about this work
   const ask = $('lask'); ask.hidden = f.sold; ask.querySelector('.long').textContent = t('ask'); ask.querySelector('.short').textContent = t('askShort');
@@ -452,7 +455,7 @@ function showLabel(i, keep) {
   // what the work is about, always open
   $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
-  label.classList.add('show');
+  label.classList.toggle('nodesc', !f.desc.length); label.classList.add('show');
 }
 
 // a body-art photo in the mirror room (not a catalog work): the same card, its title and line from the data (the contest and its year,
@@ -463,7 +466,7 @@ function showStation(h) {
   $('lm').textContent = [h.year ? ltr(h.year) : seriesText('body', 1), h.credit ? `${t('credit')}: ${h.credit}` : ''].filter(Boolean).join(' · ');
   const lp = $('lp'); lp.textContent = ''; lp.classList.remove('muted'); $('lh').textContent = ''; desc.replaceChildren();
   $('lask').hidden = true;
-  label.classList.add('show');
+  label.classList.remove('open'); label.classList.add('nodesc', 'show'); $('lmore').setAttribute('aria-expanded', 'false');
 }
 
 /* ---------- looking closely ---------- */
