@@ -430,7 +430,6 @@ ${single('book/', '0.6')}
 `);
 write('robots.txt', `User-agent: *
 Allow: /
-Disallow: /concepts/
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);

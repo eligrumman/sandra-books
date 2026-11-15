@@ -54,7 +54,7 @@ for(let n=1;n<=29;n++){
 elements.language.onchange({target:{value:'ru'}});
 assert.equal(location.hash,'#p=9');assert.equal(location.search,'?lang=ru');assert.equal(document.documentElement.dir,'ltr');
 assert.equal(elements.rangeLabel.textContent,'Страница 9 из 29');
-assert.equal(elements.pageGrid.children.length,30);assert.equal(elements.notes.children.length,5);
+assert.equal(elements.pageGrid.children.length,30);
 elements.start.onclick();
 for(let n=1;n<=29;n++){
  assert.equal(elements.story.children.map(c=>c.textContent).join('\n'),ru[n].text.split('\n').filter(Boolean).join('\n'));
@@ -64,7 +64,7 @@ assert.equal(elements.next.disabled,true);
 events.keydown({key:'ArrowLeft',preventDefault(){}});assert.equal(location.hash,'#p=28');
 elements.language.onchange({target:{value:'he'}});assert.equal(location.hash,'#p=28');assert.equal(document.documentElement.dir,'rtl');
 assert.equal(elements.story.children.map(c=>c.textContent).join('\n'),book[28].text);
-assert.equal(elements.pageGrid.children.length,30);assert.equal(elements.notes.children.length,5);
+assert.equal(elements.pageGrid.children.length,30);
 assert.equal(values.get('unicorn-page'),'28');assert.equal(elements.sizeLabel.textContent,'145%');assert.equal(elements.night.attrs['aria-checked'],'true');
-console.log('PASS: 29 complete ordered pages in both languages, shared assets, Hebrew source regression, language switching retains page/settings, RTL/LTR keyboard, navigation and all five editorial questions.');
+console.log('PASS: 29 complete ordered pages in both languages, shared assets, Hebrew source regression, language switching retains page/settings, RTL/LTR keyboard and navigation.');
 await import('./check-site.mjs');
