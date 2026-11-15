@@ -900,6 +900,7 @@ function applyLang() {
 }
 document.querySelectorAll('[data-lang-link]').forEach(a => a.addEventListener('click', e => {
   e.preventDefault();
+  try { localStorage.setItem('sl_lang', a.dataset.langLink); } catch (err) {} // remembered; the home's first-visit suggestion never overrides it
   const next = a.dataset.langLink; if (next === lang) return;
   const val = document.getElementById('words'); if (val && state.words.phase === 'run') state.words.text = val.value;
   lang = next; history.replaceState(null, '', '?lang=' + lang); applyLang(); renderStep(false);

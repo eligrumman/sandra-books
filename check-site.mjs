@@ -279,4 +279,20 @@ assert.ok(!exists('concepts/'), 'concepts/ is removed');
 for (const page of ['about/', 'body-art/']) for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + page + 'index.html'); assert.ok(h.includes('class="closing') && h.includes('data-wa') && h.includes('#studio') && h.includes('#works'), `${pre}${page}: closing block`); }
 assert.ok(!read('book/index.html').includes('reviewBtn'), 'book: no editor-notes button');
 for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + 'index.html'); assert.ok(!h.includes('id="seriesRail"') && h.indexOf('id="studio"') > h.indexOf('id="works"') && h.indexOf('id="studio"') < h.indexOf('id="exhibition"'), `${pre}home: series once, workshops right after works`); }
+// Language suggestion on first visit (Owner approved auto-language 2026-11-15; changed to a banner after best-practice review): only on the Hebrew home, guarded, no redirect.
+{
+  const walk = d => fs.readdirSync(new URL(d, root), {withFileTypes: true}).flatMap(e => e.isDirectory() ? walk(d + e.name + '/') : [d + e.name]);
+  const withRedirect = walk('').filter(f => /\.html$/.test(f) && read(f).includes('lang-suggest: first visit only'));
+  assert.deepEqual(withRedirect, ['index.html'], 'lang-suggest only in dist/index.html');
+  const h = read('index.html'), m = h.match(/<script>\/\* lang-suggest[\s\S]*?<\/script>/);
+  assert.ok(m && h.indexOf(m[0]) < h.indexOf('</head>'), 'auto-lang script is in the head');
+  assert.ok(m[0].includes('bot|crawl|spider') && m[0].includes('lighthouse'), 'auto-lang: bot guard');
+  assert.equal((m[0].match(/l\.replace\(/g) || []).length, 1, 'lang-suggest: exactly one redirect');
+  assert.ok(m[0].includes("if(st){if(st==='ru'||st==='en')l.replace(st+'/'+l.search+l.hash);return}"), 'lang-suggest: redirects only on the visitor\'s own stored ru/en choice');
+  assert.ok(m[0].indexOf('l.replace(') > m[0].indexOf('d.referrer') && m[0].indexOf('l.replace(') > m[0].indexOf('bot|crawl'), 'lang-suggest: redirect only after the bot, ?lang= and referrer guards');
+  assert.ok(m[0].includes('localStorage.getItem(k)') && m[0].includes("k='sl_lang'"), 'auto-lang: stored-choice guard');
+  assert.ok(m[0].includes('lang=') && m[0].includes('d.referrer'), 'auto-lang: ?lang= and referrer guards');
+  assert.ok(read('assets/js/site.js').includes("localStorage.setItem('sl_lang'") && read('neurographics/app.js').includes("localStorage.setItem('sl_lang'"), 'language switchers store sl_lang');
+  for (const pre of ['ru/', 'en/']) assert.ok(read(pre + 'index.html').includes('hreflang="x-default"'), `${pre}home: hreflang kept`);
+}
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
