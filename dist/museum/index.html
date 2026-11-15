@@ -416,11 +416,10 @@ function drawSign(g, w) {
   g.fillStyle = rm.sub; fit(g, line, 400, 40, fontOf(), w - 80, 16); g.fillText(line, w / 2, 345);
 }
 // the room's photos: whole body-art photos (body-art-data.js: size, credit, contest year) and, for the shoots that are catalog works, the catalog image.
-// A photo tagged for review is never shown.
 const BA = window.BODY_ART.items;
 function photo(id, wid) {
   if (wid) { const m = C.IMG[wid]; return {src: C.src(wid, 800), hi: C.src(wid, 1600), big: C.src(wid, 2400), w: m.w, h: m.h}; }
-  const b = BA.find(x => x.id === 'body-art-' + id); if (!b || b.review) return null;
+  const b = BA.find(x => x.id === 'body-art-' + id); if (!b) return null;
   const f = n => `../assets/img/body-art/${b.id}-${n}.webp`;
   return {src: f(800), hi: f(1600), big: f(1600), w: b.w, h: b.h, credit: b.credit || null, year: b.group === 'events' ? b.year : null};
 }

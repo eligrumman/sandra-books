@@ -109,8 +109,8 @@ document.addEventListener('click', e => {
 });
 
 /* ---------- hero: endless wall ---------- */
-// Body-art photos mixed into the wall. Photos tagged review:'nudity' stay off the first screen; set to false to let them in.
-const HERO_SKIP_REVIEW = true;
+// Body-art photos mixed into the wall. Photos tagged review:'nudity' are in (Owner, 2026-11-15); set to true to keep them off the first screen.
+const HERO_SKIP_REVIEW = false;
 const bodyName = (S.series.find(s => s.id === 'body') || {[lang]: ['']})[lang][0];
 window.EndlessWall($('hero'), window.EndlessWall.mix(S.works.map(w => w.id), window.BODY_ART, HERO_SKIP_REVIEW), {
   base: BASE, title: id => id.startsWith('body-art-') ? bodyName : L(work(id).t), reduced: reduced.matches,
