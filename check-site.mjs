@@ -212,6 +212,10 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
     assert.ok(bw.includes('data-body-art-link') && bw.includes('body-art/"'), `${pre}works/gaze: link to the body-art page`);
   }
   assert.ok(exists('assets/css/body-art.css') && exists('assets/js/body-art.js'), 'body-art css and js');
+  // the gallery's body-art chip is a link to the body-art page in the current language, not a grid filter
+  const siteJs = read('assets/js/site.js');
+  assert.ok(/o\.id === 'body'[\s\S]{0,200}a\.href = home\(lang\) \+ 'body-art\/'[\s\S]{0,120}dataset\.bodyChip/.test(siteJs), 'site.js: the body-art filter chip links to the body-art page');
+  assert.ok(/toPage[\s\S]{0,160}home\(lang\) \+ 'body-art\/'/.test(siteJs), 'site.js: the body series card links to the body-art page');
 }
 
 // The mirror room: a white backstage makeup room, the last room of the museum (museum/makeup-room.js).

@@ -119,6 +119,11 @@ window.EndlessWall($('hero'), S.works.map(w => w.id), {
 function renderFilters() {
   const opts = [{id: 'all', name: t('all'), n: S.works.length}, ...S.series.map(s => ({id: s.id, name: s[lang][0], n: S.works.filter(w => w.kind === s.id).length}))];
   $('filters').replaceChildren(...opts.map(o => {
+    if (o.id === 'body') { // body art lives on its own page, not as a filter of the grid
+      const a = el('a', 'filter-link'); a.href = home(lang) + 'body-art/'; a.dataset.bodyChip = '';
+      a.append(o.name, ' ', el('span', 'arr', lang === 'he' ? '←' : '→')); a.lastChild.setAttribute('aria-hidden', 'true');
+      return a;
+    }
     const b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(o.id === filter));
     b.append(o.name); b.append(el('sup', '', o.n));
     b.addEventListener('click', () => { filter = o.id; renderFilters(); renderGallery(); });
