@@ -163,6 +163,25 @@ const an = read('assets/js/analytics.js');
 assert.ok(an.includes("persistence: 'memory'") && an.includes('disable_session_recording: true') && an.includes("api_host: 'https://eu.i.posthog.com'") && an.includes("document.addEventListener('sl:wa'") && !/phx_/.test(an), 'analytics.js: cookieless config and sl:wa');
 assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנווד המהורהר', 'thoughtful-wanderer title matches the catalog');
 
+// Home hero wall: body-art photos are mixed in, none of them review-tagged (nudity), none duplicated, and the flag is on.
+{
+  const wctx = vm.createContext({window: {}, document: {}});
+  vm.runInContext(read('assets/js/wall.js'), wctx);
+  const mixed = wctx.window.EndlessWall.mix(ids, ctx.window.BODY_ART, true), tiles = mixed.filter(x => typeof x !== 'string');
+  const wantIds = ctx.window.BODY_ART.items.filter(x => !x.review).map(x => x.id);
+  assert.equal(tiles.map(x => x.id).sort().join(), [...wantIds].sort().join(), 'hero wall: every non-review body-art photo, once');
+  for (const t of tiles) {
+    assert.ok(!ctx.window.BODY_ART.items.find(x => x.id === t.id).review, `hero wall: ${t.id} is review-tagged`);
+    for (const f of ['800']) assert.ok(exists(`assets/img/body-art/${t.id}-${f}.webp`), `hero wall: ${t.id}-${f}`);
+  }
+  assert.ok(tiles.length >= 5 && tiles.some(x => x.id === 'body-art-13') && tiles.some(x => x.id === 'body-art-event-01'), 'hero wall: contest photos in');
+  assert.equal(mixed.filter(x => typeof x === 'string').join(), ids.join(), 'hero wall: works unchanged and in order');
+  const firstClump = mixed.slice(0, 12).filter(x => typeof x !== 'string').length;
+  assert.ok(firstClump <= 4, 'hero wall: body-art photos spread, not clumped');
+  assert.ok(/const HERO_SKIP_REVIEW = true;/.test(read('assets/js/site.js')), 'hero wall: nudity skip flag on');
+  for (const p of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(p).includes('assets/js/body-art-data.js'), `${p}: body-art-data.js for the wall`);
+}
+
 // Body-art gallery: a page per language, every referenced image exists, alt text everywhere, the contest sentence is the bio's own, lightbox hooks, links in.
 {
   const BODY = ctx.window.BODY_ART;
