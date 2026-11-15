@@ -25,6 +25,7 @@
 .ba-lb:not([open]){display:none}
 .ba-lb::backdrop{background:rgba(0,0,0,.7)}
 .ba-lb-top{display:flex;justify-content:space-between;align-items:center;padding:14px var(--pad-x) 6px;font-size:13px;color:var(--muted)}
+.ba-lb-top span{direction:ltr;unicode-bidi:isolate} /* "3 / 17" reads the same in Hebrew */
 .ba-lb-btn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;border:1px solid var(--line);transition:background .25s,border-color .25s}
 .ba-lb-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3)}
 .ba-lb-stage{display:flex;align-items:center;justify-content:center;gap:clamp(6px,2vw,24px);padding:6px clamp(8px,3vw,40px);min-height:0}

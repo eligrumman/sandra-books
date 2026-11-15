@@ -1,41 +1,31 @@
 // The mirror room, the museum's fourth room: a white backstage makeup room. Vanity mirrors framed with bulbs
-// along both long walls; in front of each, in a makeup chair, a figure wearing Sandra Leifer's body art
-// (cut out of the real photo). From the aisle you see them from behind; their faces are in the mirrors.
-// Built into the museum scene (museum/index.html), so the same walk, joystick, card, tour and zoom apply.
+// along both long walls; each makeup chair is turned to the aisle and holds one of Sandra Leifer's body-art
+// photos, whole and framed, propped on its arms against the backrest. The contest photos hang on the end wall.
+// A tap on a photo opens it in the body-art gallery's lightbox (assets/js/body-art.js, set up in museum/index.html).
+// Built into the museum scene (museum/index.html), so the same walk, joystick, card, tour and arrows apply.
 import * as THREE from 'three';
 import {Reflector} from '../assets/vendor/Reflector.js';
 
-// The figures. h/w: the cutout's pixels, H: its height in metres at life size (from the size of the head),
-// eye: the eye line from the top (share of H). link: the catalog work this shoot is (it opens the catalog
-// image and its card shows the catalog title); without one the figure opens its own body-art photo.
-// side 1 = the right-hand wall as you come in, -1 = the left; listed in walking order (down the right, back up the left).
-export const FIG = [
-  {id: '06', link: 'work-chromatic-reverie', w: 1060, h: 1593, H: .5, eye: .30, side: 1},
-  {id: '02', w: 946, h: 1017, H: .6, eye: .36, side: 1},
-  {id: '10', w: 1030, h: 1492, H: .67, eye: .24, side: 1},
-  {id: '14', link: 'work-gaze', w: 1061, h: 1593, H: .73, eye: .27, side: 1},
-  {id: '19', w: 770, h: 1290, H: 1.12, eye: .22, side: 1},
-  {id: '11', w: 998, h: 1036, H: .75, eye: .42, side: 1, credit: 'Susanna'},
-  {id: '20', w: 1120, h: 1214, H: 1.1, eye: .24, side: -1},
-  {id: '09', w: 1477, h: 1065, H: .58, eye: .16, side: -1},
-  {id: null, side: -1}, // an empty seat: body-art-13 is the 2025 contest photo, and contest and event photos stay out of this room
-  {id: '03', w: 1061, h: 1539, H: .64, eye: .29, side: -1},
-  {id: '17', w: 1026, h: 1549, H: .72, eye: .285, side: -1},
-  {id: '01', link: 'work-smoke', w: 1260, h: 1503, H: .58, eye: .28, side: -1}
+// The chairs, in walking order: down the right-hand wall as you come in, then back up the left.
+// id: the body-art photo (assets/img/body-art/body-art-<id>-*.webp; its size, credit and tags come from body-art-data.js).
+// work: the catalog work this shoot is: the chair shows the catalog image, and the card its title and the way to buy it.
+export const SEATS = [
+  {id: '06', work: 'chromatic-reverie'}, {id: '02'}, {id: '10'}, {id: '14', work: 'gaze'}, {id: '19'}, {id: '11'}, {id: '04'},
+  {id: '20'}, {id: '09'}, {id: '16'}, {id: '03'}, {id: '17'}, {id: '21'}, {id: '01', work: 'smoke'}
 ];
-// photos whose cutout was not clean enough: framed on the end wall
-export const PRINTS = [{id: '04', w: 912, h: 1600}, {id: '16', w: 1067, h: 1600}, {id: '21', w: 1068, h: 1600}];
+// the end wall: the contest photos, 2025 then 2026 (body-art-data.js gives each its year)
+export const PRINTS = [{id: '13'}, {id: 'event-01'}, {id: 'event-02'}];
 
 export const HW = 4.2, D = 14; // half the room's width, its depth
-const N = 6, PITCH = 1.85, ROW = N * PITCH; // stations per wall, their spacing
+const N = SEATS.length / 2, PITCH = 1.6, ROW = N * PITCH; // stations per wall, their spacing
 const COUNTER = {h: .8, d: .5}, MIR = {w: 1, h: 1.1, y: .88 + .55}, BOARD = {w: 1.4, h: 1.5};
 const CHAIR = {x: 1.0, seat: .5, top: 1.06, w: .5}; // x: the seat's distance from the mirror wall
-const FIGX = 1.03, EYE = 1.15, CROP = .62; // the figure's plane from the wall, a seated eye line, the lowest cut
+const ARM = CHAIR.seat + .245, LONG = .95, MAT = .035, FR = .025, LEAN = .17; // the arms' top; a photo's long side, its white mat, its frame, its lean
 
 export function makeupRoom(ctx) {
-  const {scene, renderer, camera, room, H, WALL, DOOR, low, textTex, canvasTex, fit, fontOf, onLoad} = ctx;
+  const {scene, renderer, camera, room, H, WALL, DOOR, low, textTex, canvasTex, fit, fontOf, onLoad, photo} = ctx;
   const group = new THREE.Group(); scene.add(group);
-  const zf = room.front, zb = room.back, zc = (zf + zb) / 2, z0 = zf - 2.35; // z0: the first station
+  const zf = room.front, zb = room.back, zc = (zf + zb) / 2, z0 = zf - 2.2; // z0: the first station
   const sz = k => z0 - k * PITCH, rowZ = z0 - (N - 1) * PITCH / 2;
   const rnd = (() => { let s = 11; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
   const add = (m, parent = group) => { parent.add(m); return m; };
@@ -107,7 +97,7 @@ export function makeupRoom(ctx) {
     m.instanceMatrix.needsUpdate = true; m.computeBoundingSphere?.(); return add(m);
   }
   const stations = [];
-  for (let k = 0; k < 2 * N; k++) { const f = FIG[k], s = f.side, j = s > 0 ? k : k - N; stations.push({f, s, z: s > 0 ? sz(j) : sz(N - 1 - j)}); }
+  for (let k = 0; k < 2 * N; k++) { const s = k < N ? 1 : -1, j = s > 0 ? k : k - N; stations.push({seat: SEATS[k], s, z: s > 0 ? sz(j) : sz(N - 1 - j)}); }
   const flat = (tex, add) => new THREE.MeshBasicMaterial({map: tex, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending});
   instanced(new THREE.PlaneGeometry(2.6, 2.6), flat(halo, true), stations.length, (o, i) => { const st = stations[i]; onWall(o, st.s, .008, MIR.y + .05, st.z); });
   // warm light on the counter and on the floor in front of each mirror; shadows under the chairs and along the counters
@@ -192,7 +182,7 @@ export function makeupRoom(ctx) {
   instanced(new THREE.SphereGeometry(.034, 14, 10), new THREE.MeshBasicMaterial({color: '#fff6e6', toneMapped: false}), bulbs.length, (o, i) => { const [st, x, y] = bulbs[i]; onWall(o, st.s, .065, y, st.z); o.translateX(x); });
   instanced(new THREE.CylinderGeometry(.018, .018, .03, 10), new THREE.MeshStandardMaterial({color: '#a9a39b', roughness: .35, metalness: .5}), bulbs.length, (o, i) => { const [st, x, y] = bulbs[i]; onWall(o, st.s, .04, y, st.z); o.translateX(x); o.rotateX(Math.PI / 2); });
 
-  /* ---------- makeup chairs: black leather, a chrome column and base ---------- */
+  /* ---------- makeup chairs: black leather, a chrome column and base, swivelled round to face the aisle ---------- */
   const leather = new THREE.MeshStandardMaterial({color: '#211e1f', roughness: .42});
   const chrome = new THREE.MeshStandardMaterial({color: '#d4d4d4', roughness: .22, metalness: .55});
   const rounded = (w, h, d, r) => {
@@ -201,17 +191,17 @@ export function makeupRoom(ctx) {
     s.lineTo(x, h / 2); s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r); s.lineTo(-w / 2, y); s.quadraticCurveTo(-w / 2, -h / 2, x, -h / 2);
     const g = new THREE.ExtrudeGeometry(s, {depth: d - .03, bevelEnabled: true, bevelThickness: .015, bevelSize: .015, bevelSegments: 3, curveSegments: 6}); g.translate(0, 0, -(d - .03) / 2); return g;
   };
-  // a chair faces its mirror: local +z points at the wall
-  const chairAt = (o, st, dz, y) => { o.position.set(st.s * (HW - CHAIR.x - dz), y, st.z); o.rotation.y = st.s > 0 ? Math.PI / 2 : -Math.PI / 2; return o; };
+  // a chair faces the aisle: local +z points away from its mirror; dz: out towards the aisle
+  const chairAt = (o, st, dz, y) => { o.position.set(st.s * (HW - CHAIR.x - dz), y, st.z); o.rotation.y = st.s > 0 ? -Math.PI / 2 : Math.PI / 2; return o; };
   const backH = CHAIR.top - CHAIR.seat - .02;
-  instanced(rounded(CHAIR.w, backH, .09, .07), leather, stations.length, (o, i) => { chairAt(o, stations[i], .25, CHAIR.seat + .02 + backH / 2); o.rotateX(-.08); });
+  instanced(rounded(CHAIR.w, backH, .09, .07), leather, stations.length, (o, i) => { chairAt(o, stations[i], -.25, CHAIR.seat + .02 + backH / 2); o.rotateX(-.08); });
   instanced((() => { const g = rounded(.5, .46, .09, .06); g.rotateX(Math.PI / 2); return g; })(), leather, stations.length, (o, i) => chairAt(o, stations[i], 0, CHAIR.seat - .045));
   const armGeo = rounded(.07, .06, .44, .025);
-  instanced(armGeo, leather, stations.length * 2, (o, i) => { const st = stations[i >> 1]; chairAt(o, st, .02, CHAIR.seat + .2); o.translateX((i & 1 ? 1 : -1) * .27); });
-  instanced(new THREE.CylinderGeometry(.012, .012, .2, 8), chrome, stations.length * 2, (o, i) => { const st = stations[i >> 1]; chairAt(o, st, -.05, CHAIR.seat + .09); o.translateX((i & 1 ? 1 : -1) * .27); });
+  instanced(armGeo, leather, stations.length * 2, (o, i) => { const st = stations[i >> 1]; chairAt(o, st, -.02, CHAIR.seat + .2); o.translateX((i & 1 ? 1 : -1) * .27); });
+  instanced(new THREE.CylinderGeometry(.012, .012, .2, 8), chrome, stations.length * 2, (o, i) => { const st = stations[i >> 1]; chairAt(o, st, .05, CHAIR.seat + .09); o.translateX((i & 1 ? 1 : -1) * .27); });
   instanced(new THREE.CylinderGeometry(.035, .045, CHAIR.seat - .1, 16), chrome, stations.length, (o, i) => chairAt(o, stations[i], 0, (CHAIR.seat - .1) / 2 + .03));
   instanced(new THREE.CylinderGeometry(.27, .29, .03, 32), chrome, stations.length, (o, i) => chairAt(o, stations[i], 0, .018));
-  instanced(new THREE.TorusGeometry(.2, .012, 8, 32), chrome, stations.length, (o, i) => { chairAt(o, stations[i], -.02, .2); o.rotateX(Math.PI / 2); });
+  instanced(new THREE.TorusGeometry(.2, .012, 8, 32), chrome, stations.length, (o, i) => { chairAt(o, stations[i], .02, .2); o.rotateX(Math.PI / 2); });
 
   /* ---------- on the counter: a face-paint palette, a cup of brushes, a sponge ---------- */
   const paints = ['#d23a3a', '#f0a43a', '#f2d64b', '#3fa66b', '#2f7fd6', '#7a4bc4', '#141414', '#f4f1ea', '#d9b38c', '#e46fae', '#46c3c9', '#c08a2c'];
@@ -226,124 +216,70 @@ export function makeupRoom(ctx) {
   instanced(new THREE.CylinderGeometry(.0045, .003, .24, 6), new THREE.MeshStandardMaterial({color: '#2a2220', roughness: .4}), stations.length * 5, (o, i) => { along(o, stations[i / 5 | 0], .2, ct + .14, .36 * stations[i / 5 | 0].s); const a = (i % 5) / 5 * Math.PI * 2; o.translateX(Math.cos(a) * .015); o.translateZ(Math.sin(a) * .015); o.rotateX(Math.sin(a) * .2); o.rotateZ(Math.cos(a) * .2); });
   instanced(new THREE.SphereGeometry(.035, 14, 10), new THREE.MeshStandardMaterial({color: '#e6b9a0', roughness: .9}), stations.length, (o, i) => { along(o, stations[i], .36, ct + .016, .12 * stations[i].s); o.scale.set(1, .45, 1.25); });
 
-  /* ---------- the figures ---------- */
-  // one double-sided cutout: its front (towards the mirror) is the photo, its back a figure seen against the light
-  const FigShader = {
-    vertex: `varying vec2 vUv; varying vec2 vPos; varying vec2 vEdge; attribute vec2 edge;
-      void main() { vUv = uv; vPos = position.xy; vEdge = edge; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragment: `uniform sampler2D map; uniform sampler2D back; uniform vec3 tint; uniform vec3 rimColor; uniform vec2 texel; uniform float fade; uniform float chairTop; uniform float chairHalf;
-      varying vec2 vUv; varying vec2 vPos; varying vec2 vEdge;
-      void main() {
-        vec4 c = texture2D(map, vUv);
-        vec3 col;
-        if (gl_FrontFacing) {
-          if (c.a < 0.04) discard;
-          // the counter shades the body below its edge
-          col = c.rgb * vec3(1.05, 1.0, 0.95) * mix(0.5, 1.0, smoothstep(0.8, 0.98, vPos.y)) * fade;
-        } else {
-          // seen from behind: below the chair's back only what the chair leaves room for
-          // the outline smoothed and closed (no fingers, props or holes): a head and shoulders against the light
-          vec4 k = texture2D(back, vUv);
-          if (k.r < 0.04 || (vPos.y < chairTop && abs(vPos.x) > chairHalf)) discard;
-          c.a = k.r;
-          col = tint * mix(0.65, 1.2, smoothstep(0.95, 1.55, vPos.y)) + rimColor * k.g * smoothstep(0.95, 1.3, vPos.y) * 0.55;
-        }
-        float b = smoothstep(0.0, 0.035, min(vEdge.x, 1.0 - vEdge.x)) * smoothstep(0.0, 0.05, vEdge.y);
-        gl_FragColor = vec4(col, c.a * b);
-        #include <tonemapping_fragment>
-        #include <colorspace_fragment>
-      }`
-  };
-  const loader = new THREE.TextureLoader(), items = [], pickBox = new THREE.BoxGeometry(.75, 1.5, .8), pickPlane = new THREE.PlaneGeometry(MIR.w, MIR.h);
-  const hidden = new THREE.MeshBasicMaterial({visible: false});
-  stations.forEach((st, k) => {
-    if (!st.f.id) return;
-    const f = st.f, w = f.H * f.w / f.h, topY = EYE + f.H * f.eye, botY = topY - f.H, cut = Math.max(botY, CROP);
-    const geo = new THREE.PlaneGeometry(w, topY - cut);
-    geo.translate(0, (topY + cut) / 2, 0);
-    // the photo cropped at the cut, and mirrored: in the mirror it reads as photographed
-    const uv = geo.attributes.uv, v0 = (cut - botY) / f.H;
-    geo.setAttribute('edge', new THREE.BufferAttribute(new Float32Array(uv.array), 2)); // 0..1 across the visible part: the photo's straight borders fade
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, 1 - uv.getX(i), v0 + uv.getY(i) * (1 - v0));
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {map: {value: null}, back: {value: null}, tint: {value: new THREE.Color('#2a2220')}, rimColor: {value: new THREE.Color('#e8b47c')}, texel: {value: new THREE.Vector2(.006, .006 * w / f.H)}, fade: {value: 0}, chairTop: {value: CHAIR.top - .02}, chairHalf: {value: CHAIR.w / 2 - .02}},
-      vertexShader: FigShader.vertex, fragmentShader: FigShader.fragment, side: THREE.DoubleSide, transparent: true
-    });
-    const fig = new THREE.Mesh(geo, mat); fig.visible = false; fig.position.set(st.s * (HW - FIGX), 0, st.z); fig.rotation.y = st.s > 0 ? Math.PI / 2 : -Math.PI / 2; add(fig);
-    loader.load(`../assets/img/mirror-room/mr-${f.id}-${low ? 'lo' : 'hi'}.webp`, tx => {
-      tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = low ? 2 : 8; mat.uniforms.map.value = tx; mat.uniforms.tint.value.copy(hairTone(tx.image)); mat.uniforms.back.value = backMask(tx.image, f, w); fig.visible = true; fades.push(mat); onLoad();
-    }, undefined, onLoad);
-    // what a click or a tap finds: the figure in its chair, and its mirror
-    const body = new THREE.Mesh(pickBox, hidden); body.position.set(st.s * (HW - CHAIR.x - .05), .9, st.z); add(body);
-    const glass = onWall(new THREE.Mesh(pickPlane, hidden), st.s, .05, MIR.y, st.z); add(glass);
-    const normal = new THREE.Vector3(-st.s, 0, 0), work = f.link && f.link.startsWith('work-') ? f.link.slice(5) : null;
-    const item = {station: true, id: work || 'body-art-' + f.id, work, credit: f.credit, n: k + 1, pic: body, picks: [body, glass],
-      center: new THREE.Vector3(st.s * (HW - .05), MIR.y, st.z), normal, right: new THREE.Vector3(0, 0, st.s),
-      zoomSrc: work ? null : `../assets/img/body-art/body-art-${f.id}-1600.webp`,
-      // stand behind the chair, a little to the side, looking at the face in the mirror
-      view(fr) {
-        const pos = new THREE.Vector3(st.s * (HW - FIGX - 1.55), 1.65, st.z - st.s * .42);
-        const aim = new THREE.Vector3(st.s * (HW + FIGX - .07), EYE + .02, st.z);
-        return aimFrom(pos, aim, fr);
-      }};
-    items.push(item);
-    if (work) { // a name card tucked in the corner of the mirror
-      const card = new THREE.Mesh(new THREE.PlaneGeometry(.24, .12), new THREE.MeshBasicMaterial({map: textTex(512, 256, (g, cw, ch) => {
-        g.fillStyle = '#fbf8f2'; g.fillRect(0, 0, cw, ch); g.strokeStyle = '#d8cdbd'; g.lineWidth = 6; g.strokeRect(3, 3, cw - 6, ch - 6);
-        const title = ctx.title(work); g.textAlign = 'center'; g.fillStyle = '#1e1a17'; fit(g, title, 700, 120, '"Amatic SC"', cw - 40, 40); g.fillText(title, cw / 2, ch / 2 + 36);
+    /* ---------- the photos: whole, framed, propped on the chairs ---------- */
+  // photo(id, work) gives {src, hi, big, w, h, credit, year} (museum/index.html: body-art-data.js and the catalog), or null for a photo that may not be shown
+  const loader = new THREE.TextureLoader(), items = [];
+  const frameMat = new THREE.MeshStandardMaterial({color: '#1c1918', roughness: .45}), matBoard = new THREE.MeshBasicMaterial({color: '#f6f2ea'});
+  const backMat = new THREE.MeshLambertMaterial({color: '#6b5b4a', emissive: '#2a221a'}); // the brown paper on a frame's back, seen in the mirrors
+  const plaqueTex = (draw) => textTex(640, 160, (g, w, h) => { g.fillStyle = '#fbf8f2'; g.fillRect(0, 0, w, h); g.strokeStyle = '#d8cdbd'; g.lineWidth = 5; g.strokeRect(2.5, 2.5, w - 5, h - 5); draw(g, w, h); });
+  // one framed photo; its bottom edge at the group's origin, facing local +z. Returns the photo and its frame (what a tap finds)
+  function framed(p, g, longSide) {
+    const ph = p.h >= p.w ? longSide : longSide * p.h / p.w, pw = ph * p.w / p.h, k = MAT + FR, fw = pw + 2 * k, fh = ph + 2 * k;
+    const frame = box(fw, fh, .032, [frameMat, frameMat, frameMat, frameMat, frameMat, backMat], 0, fh / 2, 0, g);
+    plane(pw + 2 * MAT, ph + 2 * MAT, matBoard, 0, fh / 2, .0165, 0, g);
+    const mat = new THREE.MeshBasicMaterial({color: '#cfc9c0'}), pic = plane(pw, ph, mat, 0, fh / 2, .018, 0, g);
+    const set = tx => { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = low ? 4 : 8; const old = mat.map; mat.map = tx; mat.color.set('#ffffff'); mat.needsUpdate = true; old?.dispose(); };
+    loader.load(p.src, tx => { set(tx); onLoad(); }, undefined, onLoad);
+    // the sharper file once you stand in front of it
+    let sharp = false; const sharpen = () => { if (sharp || p.hi === p.src) return; sharp = true; loader.load(p.hi, set); };
+    return {pic, frame, pw, ph, fw, fh, sharpen};
+  }
+  // the item the museum walks to, shows a card for and opens in the lightbox
+  const itemOf = (p, seat, f, center, normal, right, view) => ({station: true, id: seat.work || 'body-art-' + seat.id, work: seat.work || null, credit: p.credit, year: p.year,
+    big: p.big, w: p.w, h: p.h, pic: f.pic, picks: [f.pic, f.frame], center, normal, right, sharpen: f.sharpen, view});
+  stations.forEach(st => {
+    const p = photo(st.seat.id, st.seat.work); if (!p) return;
+    // on the chair's arms, leaning back against its backrest, facing the aisle
+    const g = new THREE.Group(); g.position.set(st.s * (HW - CHAIR.x + .1), ARM, st.z); g.rotation.y = st.s > 0 ? -Math.PI / 2 : Math.PI / 2; add(g);
+    const lean = new THREE.Group(); lean.rotation.x = -LEAN; g.add(lean);
+    const f = framed(p, lean, LONG);
+    g.updateMatrixWorld(true);
+    const center = f.pic.getWorldPosition(new THREE.Vector3()), tilt = new THREE.Vector3(0, 0, 1).applyQuaternion(f.pic.getWorldQuaternion(new THREE.Quaternion()));
+    const normal = new THREE.Vector3(-st.s, 0, 0);
+    if (st.seat.work) { // the catalog title on a card at the foot of the frame
+      const card = new THREE.Mesh(new THREE.PlaneGeometry(.36, .09), new THREE.MeshBasicMaterial({map: plaqueTex((c, cw, ch) => {
+        const title = ctx.title(st.seat.work); c.textAlign = 'center'; c.fillStyle = '#1e1a17'; fit(c, title, 700, 104, '"Amatic SC"', cw - 50, 40); c.fillText(title, cw / 2, ch / 2 + 34);
       })}));
-      onWall(card, st.s, .045, MIR.y - MIR.h / 2 + .08, st.z); card.translateX(MIR.w / 2 - .13); card.rotateZ(-.06); add(card);
+      card.position.set(0, .018, .036); card.rotation.z = st.s * .03; lean.add(card);
     }
+    items.push(itemOf(p, st.seat, f, center, normal, new THREE.Vector3(0, 0, st.s), fr => {
+      // square on to the photo, as close as the screen needs: the photo fills the part of the screen the card leaves free
+      const m = fr.wide ? .5 : .03, dist = Math.max(1.05, (f.fh + m) / (fr.fhN * fr.tanV), (f.fw + m) / (fr.fwN * fr.tanH));
+      return aimFrom(center.clone().addScaledVector(tilt, dist), center, fr);
+    }));
   });
-  // the colour of the hair (the top of the cutout), darkened: the figure's tone seen from behind
-  function hairTone(img) {
-    const c = document.createElement('canvas'); c.width = c.height = 24; const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0, 24, 24);
-    const d = g.getImageData(0, 0, 24, 8).data; let r = 0, gg = 0, b = 0, n = 0;
-    for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 200) { r += d[i]; gg += d[i + 1]; b += d[i + 2]; n++; }
-    const col = n ? new THREE.Color(r / n / 255, gg / n / 255, b / n / 255) : new THREE.Color('#2a2220');
-    col.convertSRGBToLinear(); return col.multiplyScalar(.3).lerp(new THREE.Color('#0b0807'), .5);
-  }
-  const fades = [];
-  // the back of a figure: its alpha blurred and cut again (R: the soft shape, G: a thin band just inside its edge)
-  // kept to a head, neck and shoulders where the photo has them: hands, props and raised arms belong to the front
-  function backMask(img, f, wm) {
-    const W = 96, Hh = Math.max(16, Math.round(W * img.height / img.width)), c = document.createElement('canvas'); c.width = W; c.height = Hh;
-    const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0, W, Hh);
-    const im = g.getImageData(0, 0, W, Hh), d = im.data; let a = new Float32Array(W * Hh), b = new Float32Array(W * Hh);
-    for (let i = 0; i < W * Hh; i++) a[i] = d[i * 4 + 3] / 255;
-    const px = W / wm, eyeY = f.eye * Hh; // pixels per metre, the eye line
-    let sx = 0, sn = 0; for (let y = Math.max(0, Math.round(eyeY - .08 * px)); y < Math.min(Hh, eyeY + .06 * px); y++) for (let x = 0; x < W; x++) { const v = a[y * W + x]; sx += x * v; sn += v; }
-    const cx = sn ? sx / sn : W / 2, hy = eyeY - .035 * px;
-    for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
-      const dx = (x - cx) / px, dy = (y - hy) / px, ey = (y - eyeY) / px;
-      const head = (dx / .125) ** 2 + (dy / .165) ** 2 < 1, neck = Math.abs(dx) < .075 && ey > 0 && ey < .24;
-      const sh = ey > .18 && Math.abs(dx) < .11 + .12 * Math.min(1, (ey - .18) / .07);
-      if (!(head || neck || sh)) a[y * W + x] = 0;
-    }
-    const R = 4, blur = (src, dst, dx, dy, n) => { for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) { let s = 0, m = 0; for (let k = -R; k <= R; k++) { const xx = x + k * dx, yy = y + k * dy; if (xx < 0 || yy < 0 || xx >= W || yy >= Hh) continue; s += src[yy * W + xx]; m++; } dst[y * W + x] = s / m; } };
-    for (let p = 0; p < 2; p++) { blur(a, b, 1, 0); blur(b, a, 0, 1); }
-    const ss = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-    for (let i = 0; i < W * Hh; i++) { const v = a[i], m = ss(.38, .52, v); d[i * 4] = m * 255; d[i * 4 + 1] = m * (1 - ss(.52, .8, v)) * 255; d[i * 4 + 2] = 0; d[i * 4 + 3] = 255; }
-    g.putImageData(im, 0, 0);
-    const tx = new THREE.CanvasTexture(c); tx.minFilter = THREE.LinearFilter; tx.generateMipmaps = false; return tx;
-  }
 
-  /* ---------- the end wall: the room's sign and three framed photos ---------- */
-  const PW = .62, frameMat = new THREE.MeshStandardMaterial({color: '#1d1a19', roughness: .5});
-  PRINTS.forEach((p, k) => {
-    const h = 1.0, w = h * p.w / p.h, x = (1 - k) * 1.9, y = 1.6, g = new THREE.Group(); g.position.set(x, y, zb + .03); add(g);
-    box(w + .16, h + .16, .035, frameMat, 0, 0, 0, g);
-    plane(w + .1, h + .1, new THREE.MeshBasicMaterial({color: '#f2eee7'}), 0, 0, .018, 0, g);
-    const mat = new THREE.MeshBasicMaterial({color: '#ddd'}), pic = plane(w, h, mat, 0, 0, .02, 0, g);
-    const glow = new THREE.Mesh(new THREE.PlaneGeometry(w * 3 + .4, 2.6), flat(poolTex, true)); glow.position.set(0, .35, -.012); g.add(glow);
-    loader.load(`../assets/img/body-art/body-art-${p.id}-${low ? 800 : 1600}.webp`, tx => { tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = low ? 2 : 8; mat.map = tx; mat.color.set('#ffffff'); mat.needsUpdate = true; onLoad(); }, undefined, onLoad);
-    const center = new THREE.Vector3(x, y, zb + .05), normal = new THREE.Vector3(0, 0, 1);
-    items.splice(N + k, 0, {station: true, print: true, id: 'body-art-' + p.id, work: null, n: 0, pic, picks: [pic], center, normal, right: new THREE.Vector3(-1, 0, 0),
-      zoomSrc: `../assets/img/body-art/body-art-${p.id}-1600.webp`,
-      view(fr) { const dist = Math.max(1.6, (h + .3) / (fr.fhN * fr.tanV), (w + .3) / (fr.fwN * fr.tanH)); return aimFrom(center.clone().addScaledVector(normal, dist).setY(1.6), center, fr); }});
+  /* ---------- the end wall: the room's sign and the contest photos ---------- */
+  PRINTS.forEach((pr, k) => {
+    const p = photo(pr.id); if (!p) return;
+    const x = (1 - k) * 2.1, g = new THREE.Group(); g.position.set(x, 1.0, zb + .02); add(g);
+    const f = framed(p, g, 1.3);
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(f.fw * 3 + .4, 2.8), flat(poolTex, true)); glow.position.set(0, f.fh / 2 + .2, -.012); g.add(glow);
+    if (p.year) { // the contest's year on a card under the photo
+      const card = new THREE.Mesh(new THREE.PlaneGeometry(.4, .1), new THREE.MeshBasicMaterial({map: plaqueTex((c, cw, ch) => {
+        const line = ctx.events() + ' · ' + p.year; c.textAlign = 'center'; c.direction = ctx.rtl() ? 'rtl' : 'ltr'; c.fillStyle = '#1e1a17'; fit(c, line, 400, 52, fontOf(), cw - 50, 18); c.fillText(line, cw / 2, ch / 2 + 18);
+      })}));
+      card.position.set(0, -.12, .01); g.add(card);
+    }
+    g.updateMatrixWorld(true);
+    const center = f.pic.getWorldPosition(new THREE.Vector3()), normal = new THREE.Vector3(0, 0, 1);
+    items.splice(N + k, 0, itemOf(p, pr, f, center, normal, new THREE.Vector3(-1, 0, 0), fr => {
+      const m = fr.wide ? .5 : .1, dist = Math.max(1.3, (f.fh + m) / (fr.fhN * fr.tanV), (f.fw + m) / (fr.fwN * fr.tanH));
+      return aimFrom(center.clone().addScaledVector(normal, dist), center, fr);
+    }));
   });
   const sign = (s, x, y, z, ry) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshBasicMaterial({transparent: true, map: textTex(1600, 400, ctx.drawSign)})); m.scale.setScalar(s); m.position.set(x, y, z); m.rotation.y = ry; add(m); };
-  sign(1, 0, 3.5, zb + .02, 0);
+  sign(1, 0, 3.55, zb + .02, 0);
   sign(.78, 0, 3.82, zf - WALL / 2 - .01, Math.PI);
 
   // turn towards a point and frame it in the part of the screen the card leaves free
@@ -358,14 +294,14 @@ export function makeupRoom(ctx) {
 
   return {
     items, mirrors, group,
-    // stay in the aisle: behind the chairs along the counters, in front of the end wall
+    // stay in the aisle: in front of the chairs along the counters, in front of the end wall
     collide(p) {
       if (p.z > zf - .2) return;
-      const inRow = p.z < z0 + 1 && p.z > sz(N - 1) - 1, lim = inRow ? HW - CHAIR.x - .62 : HW - .45;
+      const inRow = p.z < z0 + 1 && p.z > sz(N - 1) - 1, lim = inRow ? HW - CHAIR.x - .75 : HW - .45;
       p.x = Math.max(-lim, Math.min(lim, p.x)); p.z = Math.max(zb + .6, p.z);
     },
     entrance: {pos: new THREE.Vector3(0, 1.65, zf - 1.2), yaw: 0, pitch: -.04},
-    update(dt) { for (let i = fades.length - 1; i >= 0; i--) { const u = fades[i].uniforms.fade; u.value = Math.min(1, u.value + dt * 1.5); if (u.value >= 1) fades.splice(i, 1); } },
+    update() {},
     resize() { const [w, h] = rtSize(); for (const m of mirrors) m.getRenderTarget().setSize(w, h); }
   };
 }

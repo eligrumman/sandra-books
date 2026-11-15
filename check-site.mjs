@@ -207,25 +207,34 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
 }
 
 // The mirror room: a white backstage makeup room, the last room of the museum (museum/makeup-room.js).
-// The figures sit at vanity mirrors, the vendored Reflector (three@0.160.0, MIT) shows their faces;
-// no walking Sandra; /mirror-room/ only redirects into the museum room; the links into the room.
+// Each makeup chair holds a whole body-art photo, framed (no cut-out figures); the contest photos hang on the end wall;
+// a tap opens the body-art gallery's own lightbox (assets/js/body-art.js). The vanity mirrors use the vendored Reflector
+// (three@0.160.0, MIT). No walking Sandra; /mirror-room/ only redirects into the museum room; the links into the room.
 {
   const m = read('museum/index.html'), js = read('museum/makeup-room.js'), r = read('mirror-room/index.html');
   assert.ok(m.includes("from './makeup-room.js'") && m.includes('makeup: true') && m.includes('id="lroom" href="?room=mirror"'), 'museum: the mirror room is its last room, with a link to it');
   assert.ok(js.includes("from '../assets/vendor/Reflector.js'") && js.includes("from 'three'"), 'makeup-room.js: three and the vendored Reflector');
   assert.ok(!exists('mirror-room/room.js') && !/sandra|trail|walker/i.test(js.replace(/\/\/.*$/gm, '').replace(/Sandra Leifer/g, '')), 'mirror room: no walking Sandra and no paint trail');
   assert.ok(r.includes('<meta name="robots" content="noindex">') && r.includes(`<link rel="canonical" href="${SITE_URL}museum/">`) && r.includes("location.replace('../museum/?room=mirror'") && r.includes('url=../museum/?room=mirror'), 'mirror-room/: redirects into the museum room');
-  const figs = [...js.matchAll(/\{id: '(\d\d)',(?: link: '([^']+)',)? w: \d+, h: \d+, H:/g)].map(m => ({id: m[1], link: m[2] || 'body-art-' + m[1]}));
-  const prints = [...js.matchAll(/\{id: '(\d\d)', w: \d+, h: \d+\}/g)].map(m => m[1]);
-  assert.ok(figs.length >= 10 && prints.length >= 1, 'mirror room: figures and prints');
-  for (const f of figs) for (const s of ['hi', 'lo']) assert.ok(fs.statSync(new URL(`assets/img/mirror-room/mr-${f.id}-${s}.webp`, root)).size > 5000, `mirror room: mr-${f.id}-${s}.webp`);
-  for (const f of figs) if (!f.link.startsWith('work-')) assert.ok(exists(`assets/img/body-art/body-art-${f.id}-1600.webp`), `mirror room: body-art-${f.id}-1600.webp`);
-  for (const id of prints) for (const s of [800, 1600]) assert.ok(exists(`assets/img/body-art/body-art-${id}-${s}.webp`), `mirror room: print body-art-${id}-${s}.webp`);
-  assert.equal(new Set(figs.map(f => f.link)).size, figs.length, 'mirror room: no photo has two figures');
-  assert.ok(figs.filter(f => f.link.startsWith('work-')).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => figs.some(f => f.link === 'work-' + n) && SITE.works.some(w => w.id === n)), 'mirror room: the three figures that are catalog shoots open the catalog work');
-  // nothing awaiting the Owner's nudity decision, and no contest or event photo, is in the room
-  const BA = ctx.window.BODY_ART.items, inRoom = [...figs.filter(f => !f.link.startsWith('work-')).map(f => 'body-art-' + f.id), ...prints.map(id => 'body-art-' + id)];
-  for (const id of inRoom) { const x = BA.find(b => b.id === id); assert.ok(x && !x.review && x.group !== 'events', `mirror room: ${id} is an art photo with no review tag`); }
+  // the photos: whole, from the body-art folder or the catalog, never the old cut-outs
+  const list = name => { const b = js.match(new RegExp(`export const ${name} = \\[([\\s\\S]*?)\\];`)); assert.ok(b, `makeup-room.js: ${name}`); return [...b[1].matchAll(/\{id: '([\w-]+)'(?:, work: '([\w-]+)')?\}/g)].map(x => ({id: x[1], work: x[2] || null})); };
+  const seats = list('SEATS'), prints = list('PRINTS'), all = [...seats, ...prints];
+  assert.ok(seats.length >= 12 && seats.length % 2 === 0 && prints.length >= 1, 'mirror room: a photo on every chair, and the end wall');
+  assert.ok(!exists('assets/img/mirror-room') && !/mirror-room\/mr-|backMask|hairTone/.test(js), 'mirror room: no cut-out figures');
+  assert.equal(new Set(all.map(x => x.id)).size, all.length, 'mirror room: no photo twice');
+  assert.ok(all.filter(x => x.work).length === 3 && ['smoke', 'gaze', 'chromatic-reverie'].every(n => seats.some(x => x.work === n) && SITE.works.some(w => w.id === n)), 'mirror room: the three catalog shoots show the catalog work (its card and the way to buy it)');
+  for (const x of all) if (!x.work) for (const s of [800, 1600]) assert.ok(exists(`assets/img/body-art/body-art-${x.id}-${s}.webp`), `mirror room: body-art-${x.id}-${s}.webp`);
+  // nothing tagged for review (the nudity-tagged photos) is in the room; the contest photos the Owner asked for are (Owner, 2026-11-15: body-art-13, event-01, event-02)
+  const BA = ctx.window.BODY_ART.items, inRoom = all.filter(x => !x.work).map(x => 'body-art-' + x.id);
+  for (const id of inRoom) { const x = BA.find(b => b.id === id); assert.ok(x && !x.review, `mirror room: ${id} is a body-art photo with no review tag`); }
+  for (const x of BA.filter(b => b.review)) assert.ok(!inRoom.includes(x.id) && !js.includes(`'${x.id.replace('body-art-', '')}'`), `mirror room: ${x.id} (tagged ${x.review}) stays out`);
+  for (const id of ['body-art-13', 'body-art-event-01', 'body-art-event-02']) assert.ok(inRoom.includes(id), `mirror room: ${id} (contest) is in the room`);
+  assert.ok(inRoom.filter(id => BA.find(b => b.id === id).group === 'events').every(id => ['body-art-13', 'body-art-event-01', 'body-art-event-02'].includes(id)), 'mirror room: only the approved contest photos');
+  assert.ok(m.includes('if (!b || b.review) return null;'), 'museum: the room never shows a review-tagged photo');
+  // the lightbox is the gallery's own
+  const lb = read('assets/js/body-art.js');
+  assert.ok(lb.includes('window.baLightbox = {open: open') && lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox, open to the museum');
+  assert.ok(m.includes('<dialog class="ba-lb" id="baLb"') && m.includes('assets/css/body-art.css') && m.includes('assets/js/body-art.js') && m.includes('assets/js/body-art-data.js') && m.includes('window.baLightbox.open('), 'museum: the mirror room opens photos in the gallery lightbox');
   const refl = read('assets/vendor/Reflector.js'), lic = read('assets/vendor/Reflector.LICENSE.txt');
   assert.ok(refl.includes("} from './three.module.min.js';") && !/from 'three'/.test(refl) && refl.includes('three@0.160.0'), 'Reflector.js: import path and version');
   assert.ok(/The MIT License/.test(lic) && /three\.js authors/.test(lic), 'Reflector.LICENSE.txt: MIT');
