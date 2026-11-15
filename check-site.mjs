@@ -274,6 +274,10 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.equal(inRoom.slice().sort().join(), BA.map(x => x.id).sort().join(), 'mirror room: every kept body-art photo once, none left out');
   assert.ok(!m.includes('b.review'), 'museum: the room no longer filters review-tagged photos');
   assert.ok(/D = ROW \+ /.test(js), 'mirror room: the depth follows the number of chairs');
+  // its visible name is the body-art label in each language (Owner, 2026-11-15: "חדר המראות לשנות לבודי ארט את השם"); ?room=mirror and /mirror-room/ stay
+  assert.ok(m.includes("mirror: 'בודי־ארט'") && m.includes("mirror: 'Боди-арт'") && m.includes("mirror: 'Body art'"), 'museum: the room is named בודי־ארט / Боди-арт / Body art');
+  for (const [f, h] of [['museum/index.html', m], ['mirror-room/index.html', r], ...['', 'ru/', 'en/'].map(p => [p + 'body-art/index.html', read(p + 'body-art/index.html')])])
+    assert.ok(!/חדר המראות|Зеркальный зал|зеркальный зал|The mirror room|Enter the mirror room|mirror room of body art/.test(h.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')), `${f}: no visible 'mirror room' name left`);
   // the lightbox is the gallery's own
   const lb = read('assets/js/body-art.js');
   assert.ok(lb.includes('window.baLightbox = {open: open') && lb.includes("querySelectorAll('.ba-item a')"), 'body-art.js: the gallery lightbox, open to the museum');
