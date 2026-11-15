@@ -267,7 +267,9 @@ for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + 'index.html'); asse
   const h = read('index.html'), m = h.match(/<script>\/\* lang-suggest[\s\S]*?<\/script>/);
   assert.ok(m && h.indexOf(m[0]) < h.indexOf('</head>'), 'auto-lang script is in the head');
   assert.ok(m[0].includes('bot|crawl|spider') && m[0].includes('lighthouse'), 'auto-lang: bot guard');
-  assert.ok(!/location\.replace|location\.href\s*=/.test(m[0]), 'lang-suggest never redirects');
+  assert.equal((m[0].match(/l\.replace\(/g) || []).length, 1, 'lang-suggest: exactly one redirect');
+  assert.ok(m[0].includes("if(st){if(st==='ru'||st==='en')l.replace(st+'/'+l.search+l.hash);return}"), 'lang-suggest: redirects only on the visitor\'s own stored ru/en choice');
+  assert.ok(m[0].indexOf('l.replace(') > m[0].indexOf('d.referrer') && m[0].indexOf('l.replace(') > m[0].indexOf('bot|crawl'), 'lang-suggest: redirect only after the bot, ?lang= and referrer guards');
   assert.ok(m[0].includes('localStorage.getItem(k)') && m[0].includes("k='sl_lang'"), 'auto-lang: stored-choice guard');
   assert.ok(m[0].includes('lang=') && m[0].includes('d.referrer'), 'auto-lang: ?lang= and referrer guards');
   assert.ok(read('assets/js/site.js').includes("localStorage.setItem('sl_lang'") && read('neurographics/app.js').includes("localStorage.setItem('sl_lang'"), 'language switchers store sl_lang');
