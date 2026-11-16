@@ -160,6 +160,8 @@ em{font-style:normal}
 .filters button[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .filters button sup{font-size:10.5px;margin-inline-start:4px;opacity:1;color:inherit}
 .masonry{display:flex;gap:clamp(14px,2.2vw,32px);align-items:flex-start}
+/* before site.js lays out the columns the grid holds the 53 works as a flat row; wrapped, it no longer makes a phone browser zoom the page out to 1560px (which also loaded every gallery image at once) */
+.masonry{flex-wrap:wrap}.masonry>.work{flex:0 0 calc(50% - 32px)}
 .mcol{flex:1;min-width:0}
 .work{break-inside:avoid;margin:0 0 clamp(26px,3vw,46px);display:block;width:100%;text-align:start;animation:fadeUp .7s var(--ease) both}
 .work .frame{position:relative;overflow:hidden;border-radius:6px;background:var(--bg,#ddd)}

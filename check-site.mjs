@@ -190,6 +190,15 @@ assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנו�
   assert.ok(/const HERO_SKIP_REVIEW = false;/.test(read('assets/js/site.js')), 'hero wall: nudity-tagged photos on (flag off)');
   assert.ok(read('assets/js/wall.js').includes('(window.IMAGES || {}).works || {}') && /try \{[^\n]*\nwindow\.EndlessWall\(\$\('hero'\)/.test(read('assets/js/site.js')), 'hero wall: a failed images.js never throws (wall.js:6) and never stops the gallery');
   for (const p of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(p).includes('assets/js/body-art-data.js'), `${p}: body-art-data.js for the wall`);
+  // Hero images on the phone (Owner 2026-11-16, "עולות אחרי מלא זמן"): the wall loads 480 px thumbnails, and only for tiles on screen;
+  // every tile has a placeholder colour; lazy is set before src (Safari otherwise fetched all gallery images at 1600 px on load).
+  for (const id of ids) assert.ok(exists(`assets/img/works/${id}-480.webp`), `hero wall thumb: works/${id}-480.webp (python3 -E tools/build-thumbs.py)`);
+  for (const t of tiles) assert.ok(exists(`assets/img/body-art/${t.id}-480.webp`) && /^#[0-9a-f]{6}$/.test(t.c), `hero wall thumb + colour: ${t.id}`);
+  for (const id of ids) assert.ok(/^#[0-9a-f]{6}$/.test((ctx.window.IMAGES.works[id] || {}).c || ''), `hero wall colour: ${id}`);
+  const wall = read('assets/js/wall.js'), site = read('assets/js/site.js');
+  assert.ok(wall.includes('-480.webp') && wall.includes('if (!t.on) show(t);') && !/\.loading\s*=/.test(wall) && !/im\.src = src\(it\.id\)/.test(wall), 'hero wall: thumbnails, loaded when a tile first shows (no all-at-once lazy)');
+  assert.ok(wall.includes('root.clientWidth') && !/innerWidth < 700/.test(wall), 'hero wall: laid out by the hero size, not a zoomed-out innerWidth');
+  assert.ok(site.indexOf("if (lazy) i.loading = 'lazy'") < site.indexOf('i.src = s.src') && !/\.src = [^;]+;[^\n]*\.loading = 'lazy'/.test(site), 'site.js: loading=lazy is set before src');
 }
 
 // Body-art gallery: a page per language, every referenced image exists, alt text everywhere, the contest sentence is the bio's own, lightbox hooks, links in.

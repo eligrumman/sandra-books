@@ -32,9 +32,9 @@ function srcset(id, max) {
 }
 function img(id, {sizes = '100vw', max, lazy = true, alt = ''} = {}) {
   const i = document.createElement('img'), s = srcset(id, max), m = IMG.works[id];
+  if (lazy) i.loading = 'lazy'; // before src: Safari fetches at once an image whose src is set while it is not lazy yet (all 53 gallery images at 1600 px, 18 MB)
   if (s.srcset) { i.srcset = s.srcset; i.sizes = sizes; }
   i.src = s.src; i.alt = alt; i.decoding = 'async';
-  if (lazy) i.loading = 'lazy';
   if (m) { i.width = m.w; i.height = m.h; }
   return i;
 }
@@ -254,7 +254,7 @@ $('lbStage').addEventListener('pointerup', e => {
 function renderExhibition() {
   $('hallGrid').replaceChildren(...S.exhibition.map((s, i) => {
     const f = el('figure', 'hall' + (i === 0 ? ' wide' : '')), m = IMG.studio[s.id] || {w: 1400, h: 933, c: '#333'}, im = el('img');
-    im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
+    im.loading = 'lazy'; im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.decoding = 'async'; im.alt = s[lang];
     f.style.background = m.c; f.append(im, el('figcaption', '', s[lang])); return f;
   }));
 }
@@ -263,7 +263,7 @@ function renderExhibition() {
 function renderStudio() {
   $('studioReel').replaceChildren(...S.studio.map(s => {
     const f = el('figure'), m = IMG.studio[s.id] || {w: 1400, h: 933, c: '#333'}, im = el('img');
-    im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.loading = 'lazy'; im.decoding = 'async'; im.alt = s[lang];
+    im.loading = 'lazy'; im.src = `${BASE}assets/img/studio/${s.id}.webp`; im.width = m.w; im.height = m.h; im.decoding = 'async'; im.alt = s[lang];
     f.style.background = m.c; f.style.aspectRatio = `${m.w} / ${m.h}`;
     f.append(im, el('figcaption', '', s[lang])); return f;
   }));
