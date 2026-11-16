@@ -6,7 +6,7 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="Sandra Leifer"><meta property="og:locale" content="he_IL"><meta property="og:locale:alternate" content="ru_RU"><meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="התערוכה של סנדרה לייפר"><meta property="og:description" content="התערוכה הווירטואלית של סנדרה לייפר: ארבעה חדרים, כל יצירה בגודלה האמיתי, ובסוף חדר הבודי־ארט."><meta property="og:url" content="https://sandraleifer.com/museum/">
 <meta property="og:image" content="https://sandraleifer.com/assets/img/og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://sandraleifer.com/museum/#page","url":"https://sandraleifer.com/museum/","name":"התערוכה של סנדרה לייפר","description":"Virtual 3D exhibition of Sandra Leifer: four rooms, every work at its true size, ending in a body art room. Hebrew, Russian, English.","inLanguage":["he","ru","en"],"author":{"@type":"Person","@id":"https://sandraleifer.com/#sandra","name":"Sandra Leifer"},"isPartOf":{"@id":"https://sandraleifer.com/#site"}}</script><link rel="stylesheet" href="../assets/css/shared.css"><link rel="stylesheet" href="../assets/css/body-art.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://sandraleifer.com/museum/#page","url":"https://sandraleifer.com/museum/","name":"התערוכה של סנדרה לייפר","description":"Virtual 3D exhibition of Sandra Leifer: four rooms, every work at its true size, ending in a body art room. Hebrew, Russian, English.","inLanguage":["he","ru","en"],"author":{"@type":"Person","@id":"https://sandraleifer.com/#sandra","name":"Sandra Leifer"},"isPartOf":{"@id":"https://sandraleifer.com/#site"}}</script><link rel="stylesheet" href="../assets/css/shared.css">
 <style>
 html,body{height:100%;overflow:hidden;background:#0c0b0f}
 html[lang=ru] body{font-family:'Comfortaa',system-ui,sans-serif}
@@ -83,6 +83,7 @@ canvas.drag{cursor:grabbing}
   .ldesc{grid-area:desc;display:none;margin:4px 0;max-height:min(30vh,240px);font-size:14.5px;line-height:1.6}
   .label.open .ldesc{display:block}
   .lmore{display:inline-flex;grid-area:more}
+  .label.nodesc .lmore{display:none} /* nothing to unfold: a body-art photo, or a work without a text */
   #lzoom{grid-area:zoom;justify-content:center;padding:0}
   #lzoom .txt,#lask .long{display:none}
   #lask .short{display:inline}
@@ -105,14 +106,11 @@ canvas.drag{cursor:grabbing}
 /* looking closely: the work full screen, zoom with the wheel or a pinch, drag to move */
 .zoom{position:fixed;inset:0;z-index:200;background:rgba(8,7,10,.97);overflow:hidden;touch-action:none;cursor:zoom-in}
 .zoom[hidden]{display:none}
+#lask[hidden]{display:none} /* a sold work or a body-art photo has no way to buy; the phone layout's grid would show it otherwise */
 .zoom.zoomed{cursor:grab}
 .zoom img{position:absolute;left:50%;top:50%;max-width:92vw;max-height:88vh;transform-origin:0 0;will-change:transform;user-select:none;-webkit-user-select:none;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .zclose{position:absolute;top:16px;inset-inline-end:16px;width:48px;height:48px;border-radius:50%;font-size:20px;color:#fff;background:rgba(20,18,26,.8);border:1px solid rgba(255,255,255,.35);cursor:pointer}
 .zhint{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);font-size:13px;color:#ddd;background:rgba(20,18,26,.75);padding:8px 14px;border-radius:30px;white-space:nowrap;pointer-events:none}
-
-/* the mirror room's photos open in the body-art gallery's lightbox (assets/css/body-art.css): the site's colours it relies on */
-.ba-lb{--pad-x:clamp(16px,4vw,48px);--muted:#a59d98;--line:rgba(255,255,255,.12);--text:#efe9df;font-family:var(--sans);background:#09080c}
-:where(.ba-lb) button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* readable over light walls */
 .cbar{mix-blend-mode:normal}
@@ -143,19 +141,10 @@ body,.ui,.joy,.help,button{-webkit-user-select:none;user-select:none;-webkit-tou
 <div class="ui"><button id="left"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button><button id="tour"><span class="ico" aria-hidden="true"></span><span class="txt"></span></button><button id="right"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
 </div>
 <div class="zoom" id="zoom" hidden><img id="zimg" alt="" draggable="false"><button type="button" class="zclose" id="zclose">✕</button><span class="zhint" id="zhint"></span></div>
-<dialog class="ba-lb" id="baLb" aria-label="">
-  <div class="ba-lb-top"><span id="baLbCount"></span><button type="button" class="ba-lb-btn" id="baLbClose" aria-label="">✕</button></div>
-  <div class="ba-lb-stage">
-    <button type="button" class="ba-lb-btn ba-lb-nav" id="baLbPrev" aria-label=""><span aria-hidden="true">‹</span></button>
-    <img id="baLbImg" alt="" draggable="false">
-    <button type="button" class="ba-lb-btn ba-lb-nav" id="baLbNext" aria-label=""><span aria-hidden="true">›</span></button>
-  </div>
-  <div class="ba-lb-cap" id="baLbCap"></div>
-</dialog>
 <div class="help" id="help"></div>
 <div class="joy" id="joy"><i id="knob"></i></div>
 
-<script src="../assets/js/body-art-data.js"></script><script src="../assets/js/body-art.js"></script><script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script><script src="../assets/js/catalog.js"></script><script>window.C_BASE = "../";</script><script src="../assets/js/shared.js"></script>
+<script src="../assets/js/body-art-data.js"></script><script src="../assets/js/images.js"></script><script src="../assets/js/data.js"></script><script src="../assets/js/catalog.js"></script><script>window.C_BASE = "../";</script><script src="../assets/js/shared.js"></script>
 <script type="module">
 import * as THREE from 'three';
 import {makeupRoom, D as MAKEUP_D, HW as MAKEUP_HW} from './makeup-room.js';
@@ -164,13 +153,13 @@ import {makeupRoom, D as MAKEUP_D, HW as MAKEUP_HW} from './makeup-room.js';
 const T = {
   he: {back: '← חזרה לאתר', title: 'התערוכה של<br>סנדרה', loading: 'תולים את היצירות על הקירות…', enter: 'להיכנס לתערוכה', tour: 'סיור מודרך', stop: 'עצירה',
     help: 'גררו כדי להסתכל מסביב · חצים או W A S D כדי ללכת · לחיצה על יצירה מביאה אתכם אליה', about: 'על היצירה', ask: 'לפרטים ולרכישה',
-    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', zoom: 'הגדלה', zoomHint: 'גלגלת או צביטה כדי להגדיל · גררו כדי לזוז · לחיצה כפולה לאיפוס', close: 'סגירה', more: 'פרטים', askShort: 'לרכישה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר', mirror: 'בודי־ארט', enterMirror: 'להיכנס לחדר הבודי־ארט', gallery: 'לגלריית הבודי־ארט', galleryShort: 'לגלריה', credit: 'צילום', events: 'תחרויות ואירועים', lbPrev: 'התמונה הקודמת', lbNext: 'התמונה הבאה', lbName: 'גלריית תמונות', lobby: 'הלובי', backTo: 'חזרה אל', toLobby: 'ללובי'},
+    left: 'היצירה משמאל', right: 'היצירה מימין', joy: 'ג׳ויסטיק להליכה', zoom: 'הגדלה', zoomHint: 'גלגלת או צביטה כדי להגדיל · גררו כדי לזוז · לחיצה כפולה לאיפוס', close: 'סגירה', more: 'פרטים', askShort: 'לרכישה', cm: 'ס״מ', name: 'סנדרה לייפר', room: 'חדר', mirror: 'בודי־ארט', enterMirror: 'להיכנס לחדר הבודי־ארט', credit: 'צילום', events: 'תחרויות ואירועים', lobby: 'הלובי', backTo: 'חזרה אל', toLobby: 'ללובי'},
   ru: {back: '← На сайт', title: 'Выставка<br>Сандры', loading: 'Развешиваем работы…', enter: 'Войти на выставку', tour: 'Экскурсия', stop: 'Стоп',
     help: 'Тяните, чтобы осмотреться · стрелки или W A S D, чтобы идти · нажмите на работу, чтобы подойти к ней', about: 'О работе', ask: 'Узнать о покупке',
-    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', zoom: 'Увеличить', zoomHint: 'Колёсико или щипок — увеличить · тяните, чтобы двигать · двойной щелчок — сброс', close: 'Закрыть', more: 'Подробнее', askShort: 'Купить', cm: 'см', name: 'Сандра Лейфер', room: 'Зал', mirror: 'Боди-арт', enterMirror: 'Войти в зал боди-арта', gallery: 'К галерее боди-арта', galleryShort: 'Галерея', credit: 'Фото', events: 'Конкурсы и мероприятия', lbPrev: 'Предыдущее фото', lbNext: 'Следующее фото', lbName: 'Галерея фотографий', lobby: 'Холл', backTo: 'Назад в', toLobby: 'В холл'},
+    left: 'Работа слева', right: 'Работа справа', joy: 'Джойстик', zoom: 'Увеличить', zoomHint: 'Колёсико или щипок — увеличить · тяните, чтобы двигать · двойной щелчок — сброс', close: 'Закрыть', more: 'Подробнее', askShort: 'Купить', cm: 'см', name: 'Сандра Лейфер', room: 'Зал', mirror: 'Боди-арт', enterMirror: 'Войти в зал боди-арта', credit: 'Фото', events: 'Конкурсы и мероприятия', lobby: 'Холл', backTo: 'Назад в', toLobby: 'В холл'},
   en: {back: '← Back to the site', title: 'Sandra’s<br>exhibition', loading: 'Hanging the works…', enter: 'Enter the exhibition', tour: 'Guided tour', stop: 'Stop',
     help: 'Drag to look around · arrows or W A S D to walk · click a work to go to it', about: 'About the work', ask: 'Details and purchase',
-    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', zoom: 'Zoom in', zoomHint: 'Wheel or pinch to zoom · drag to move · double-click to reset', close: 'Close', more: 'Details', askShort: 'Buy', cm: 'cm', name: 'Sandra Leifer', room: 'Room', mirror: 'Body art', enterMirror: 'Enter the body art room', gallery: 'Body-art gallery', galleryShort: 'Gallery', credit: 'Photo', events: 'Contests & events', lbPrev: 'Previous photo', lbNext: 'Next photo', lbName: 'Photo gallery', lobby: 'Lobby', backTo: 'Back to the', toLobby: 'Lobby'}
+    left: 'Work on the left', right: 'Work on the right', joy: 'Walking joystick', zoom: 'Zoom in', zoomHint: 'Wheel or pinch to zoom · drag to move · double-click to reset', close: 'Close', more: 'Details', askShort: 'Buy', cm: 'cm', name: 'Sandra Leifer', room: 'Room', mirror: 'Body art', enterMirror: 'Enter the body art room', credit: 'Photo', events: 'Contests & events', lobby: 'Lobby', backTo: 'Back to the', toLobby: 'Lobby'}
 };
 const LANGS = ['he', 'ru', 'en'];
 const store = {get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }};
@@ -185,8 +174,9 @@ const seriesText = (kind, k) => { const s = SITE.series.find(x => x.id === kind)
 const ltr = x => '⁦' + x + '⁩';
 function info(id) {
   const w = work(id);
-  return {title: L(w.t), medium: L(w.med), size: [ltr(w.s) + ' ' + t('cm'), ltr(String(w.y))].join(' · '),
-    price: w.status ? L(w.status) : (w.price || ''), sold: !!w.status, desc: L(w.d)};
+  // the body-art works on the mirror room's chairs have only a title in the catalog: their line is the site's body-art label
+  return {title: L(w.t), medium: w.med ? L(w.med) : w.kind === 'body' ? SITE.text[lang].body : '', size: [w.s ? ltr(w.s) + ' ' + t('cm') : '', w.y ? ltr(String(w.y)) : ''].filter(Boolean).join(' · '),
+    price: w.status ? L(w.status) : (w.price || ''), sold: !!w.status, desc: w.d ? L(w.d) : []};
 }
 const onCanvas = id => /холст/i.test(CATALOG[id].med[1]);
 const size = id => work(id).s.split('×').map(n => parseFloat(n) / 100); // catalog "W × H" in cm
@@ -406,7 +396,7 @@ for (const [ri, r] of ROOMS.entries()) {
     for (const id of part) { hang(id, ri, r.faces[wall], x); x += unit(id) + free; }
   });
 }
-// the mirror room: its stations join the works, so the arrows, the tour, the card and the zoom go on into it
+// the mirror room: its stations join the works, so the arrows, the tour, a tap, the card and the zoom work there exactly as in the other rooms
 const MR = ROOMS.findIndex(r => r.makeup), rm = ROOMS[MR];
 function drawSign(g, w) {
   g.textAlign = 'center'; g.direction = lang === 'he' ? 'rtl' : 'ltr';
@@ -453,32 +443,30 @@ function showLabel(i, keep) {
   if (i === shown && !keep) return; shown = i;
   dock.classList.toggle('has', i >= 0);
   if (i < 0) { viewing(false); label.classList.remove('show', 'open'); $('lmore').setAttribute('aria-expanded', 'false'); return; }
-  const h = hung[i];
-  if (h.station) return showStation(h);
-  const f = info(h.id);
-  $('lr').textContent = `${t('room')} ${h.room + 1} · ${seriesText(ROOMS[h.room].kind, 0)}`;
-  $('lt').textContent = f.title; $('lm').textContent = f.medium + ' · ' + f.size;
+  const h = hung[i], id = h.station ? h.work : h.id; // a chair in the mirror room that holds a catalog work gets that work's card
+  if (!id) return showStation(h);
+  const f = info(id);
+  $('lr').textContent = `${t('room')} ${h.room + 1} · ${roomName(h.room)}`;
+  $('lt').textContent = f.title; $('lm').textContent = [f.medium, f.size].filter(Boolean).join(' · ');
   const lp = $('lp'); lp.textContent = f.price; lp.classList.toggle('muted', f.sold);
   // a WhatsApp message to Sandra about this work
   const ask = $('lask'); ask.hidden = f.sold; ask.querySelector('.long').textContent = t('ask'); ask.querySelector('.short').textContent = t('askShort');
-  ask.href = SITE.waWork(lang, work(h.id), 'https://sandraleifer.com/' + (lang === 'he' ? '' : lang + '/') + 'works/' + h.id + '/'); ask.target = '_blank'; ask.onclick = () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: h.id}})); ask.rel = 'noopener';
+  ask.href = SITE.waWork(lang, work(id), 'https://sandraleifer.com/' + (lang === 'he' ? '' : lang + '/') + 'works/' + id + '/'); ask.target = '_blank'; ask.onclick = () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: id}})); ask.rel = 'noopener';
   // what the work is about, always open
   $('lh').textContent = f.desc.length ? t('about') : '';
   desc.replaceChildren(...f.desc.map(x => { const p = document.createElement('p'); p.textContent = x; return p; })); desc.scrollTop = 0;
-  label.classList.add('show');
+  label.classList.toggle('nodesc', !f.desc.length); label.classList.add('show');
 }
 
-// a figure (or a framed photo) in the mirror room: a catalog work shows its title and the question to Sandra, a photo the way to the gallery
+// a body-art photo in the mirror room (not a catalog work): the same card, its title and line from the data (the contest and its year,
+// or body art), the photographer's credit; no price and no way to buy, since the photo is not for sale
 function showStation(h) {
-  const w = h.work && work(h.work), ask = $('lask');
-  $('lr').textContent = `${t('room')} ${MR + 1} · ${t('mirror')}`;
-  $('lt').textContent = w ? L(w.t) : h.year ? t('events') : seriesText('body', 0);
-  $('lm').textContent = [w ? SITE.text[lang].body : h.year ? ltr(h.year) : seriesText('body', 1), h.credit ? `${t('credit')}: ${h.credit}` : ''].filter(Boolean).join(' · ');
-  $('lp').textContent = ''; $('lh').textContent = ''; desc.replaceChildren();
-  ask.hidden = false; ask.target = '_blank'; ask.rel = 'noopener';
-  if (w) { ask.href = SITE.waWork(lang, w, 'https://sandraleifer.com/' + (lang === 'he' ? '' : lang + '/') + 'works/' + w.id + '/'); ask.onclick = () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'work', slug: w.id}})); ask.querySelector('.long').textContent = t('ask'); ask.querySelector('.short').textContent = t('askShort'); }
-  else { ask.href = '../' + (lang === 'he' ? '' : lang + '/') + 'body-art/'; ask.target = ''; ask.onclick = null; ask.querySelector('.long').textContent = t('gallery'); ask.querySelector('.short').textContent = t('galleryShort'); }
-  label.classList.add('show');
+  $('lr').textContent = `${t('room')} ${h.room + 1} · ${roomName(h.room)}`;
+  $('lt').textContent = h.year ? t('events') : seriesText('body', 0);
+  $('lm').textContent = [h.year ? ltr(h.year) : seriesText('body', 1), h.credit ? `${t('credit')}: ${h.credit}` : ''].filter(Boolean).join(' · ');
+  const lp = $('lp'); lp.textContent = ''; lp.classList.remove('muted'); $('lh').textContent = ''; desc.replaceChildren();
+  $('lask').hidden = true;
+  label.classList.remove('open'); label.classList.add('nodesc', 'show'); $('lmore').setAttribute('aria-expanded', 'false');
 }
 
 /* ---------- looking closely ---------- */
@@ -491,24 +479,14 @@ function zAt(f, cx, cy) { // scale by f around a screen point
   const ns = Math.max(1, Math.min(8, zs * f)), k = ns / zs, ox = cx - innerWidth / 2, oy = cy - innerHeight / 2;
   zx = ox - (ox - zx) * k; zy = oy - (oy - zy) * k; zs = ns; if (zs === 1) { zx = -zw / 2; zy = -zh / 2; } zApply();
 }
-// the mirror room's photos open in the body-art gallery's lightbox, its arrows going through the room's photos in walking order;
-// closing it on another photo walks you to that one
-const stations = () => hung.filter(h => h.station);
-const lbCap = h => [h.work ? L(work(h.work).t) : h.year ? t('events') + ' · ' + h.year : '', h.credit ? `${t('credit')}: ${h.credit}` : ''].filter(Boolean).join(' · ');
-function openPhoto(i) {
-  const st = stations(), k = st.indexOf(hung[i]); stopTour();
-  window.baLightbox.open(st.map(h => ({src: h.big, w: h.w, h: h.h, alt: h.work ? L(work(h.work).t) : h.year ? t('events') : seriesText('body', 0), cap: lbCap(h)})), k, null,
-    j => { const to = hung.indexOf(st[j]); if (j !== k) goTo(to); });
-}
 function openZoom(i) {
-  if (hung[i].station && window.baLightbox) return openPhoto(i);
   const h = hung[i], id = h.work || h.id; stopTour();
   zimg.alt = h.station && !h.work ? seriesText('body', 0) : L(work(id).t); zimg.style.transform = ''; zoom.hidden = false;
   zimg.onload = () => { zw = zimg.offsetWidth; zh = zimg.offsetHeight; zFit(); };
-  zimg.src = h.zoomSrc || C.src(id, 2400);
+  zimg.src = h.zoomSrc || C.src(id, 2400); // a mirror-room photo: its largest file (zoomSrc)
   if (zimg.complete && zimg.naturalWidth) zimg.onload();
 }
-$('lzoom').onclick = () => { if (shown < 0) return; if (shown === focused || hung[shown].station) openZoom(shown); else { zoomAfter = shown; goTo(shown); } };
+$('lzoom').onclick = () => { if (shown < 0) return; if (shown === focused) openZoom(shown); else { zoomAfter = shown; goTo(shown); } };
 $('zclose').onclick = () => { zoom.hidden = true; pointers.clear(); };
 addEventListener('keydown', e => { if (e.key === 'Escape' && !zoom.hidden) zoom.hidden = true; });
 zoom.addEventListener('wheel', e => { e.preventDefault(); zAt(Math.exp(-e.deltaY * .0015), e.clientX, e.clientY); }, {passive: false});
@@ -534,7 +512,7 @@ function regionOf(p) {
   return LOBBY;
 }
 const keys = {};
-addEventListener('keydown', e => { if ($('baLb').open) return; keys[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow')) e.preventDefault(); stopTour(); });
+addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key.startsWith('Arrow')) e.preventDefault(); stopTour(); });
 addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 // joystick for touch screens: up = forward, sideways = step aside
 let held = 0, joyX = 0; const joy = $('joy'), knob = $('knob');
@@ -552,7 +530,7 @@ const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 // a doorway (or the room's name over it) walks into that room; from inside, back to the lobby
 function pick(e) { ndc.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); const hit = ray.intersectObjects([...hung.flatMap(h => h.picks || [h.pic]), ...doorPicks])[0]; if (!hit) return; stopTour();
   const room = hit.object.userData.room; if (room != null) return regionOf(camera.position) === room ? goToHub() : goToRoom(room);
-  const i = hit.object.userData.index; if (hung[i].station) { if (i !== focused) goTo(i); openZoom(i); } else if (i === focused) openZoom(i); else goTo(i); }
+  const i = hit.object.userData.index; if (i === focused) openZoom(i); else goTo(i); }
 
 // going to a work: show its card first, then frame the work and its label in the part of the screen the card leaves free
 let glide = null, current = -1, focused = -1, zoomAfter = -1; // focused: the work the camera has arrived in front of
@@ -674,7 +652,6 @@ function applyLang() {
   $('left').setAttribute('aria-label', t('left')); $('right').setAttribute('aria-label', t('right')); $('joy').setAttribute('aria-label', t('joy'));
   $('lzoom').querySelector('.txt').textContent = t('zoom'); $('lzoom').setAttribute('aria-label', t('zoom')); $('lmore').textContent = t('more'); $('zhint').textContent = t('zoomHint'); $('zclose').setAttribute('aria-label', t('close'));
   $('lask').querySelector('.long').textContent = t('ask'); $('lask').querySelector('.short').textContent = t('askShort');
-  $('baLb').setAttribute('aria-label', t('lbName')); $('baLbClose').setAttribute('aria-label', t('close')); $('baLbPrev').setAttribute('aria-label', t('lbPrev')); $('baLbNext').setAttribute('aria-label', t('lbNext'));
   document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
   live.forEach(f => f()); fonts().then(() => live.forEach(f => f()));
   if (shown >= 0) showLabel(shown, true);

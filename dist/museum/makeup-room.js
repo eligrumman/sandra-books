@@ -1,7 +1,7 @@
 // The mirror room, the museum's fourth room: a white backstage makeup room. Vanity mirrors framed with bulbs
 // along both long walls; each makeup chair is turned to the aisle and holds one of Sandra Leifer's body-art
 // photos, whole and framed, propped on its arms against the backrest. The contest photos hang on the end wall.
-// A tap on a photo opens it in the body-art gallery's lightbox (assets/js/body-art.js, set up in museum/index.html).
+// A tap walks to a photo and shows its card; a tap on the photo you stand at (or the card's zoom) opens the museum's own zoom, as in the other rooms.
 // Built into the museum scene (museum/index.html), so the same walk, joystick, card, tour and arrows apply. The room is built
 // in its own frame (its doorway at z = room.front, x across) inside ctx.parent, which places it off the lobby; items are in world space.
 import * as THREE from 'three';
@@ -237,9 +237,9 @@ export function makeupRoom(ctx) {
     let sharp = false; const sharpen = () => { if (sharp || p.hi === p.src) return; sharp = true; loader.load(p.hi, set); };
     return {pic, frame, pw, ph, fw, fh, sharpen};
   }
-  // the item the museum walks to, shows a card for and opens in the lightbox
+  // the item the museum walks to, shows a card for and opens in its zoom (zoomSrc: the largest file)
   const itemOf = (p, seat, f, center, normal, right, view) => ({station: true, id: seat.work || 'body-art-' + seat.id, work: seat.work || null, credit: p.credit, year: p.year,
-    big: p.big, w: p.w, h: p.h, pic: f.pic, picks: [f.pic, f.frame], center, normal, right, sharpen: f.sharpen, view});
+    big: p.big, zoomSrc: p.big, w: p.w, h: p.h, pic: f.pic, picks: [f.pic, f.frame], center, normal, right, sharpen: f.sharpen, view});
   stations.forEach(st => {
     const p = photo(st.seat.id, st.seat.work); if (!p) return;
     // on the chair's arms, leaning back against its backrest, facing the aisle
