@@ -9,9 +9,14 @@ window.EndlessWall = function (root, ids, opts) {
   const meta = {}; ids = ids.map(x => { if (typeof x === 'string') return x; meta[x.id] = x; return x.id; });
   ids = ids.filter(id => meta[id] || IMG[id]);
   const src = id => meta[id] ? `${opts.base}assets/img/body-art/${id}-800.webp` : `${opts.base}assets/img/works/${id}-${IMG[id].s.includes(800) ? 800 : IMG[id].s[0]}.webp`;
+  // tiles are 145-290 CSS px wide: a 480 px thumbnail (tools/build-thumbs.py) unless the screen needs more pixels than that
+  const thumb = id => `${opts.base}assets/img/${meta[id] ? 'body-art' : 'works'}/${id}-480.webp`;
+  const pick = (id, w) => w * Math.min(devicePixelRatio || 1, 3) <= 552 ? thumb(id) : src(id);
   const ratio = id => meta[id] ? meta[id].w8 / meta[id].h8 : IMG[id].w / IMG[id].h;
   const world = document.createElement('div'); world.className = 'wall-world'; root.prepend(world);
-  const mobile = innerWidth < 700, colW = mobile ? 165 : 290, gap = mobile ? 16 : 34, cols = mobile ? 5 : 7;
+  // the hero's own size, not innerWidth: while the page loads a mobile browser can report a zoomed-out innerWidth (1560 seen on a 390 px phone)
+  const VW = root.clientWidth || innerWidth, VH = root.clientHeight || innerHeight;
+  const mobile = VW < 700, colW = mobile ? 165 : 290, gap = mobile ? 16 : 34, cols = mobile ? 5 : 7;
 
   // Lay works into columns (shortest column first); each column repeats with its own height,
   // so there are no empty stretches where short columns would end.
@@ -22,25 +27,34 @@ window.EndlessWall = function (root, ids, opts) {
     col.items.push({id, w, h, y: col.h}); col.h += h + gap;
   });
   const BW = cols * (colW + gap), tiles = [];
-  const copiesX = Math.ceil(innerWidth / BW) + 1;
+  const copiesX = Math.ceil(VW / BW) + 1;
   columns.forEach((col, c) => {
-    const copiesY = Math.ceil(innerHeight / col.h) + 1;
+    const copiesY = Math.ceil(VH / col.h) + 1;
     for (let a = 0; a < copiesX; a++) for (let b = 0; b < copiesY; b++) col.items.forEach(it => {
       const el = document.createElement('button'); el.type = 'button'; el.className = 'wall-tile';
       el.style.width = it.w + 'px'; el.style.height = it.h + 'px'; el.setAttribute('aria-label', opts.title(it.id));
-      const im = new Image(); im.width = Math.round(it.w); im.height = Math.round(it.h); im.alt = ''; im.decoding = 'async';
-      // the first tile of the first columns is what the eye lands on: it loads at once (the very first one with top priority); every other tile is lazy
-      const first = a === 0 && b === 0 && it.y === 0 && c < 3;
-      im.loading = first ? 'eager' : 'lazy'; if (first && c === 0) im.fetchPriority = 'high';
-      im.src = src(it.id); el.append(im);
+      // placeholder: the work's average colour until the image arrives; the image itself is requested only when the tile first shows (show())
+      const bg = meta[it.id] ? meta[it.id].c : IMG[it.id].c; if (bg) el.style.backgroundColor = bg;
       el.dataset.id = it.id; if (meta[it.id]) el.dataset.body = ''; world.append(el);
-      tiles.push({el, x: c * (colW + gap) + (colW - it.w) / 2 + a * BW, y: it.y + b * col.h, w: it.w, h: it.h, W: copiesX * BW, H: copiesY * col.h});
+      tiles.push({el, id: it.id, x: c * (colW + gap) + (colW - it.w) / 2 + a * BW, y: it.y + b * col.h, w: it.w, h: it.h, W: copiesX * BW, H: copiesY * col.h});
     });
   });
 
   let ox = -BW * .15, oy = -innerHeight * .2, vx = 0, vy = 0, mx = null, my = null, overTile = false;
   let down = false, lx = 0, ly = 0, moved = 0, visible = true;
   const mod = (n, m) => ((n % m) + m) % m;
+  // Loads a tile's image the first time it is on screen. loading=lazy cannot do this here: tiles off screen are hidden in place
+  // (never moved off), so the browser saw them all in view and fetched every image at once (67 files, 8.9 MB, plus the gallery).
+  // The first screenful gets high priority. A failed thumbnail falls back to the 800 file, then one more try after 3 s.
+  let firstFrame = true;
+  function show(t) {
+    t.on = true;
+    const im = new Image(), url = pick(t.id, t.w); let tries = 0;
+    im.width = Math.round(t.w); im.height = Math.round(t.h); im.alt = ''; im.decoding = 'async';
+    if (firstFrame) im.fetchPriority = 'high';
+    im.onerror = () => { tries++; if (tries === 1 && url !== src(t.id)) im.src = src(t.id); else if (tries <= 2) setTimeout(() => { im.src = src(t.id) + '?r=' + tries; }, 3000); };
+    im.src = url; t.el.append(im);
+  }
   const calm = () => (opts.calmZones || []).some(z => { const r = z.getBoundingClientRect(); return mx !== null && mx > r.left - 140 && mx < r.right + 140 && my > r.top - 140 && my < r.bottom + 140; });
   function render() {
     const W = root.clientWidth, H = root.clientHeight;
@@ -48,7 +62,9 @@ window.EndlessWall = function (root, ids, opts) {
       const x = mod(t.x + ox + t.w, t.W) - t.w, y = mod(t.y + oy + t.h, t.H) - t.h;
       if (x > W + 40 || y > H + 40) { t.el.style.visibility = 'hidden'; continue; }
       t.el.style.visibility = ''; t.el.style.transform = `translate3d(${x}px,${y}px,0)`;
+      if (!t.on) show(t);
     }
+    firstFrame = false;
   }
   function loop() {
     if (!down && visible) {
@@ -84,7 +100,7 @@ window.EndlessWall = function (root, ids, opts) {
 // Body-art photos for the wall: BODY_ART items, minus anything carrying a review tag (e.g. 'nudity') while skipReview is on,
 // spread evenly among the work ids (not in one clump). Returns the mixed list for EndlessWall.
 window.EndlessWall.mix = function (workIds, bodyArt, skipReview) {
-  const photos = ((bodyArt && bodyArt.items) || []).filter(i => !(skipReview && i.review)).map(i => ({id: i.id, body: true, w8: i.w8, h8: i.h8}));
+  const photos = ((bodyArt && bodyArt.items) || []).filter(i => !(skipReview && i.review)).map(i => ({id: i.id, body: true, w8: i.w8, h8: i.h8, c: i.c}));
   const out = workIds.slice(), n = workIds.length, m = photos.length;
   photos.forEach((p, j) => out.splice(Math.floor((j + .5) * n / m) + j, 0, p));
   return out;
