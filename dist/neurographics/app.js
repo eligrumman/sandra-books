@@ -850,7 +850,8 @@ const STEPS = [
     if (!state.figDone) {
       doneBtn = h('button', {type: 'button', class: 'btn btn-solid', id: 'figDone', disabled: !figs().length, onclick: () => { state.figDone = true; state.tool.width = 1; save(); renderStep(false); }}, t('ngShapeDone'));
       left.push(note('ngShapeDraw'));
-      return cols(left, h('div', {}, board.el, h('div', {class: 'shape-row'}, doneBtn))); // under the sheet, where the finger is
+      board.el.firstChild.after(h('div', {class: 'shape-row'}, doneBtn)); // right under the sheet, above the tools, so the sticky nav never hides it
+      return cols(left, board.el);
     } else {
       const auto = h('button', {type: 'button', class: 'tbtn', onclick: () => {
         const f = figs(); if (!f.length) return board.say(t('ngNeedFigure'));
