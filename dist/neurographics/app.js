@@ -691,7 +691,7 @@ function makeBoard(key, o = {}) {
       if (o.tapOnly) { say(t('ngTapMiss')); down = null; paint(); return; } // a miss leaves no dot, only a hint
     }
     down = null;
-    if (o.tapOnly && status.textContent === t('ngTapMiss')) say('');
+    if (o.tapOnly && [t('ngTapMiss'), t('ngAllRound')].includes(status.textContent)) say(''); // a new line: the old hint no longer holds
     if (e.type === 'pointercancel' && s.pts.length < 2) { paint(); return; }
     const it = {t: 's', pts: s.pts, color: s.color, w: s.w};
     if (s.fig) { // a figure drawn in one go: when its ends nearly meet, close it
