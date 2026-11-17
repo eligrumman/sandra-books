@@ -40,8 +40,17 @@ const PAINT = COLORS.concat(['#ef8fb1', '#7cc4ee', '#a5d77a', '#b8a1e8', '#a19fa
 const WIDTHS = [5, 9, 20]; // logical units on a 1000 x 1000 sheet
 const WORDS = /[\p{L}\p{N}][\p{L}\p{N}'’\-־]*/gu;
 const TOTAL = 13;
+const WORDS_STEP = 3;
+const LINES_MIN = 8; // the line-drawing step encourages at least this many lines (a hint, never a block)
+// a tap rounds every sharp corner within this many CSS px (a finger needs room: at least ~28 px)
+const TAP_TOUCH_PX = 32, TAP_MOUSE_PX = 20;
+// a press that moves less than this is a tap, not a line
+const SLOP_TOUCH_PX = 12, SLOP_MOUSE_PX = 6;
+const COARSE = window.matchMedia('(pointer: coarse)').matches; // a phone or a tablet: the screen choice says "phone"
 const state = {
   step: 0,
+  mode: null, // 'paper': guidance for paper and markers, no drawing sheet; 'phone': the drawing simulator
+  figDone: false, // phone mode, step 9: the hand-drawn figure is finished
   sheets: {main: newSheet()},
   tool: {color: 1, width: 1, mode: 'pen', paint: 8},
   theme: '',
@@ -51,6 +60,49 @@ const state = {
   changed: ''
 };
 function newSheet() { return {items: [], ver: 0, anim: null}; }
+const paper = () => state.mode === 'paper';
+
+/* ---------- this visit's work survives re-renders, steps, language switches and a reload of the tab ---------- */
+const SKEY = 'ng-session-v1';
+const sess = {
+  get() { try { return JSON.parse(sessionStorage.getItem(SKEY) || 'null'); } catch { return null; } },
+  set(v) { try { sessionStorage.setItem(SKEY, JSON.stringify(v)); } catch {} },
+  clear() { try { sessionStorage.removeItem(SKEY); } catch {} }
+};
+const PLAIN = ['t', 'pts', 'color', 'w', 'fig', 'id', 'keys', 'x', 'y'];
+const plainItem = it => { const o = {}; for (const k of PLAIN) if (it[k] !== undefined) o[k] = it[k]; if (it.was) o.was = it.was.map(([i, f]) => [i, plainItem(f)]); return o; };
+function liveWords() { // the words box on screen is the truth while the timer runs
+  const el = document.getElementById('words');
+  if (el && state.words.phase === 'run') state.words.text = el.value;
+}
+let saveT = 0;
+function save(now) {
+  clearTimeout(saveT);
+  const run = () => {
+    liveWords();
+    const W = state.words;
+    sess.set({v: 1, step: state.step, mode: state.mode, figDone: state.figDone, theme: state.theme, changed: state.changed, check: state.check, check2: state.check2,
+      words: {text: W.text, phase: W.phase, end: W.end, surprised: [...W.surprised]}, items: state.sheets.main.items.map(plainItem)});
+  };
+  if (now) run(); else saveT = setTimeout(run, 250);
+}
+function restore() {
+  const d = sess.get();
+  if (!d || d.v !== 1) return;
+  const str = (v, def = '') => typeof v === 'string' ? v : def, arr4 = a => [0, 1, 2, 3].map(i => str(a && a[i]));
+  state.step = Number.isInteger(d.step) ? Math.max(0, Math.min(TOTAL - 1, d.step)) : 0;
+  state.mode = d.mode === 'paper' || d.mode === 'phone' ? d.mode : null;
+  state.figDone = !!d.figDone; state.theme = str(d.theme); state.changed = str(d.changed);
+  state.check = arr4(d.check); state.check2 = arr4(d.check2);
+  const w = d.words || {};
+  let phase = ['idle', 'run', 'done'].includes(w.phase) ? w.phase : 'idle';
+  if (phase === 'run' && !(w.end > Date.now())) phase = 'done';
+  state.words = {text: str(w.text), phase, end: +w.end || 0, surprised: new Set(Array.isArray(w.surprised) ? w.surprised : []), id: 0};
+  if (Array.isArray(d.items)) {
+    state.sheets.main.items = d.items.filter(it => it && (it.t === 's' ? Array.isArray(it.pts) && it.pts.length : it.t === 'r' ? Array.isArray(it.keys) : it.t === 'f'));
+    for (const it of state.sheets.main.items) uid = Math.max(uid, it.id || 0);
+  }
+}
 
 /* ---------- geometry: junctions of the strokes and their rounded corners ----------
    As on paper: the lines stay whole, and each sharp wedge between two neighbouring lines
@@ -334,11 +386,11 @@ function maskOf(sheet) { // barrier raster of the lines and their rounded corner
     if (x0 > 0) v = Math.min(v, dist[i - 1] + 1); if (y > 0) { v = Math.min(v, dist[i - MASK] + 1); if (x0 > 0) v = Math.min(v, dist[i - MASK - 1] + 1.4); if (x0 < MASK - 1) v = Math.min(v, dist[i - MASK + 1] + 1.4); } dist[i] = v; }
   for (let y = MASK - 1; y >= 0; y--) for (let x0 = MASK - 1; x0 >= 0; x0--) { const i = y * MASK + x0; if (!dist[i]) continue; let v = dist[i];
     if (x0 < MASK - 1) v = Math.min(v, dist[i + 1] + 1); if (y < MASK - 1) { v = Math.min(v, dist[i + MASK] + 1); if (x0 < MASK - 1) v = Math.min(v, dist[i + MASK + 1] + 1.4); if (x0 > 0) v = Math.min(v, dist[i + MASK - 1] + 1.4); } dist[i] = v; }
-  const widest = new Float32Array(area.length), edge = new Uint8Array(area.length), cx = new Float64Array(area.length), cy = new Float64Array(area.length);
-  for (let i = 0; i < N; i++) { const l = lab[i]; if (l < 0) continue; if (dist[i] > widest[l]) widest[l] = dist[i]; const x0 = i % MASK; cx[l] += x0; cy[l] += (i - x0) / MASK; if (x0 === 0 || x0 === MASK - 1 || i < MASK || i >= N - MASK) edge[l] = 1; }
+  const widest = new Float32Array(area.length), deep = new Int32Array(area.length), edge = new Uint8Array(area.length), cx = new Float64Array(area.length), cy = new Float64Array(area.length);
+  for (let i = 0; i < N; i++) { const l = lab[i]; if (l < 0) continue; if (dist[i] > widest[l]) { widest[l] = dist[i]; deep[l] = i; } const x0 = i % MASK; cx[l] += x0; cy[l] += (i - x0) / MASK; if (x0 === 0 || x0 === MASK - 1 || i < MASK || i >= N - MASK) edge[l] = 1; }
   const thin = area.map((a, l) => !edge[l] && a < N * 0.02 && widest[l] <= 3.6);
   const mid = area.map((a, l) => [cx[l] / a * 1000 / MASK, cy[l] / a * 1000 / MASK]); // centre of each space, in sheet units
-  sheet.mask = {m, lab, area, thin, mid}; sheet.maskKey = key;
+  sheet.mask = {m, lab, area, thin, mid, widest, deep}; sheet.maskKey = key;
   return sheet.mask;
 }
 // a thin sliver of paper right next to a rounded junction is inked in, as when inking by hand (its colour: the junction's)
@@ -453,11 +505,11 @@ function animProgress(sheet, c, now) {
 }
 
 /* ---------- sample neuro-line and shapes ---------- */
-function sampleLine() {
-  const ph = [Math.random() * 7, Math.random() * 7, Math.random() * 7];
-  let x = 150 + Math.random() * 700, y = 150 + Math.random() * 700, a = Math.random() * 6.28, pts = [[x, y]];
+function sampleLine(rnd = Math.random) {
+  const ph = [rnd() * 7, rnd() * 7, rnd() * 7];
+  let x = 150 + rnd() * 700, y = 150 + rnd() * 700, a = rnd() * 6.28, pts = [[x, y]];
   for (let i = 0; i < 300; i++) {
-    const turn = 0.075 * (Math.sin(i * 0.05 + ph[0]) + 1.3 * Math.sin(i * 0.019 + ph[1]) + 0.9 * Math.sin(i * 0.11 + ph[2])) + (Math.random() - 0.5) * 0.12;
+    const turn = 0.075 * (Math.sin(i * 0.05 + ph[0]) + 1.3 * Math.sin(i * 0.019 + ph[1]) + 0.9 * Math.sin(i * 0.11 + ph[2])) + (rnd() - 0.5) * 0.12;
     a += turn;
     const m = 90, cx = 500 - x, cy = 500 - y;
     if (x < m || x > 1000 - m || y < m || y > 1000 - m) { let da = Math.atan2(cy, cx) - a; da = Math.atan2(Math.sin(da), Math.cos(da)); a += da * 0.12; }
@@ -465,30 +517,28 @@ function sampleLine() {
   }
   return pts;
 }
-function shapePts(kind) {
-  const wob = (i, n) => 5 * Math.sin(i / n * 6.28 * 2.3 + 1) + 3 * Math.sin(i / n * 6.28 * 5.1);
-  let poly;
-  if (kind === 'triangle') poly = [[500, 300], [680, 640], [320, 640]];
-  else if (kind === 'square') poly = [[350, 350], [650, 350], [650, 650], [350, 650]];
-  else poly = null;
-  const out = [];
-  if (poly) {
-    poly = poly.concat([poly[0]]);
-    for (let s = 0; s < poly.length - 1; s++) {
-      const [a, b] = [poly[s], poly[s + 1]], n = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 5);
-      for (let i = 0; i < n; i++) out.push([a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n]);
-    }
-    out.push(poly[0].slice());
-  } else {
-    const rx = kind === 'ellipse' ? 230 : 170, ry = kind === 'ellipse' ? 140 : 170, n = 150;
-    for (let i = 0; i <= n; i++) { const th = i / n * 6.2832, r = 1 + wob(i, n) / 170; out.push([500 + Math.cos(th) * rx * r, 500 + Math.sin(th) * ry * r]); }
-  }
+function handShape(rnd) { // the paper-mode illustration of a figure: a closed outline with a hand's wobble (never a ready-made shape on the user's sheet)
+  const ph = rnd() * 6, out = [], n = 150;
+  for (let i = 0; i <= n; i++) { const th = i / n * 2 * Math.PI, r = 1 + 0.09 * Math.sin(2 * th + ph) + 0.05 * Math.sin(3 * th + 1.7 * ph) + 0.015 * Math.sin(9 * th); out.push([500 + Math.cos(th) * 190 * r, 530 + Math.sin(th) * 160 * r]); }
   return out;
 }
-function neurographFigure(fig, color) { // a free line that runs along the outline and weaves through it
-  const pts = fig.pts, n = pts.length;
+function demoLine(rnd) { // the paper-mode illustration of a neuro-line: edge to edge across the sheet, never repeating
+  const a = rnd() * Math.PI, c = [500 + (rnd() - 0.5) * 300, 500 + (rnd() - 0.5) * 300], d = [Math.cos(a), Math.sin(a)], nrm = [-d[1], d[0]];
+  const ph = [rnd() * 7, rnd() * 7, rnd() * 7], amp = [50 + rnd() * 50, 25 + rnd() * 30, 10 + rnd() * 10], out = [];
+  for (let i = 0; i <= 220; i++) {
+    const u = i / 220, s = (u - 0.5) * 1300, off = amp[0] * Math.sin(u * 5.1 + ph[0]) + amp[1] * Math.sin(u * 11.3 + ph[1]) + amp[2] * Math.sin(u * 23 + ph[2]);
+    out.push([c[0] + d[0] * s + nrm[0] * off, c[1] + d[1] * s + nrm[1] * off]);
+  }
+  const inside = q => q[0] > -15 && q[0] < 1015 && q[1] > -15 && q[1] < 1015;
+  let best = [], run = [];
+  for (const q of out) { if (inside(q)) run.push(q); else { if (run.length > best.length) best = run; run = []; } }
+  return run.length > best.length ? run : best;
+}
+function seeded(seed) { let x = seed; return () => (x = (x * 16807) % 2147483647) / 2147483647; }
+function neurographFigure(pts, rnd = Math.random) { // a free line that runs along the outline and weaves through it
+  const n = pts.length;
   let cx = 0, cy = 0; for (const p of pts) { cx += p[0]; cy += p[1]; } cx /= n; cy /= n;
-  const ph = [Math.random() * 7, Math.random() * 7], out = [], steps = Math.round(n * 1.04);
+  const ph = [rnd() * 7, rnd() * 7], out = [], steps = Math.round(n * 1.04);
   for (let k = 0; k < steps; k++) {
     const p = pts[Math.floor(k * n / steps) % n], dx = p[0] - cx, dy = p[1] - cy, len = Math.hypot(dx, dy) || 1;
     const off = 34 * Math.sin(k * 0.21 + ph[0]) + 22 * Math.sin(k * 0.073 + ph[1]) + 10 * Math.sin(k * 0.47);
@@ -518,7 +568,7 @@ function makeBoard(key, o = {}) {
   const undo = h('button', {type: 'button', class: 'tbtn', onclick: () => { // one step back; a recolour gives the space its earlier colour back
     const it = sheet.items.pop(); if (it && it.was) for (const [i, f] of it.was) sheet.items.splice(i, 0, f); changed(); }}, t('ngUndo'));
   const clear = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.length = 0; sheet.anim = null; changed(); }}, t('ngClear'));
-  const sample = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: COLORS[tool.color], w: WIDTHS[Math.min(tool.width, 1)]}); changed(); }}, t('ngSample'));
+  const sample = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: COLORS[tool.color], w: WIDTHS[Math.min(tool.width, 1)]}); changed(); if (o.onStroke) o.onStroke(sheet); }}, t('ngSample'));
   const fillBtn = o.fill ? h('button', {type: 'button', class: 'tbtn', 'aria-pressed': 'false', onclick: () => { tool.mode = tool.mode === 'fill' ? 'pen' : 'fill'; say(tool.mode === 'fill' ? t('ngFillOn') : ''); sync(); }}, t('ngFill')) : null;
   const roundBtn = o.round ? h('button', {type: 'button', class: 'tbtn round', onclick: () => roundKeys(sharpCorners(sheet).map(c => c.id))}, t('ngRoundBtn')) : null;
   const tools = h('div', {class: 'tools', role: 'group', 'aria-label': t('ngTools')}, swatches, widths, h('div', {class: 'tool-group'}, undo, clear, sample, fillBtn, roundBtn));
@@ -540,11 +590,11 @@ function makeBoard(key, o = {}) {
   }
   function changed() {
     for (const it of sheet.items) if (!it.id) it.id = ++uid;
-    sheet.ver++; sheet.anim = null; paint(); sync();
+    sheet.ver++; sheet.anim = null; paint(); sync(); save();
   }
   function roundKeys(keys) { // one undoable step; the new corners fill in with a short animation
     if (!keys.length) return;
-    sheet.items.push({t: 'r', keys, id: ++uid});
+    sheet.items.push({t: 'r', keys, id: ++uid}); save();
     const byId = new Map(junctions(sheet).corners.map(c => [c.id, c]));
     const left = sharpCorners(sheet).length;
     if (reduced()) { sheet.anim = null; sheet.ver++; paint(); sync(); if (!left) say(t('ngAllRound'), true); return; }
@@ -592,28 +642,18 @@ function makeBoard(key, o = {}) {
   }
   const pos = e => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 1000, (e.clientY - r.top) / r.height * 1000]; };
   const perCss = () => 1000 / (canvas.getBoundingClientRect().width || 1); // sheet units per CSS pixel
-  // the corner a tap or click means: on the junction itself, all its sharp corners; elsewhere, the corner whose mark is
-  // nearest, preferring the corners whose wedge holds the point. In a tight knot the centre zone shrinks to half the distance
-  // to its nearest corner mark (touch and mouse alike), so a deliberate tap or click on one corner rounds just that corner.
-  function cornerAt(p, touch) {
-    const k = perCss(), reach = 32 * k, jx = junctions(sheet);
-    if (!jx.nodes.length) return null;
-    const rs = roundedSet(sheet), dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-    let nb = null;
-    for (const nd of jx.nodes) { const d = dist(p, nd.p); if (!nb || d < nb.d) nb = {nd, d}; }
-    const near = Math.min(...nb.nd.corners.map(c => dist(c.anchor, nb.nd.p)));
-    const centre = Math.min((touch ? 14 : 8) * k, 0.5 * near);
-    if (nb.d <= centre) return {node: nb.nd, keys: nb.nd.corners.filter(c => !rs.has(c.id)).map(c => c.id)};
-    const inWedge = c => { let x = Math.atan2(p[1] - c.P[1], p[0] - c.P[0]) - c.ang[0], y = c.ang[1] - c.ang[0]; x = (x + 4 * Math.PI) % (2 * Math.PI); y = (y + 4 * Math.PI) % (2 * Math.PI); return x <= y; };
+  // the corners a tap or click means, generously (Owner 2026-11-17: "if you tapped near, close the nearby corners"):
+  // every sharp corner whose mark, vertex or junction centre lies within reach (32 CSS px for a finger, 20 for a mouse);
+  // when none is that close, the nearest sharp corner within 1.6 x reach.
+  function cornersNear(p, touch) {
+    const R = (touch ? TAP_TOUCH_PX : TAP_MOUSE_PX) * perCss(), rs = roundedSet(sheet);
+    const sharp = junctions(sheet).corners.filter(c => !rs.has(c.id));
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]), d = c => Math.min(dist(p, c.anchor), dist(p, c.P), dist(p, c.node.p));
+    const hit = sharp.filter(c => d(c) <= R);
+    if (hit.length) return hit.map(c => c.id);
     let best = null;
-    for (const c of jx.corners) {
-      const dA = dist(p, c.anchor), inside = inWedge(c);
-      if (!(inside ? dist(p, c.P) <= reach + 1.3 * dist(c.anchor, c.P) : dA <= 0.75 * reach)) continue;
-      const score = dA * (inside ? 1 : 1.6);
-      if (!best || score < best.score) best = {c, score};
-    }
-    if (!best) return null;
-    return {node: best.c.node, keys: rs.has(best.c.id) ? [] : [best.c.id]};
+    for (const c of sharp) { const x = d(c); if (!best || x < best.x) best = {c, x}; }
+    return best && best.x <= 1.6 * R ? [best.c.id] : [];
   }
   let pid = null, down = null;
   canvas.addEventListener('pointerdown', e => {
@@ -623,11 +663,12 @@ function makeBoard(key, o = {}) {
     const p = pos(e);
     if (mode() === 'fill') { fillAt(p); pid = null; return; }
     down = {t: performance.now(), x: e.clientX, y: e.clientY, travel: 0, touch: e.pointerType !== 'mouse'};
-    live = {pts: [p], color: COLORS[tool.color], w: WIDTHS[tool.width]}; paint();
+    const fig = !!(o.fig && o.fig()); // drawing the figure: always the thick marker
+    live = {pts: [p], color: COLORS[tool.color], w: WIDTHS[fig ? 2 : tool.width], fig}; paint();
   });
   canvas.addEventListener('pointermove', e => {
     if (e.pointerId !== pid || !live) {
-      if (o.round && pid === null && e.pointerType === 'mouse' && mode() !== 'fill') { const c = cornerAt(pos(e), false); canvas.style.cursor = c && c.keys.length ? 'pointer' : 'crosshair'; }
+      if (o.round && pid === null && e.pointerType === 'mouse' && mode() !== 'fill') canvas.style.cursor = cornersNear(pos(e), false).length ? 'pointer' : 'crosshair';
       return;
     }
     for (const ev of (e.getCoalescedEvents ? e.getCoalescedEvents() : [e])) {
@@ -642,15 +683,22 @@ function makeBoard(key, o = {}) {
     if (!live) return;
     const s = live; live = null;
     if (down) down.travel = Math.max(down.travel, Math.hypot(e.clientX - down.x, e.clientY - down.y));
-    if (o.round && down && e.type === 'pointerup' && down.travel < 8 && (o.tapOnly || performance.now() - down.t < 350)) { // a tap: round the corner under it
-      const hit = cornerAt(s.pts[0], down.touch);
-      if (hit && hit.keys.length) { say(''); roundKeys(hit.keys); down = null; return; }
+    // a tap rounds the sharp corners near it; anything that moves further is a line, on every board, so lines can
+    // always be added after rounding (the rounding steps included)
+    if (o.round && down && e.type === 'pointerup' && down.travel < (down.touch ? SLOP_TOUCH_PX : SLOP_MOUSE_PX) && (o.tapOnly || performance.now() - down.t < 350)) {
+      const keys = cornersNear(s.pts[0], down.touch);
+      if (keys.length) { say(''); roundKeys(keys); down = null; return; }
       if (o.tapOnly) { say(t('ngTapMiss')); down = null; paint(); return; } // a miss leaves no dot, only a hint
     }
     down = null;
     if (o.tapOnly && status.textContent === t('ngTapMiss')) say('');
     if (e.type === 'pointercancel' && s.pts.length < 2) { paint(); return; }
-    sheet.items.push({t: 's', pts: s.pts, color: s.color, w: s.w}); changed(); if (o.onStroke) o.onStroke(sheet);
+    const it = {t: 's', pts: s.pts, color: s.color, w: s.w};
+    if (s.fig) { // a figure drawn in one go: when its ends nearly meet, close it
+      it.fig = true; const a = s.pts[0], b = s.pts[s.pts.length - 1];
+      if (s.pts.length > 20 && Math.hypot(a[0] - b[0], a[1] - b[1]) < 70) it.pts = s.pts.concat([a.slice()]);
+    }
+    sheet.items.push(it); changed(); if (o.onStroke) o.onStroke(sheet);
   };
   canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
   canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -678,7 +726,7 @@ function roundInfo(info, sh, none) { // junctions and the sharp corners still le
   info.classList.toggle('good', nodes > 0 && !sharp);
 }
 let breathTimer = 0, timerId = 0;
-const clearTimers = () => { clearInterval(breathTimer); clearInterval(timerId); breathTimer = timerId = 0; };
+const clearTimers = () => { clearInterval(breathTimer); breathTimer = 0; }; // the words timer is not a view timer: it survives re-renders
 
 function title(key) { return h('h2', {tabindex: '-1', id: 'stepTitle'}, t(key)); }
 function breathing() {
@@ -689,16 +737,62 @@ function breathing() {
   setTimeout(flip, 60); breathTimer = setInterval(flip, 4500);
   return h('div', {}, box, h('p', {class: 'ng-muted'}, t('ngBreatheNote')));
 }
+const phoneKey = () => COARSE ? 'ngChoosePhone' : 'ngChooseScreen';
+function setMode(m) { state.mode = m; save(); }
+
+/* ---------- paper mode: the same steps as instructions, each with a small picture made by the same drawing engine ---------- */
+let demo = null;
+function demoSheets() {
+  if (demo) return demo;
+  const rnd = seeded(1117), mk = items => ({...newSheet(), items});
+  const roundAll = sh => mk(sh.items.concat([{t: 'r', keys: sharpCorners(sh).map(c => c.id), id: ++uid}]));
+  const lines = mk([1, 2, 3, 5, 4, 0, 1].map(c => ({t: 's', pts: demoLine(rnd), color: COLORS[c], w: WIDTHS[1], id: ++uid})));
+  const rounded = roundAll(lines);
+  const fig = {t: 's', pts: handShape(rnd), color: COLORS[0], w: WIDTHS[2], fig: true, id: ++uid};
+  const figure = mk(rounded.items.concat([fig, {t: 's', pts: neurographFigure(fig.pts, rnd), color: COLORS[1], w: WIDTHS[1], id: ++uid}]));
+  const figureRounded = roundAll(figure);
+  const {area, widest, deep} = maskOf(figureRounded), fills = [];
+  area.forEach((a, l) => { if (widest[l] < 5) return; const i = deep[l]; fills.push({t: 'f', x: (i % MASK + 0.5) * 1000 / MASK, y: (Math.floor(i / MASK) + 0.5) * 1000 / MASK, color: PAINT[1 + Math.floor(rnd() * (PAINT.length - 1))], id: ++uid}); });
+  const colored = mk(figureRounded.items.concat(fills));
+  return (demo = {lines, rounded, figure, figureRounded, colored});
+}
+function illus(sheet, cls = 'final-sheet ng-illus') {
+  const cv = h('canvas', {class: cls, role: 'img', 'aria-label': t('ngIllAlt')});
+  cv.width = cv.height = 900; paintBase(cv.getContext('2d'), sheet, 900);
+  return cv;
+}
+function illusPair(a, b) {
+  const fig = (sh, cap) => h('figure', {}, illus(sh, 'ng-illus'), h('figcaption', {}, cap));
+  return h('div', {class: 'ng-anim ng-pair'}, fig(a, t('ngIllBefore')), fig(b, t('ngIllAfter')));
+}
+const lead = k => h('p', {class: 'ng-lead'}, t(k)), muted = k => h('p', {class: 'ng-muted'}, t(k)), note = k => h('p', {class: 'ng-info'}, t(k));
+const cols = (left, right) => h('div', {class: 'ng-cols'}, h('div', {}, ...left), right);
+function ctaBox(noteKey) {
+  return h('div', {class: 'cta'}, h('h3', {}, t('ngCtaTitle')), lead('ngCtaText'),
+    h('a', {class: 'btn btn-solid gold', id: 'ctaBtn', href: S.waNeuro(lang), target: '_blank', rel: 'noopener', onclick: () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'book', slug: 'neurographics'}}))}, t('ngCtaBtn')), muted(noteKey));
+}
+function roundBoard(titleKey, texts) {
+  const info = h('p', {class: 'ng-info', role: 'status'});
+  const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
+  return cols([title(titleKey), ...texts, info], board.el);
+}
 
 const STEPS = [
-  // 1. intro and materials
+  // 1. intro, materials, and the choice: paper and markers (the best way) or the phone
   () => {
     const w = S.works.find(x => x.id === 'spiral'), m = IMG.works.spiral, title2 = L(w.t);
     const sizes = m.s.filter(s => s <= 1600);
+    const choose = md => { setMode(md); go(1); };
+    const choice = h('div', {class: 'ng-choice', role: 'group', 'aria-labelledby': 'chooseQ'},
+      h('p', {class: 'ng-lead ng-paper-best'}, t('ngPaperBest')),
+      h('p', {class: 'ng-label', id: 'chooseQ'}, t('ngChooseQ')),
+      h('div', {class: 'ng-choice-btns'},
+        h('button', {type: 'button', class: 'btn btn-solid gold', id: 'choosePaper', onclick: () => choose('paper')}, t('ngChoosePaper')),
+        h('button', {type: 'button', class: 'btn btn-ghost', id: 'choosePhone', onclick: () => choose('phone')}, t(phoneKey()))));
     return h('div', {class: 'ng-hero'},
-      h('div', {}, h('p', {class: 'ng-by'}, t('ngBy')), h('h1', {tabindex: '-1', id: 'stepTitle'}, t('ngS1Title')), h('p', {class: 'ng-lead'}, t('ngS1Lead')),
+      h('div', {}, h('p', {class: 'ng-by'}, t('ngBy')), h('h1', {tabindex: '-1', id: 'stepTitle'}, t('ngS1Title')), lead('ngS1Lead'), choice,
         h('div', {class: 'ng-card'}, h('span', {class: 'ng-label'}, t('ngMatTitle')),
-          h('ul', {class: 'ng-list'}, [1, 2, 3, 4, 5].map(i => h('li', {}, t('ngMat' + i)))), h('p', {class: 'ng-muted'}, t('ngMatNote')))),
+          h('ul', {class: 'ng-list'}, [1, 2, 3, 4, 5].map(i => h('li', {}, t('ngMat' + i)))))),
       h('figure', {}, h('img', {src: `../assets/img/works/spiral-${sizes[0]}.webp`, srcset: sizes.map(s => `../assets/img/works/spiral-${s}.webp ${s}w`).join(', '), sizes: '(max-width:900px) 100vw, 45vw', width: m.w, height: m.h, alt: `${title2}, ${L(['סנדרה לייפר', 'Сандра Лейфер', 'Sandra Leifer'])}`, style: `background:${m.c}`}),
         h('figcaption', {}, t('ngWorkCap', {title: title2}))));
   },
@@ -711,140 +805,144 @@ const STEPS = [
     for (let i = 0; i < 70; i++) { a += (rnd() - 0.5) * 1.6 + 0.25 * Math.sin(i * 0.37); a = Math.max(-1.3, Math.min(1.3, a)); x += 5.4 + rnd() * 2.2; y += Math.sin(a) * 9 + (80 - y) * 0.06; np.push([x, Math.max(14, Math.min(146, y))]); }
     const npath = np.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     const svg = (cls, d, label, delay) => h('figure', {}, h('svg', {viewBox: '0 0 400 160', role: 'img', 'aria-label': label, html: `<path class="${cls} run ${delay}" pathLength="1" d="${d}"/>`}), h('figcaption', {}, label));
-    return h('div', {class: 'ng-single'}, title('ngS2Title'), h('p', {class: 'ng-lead'}, t('ngS2Text')),
+    return h('div', {class: 'ng-single'}, title('ngS2Title'), lead('ngS2Text'),
       h('div', {class: 'ng-anim', role: 'img', 'aria-label': t('ngLineAlt')}, svg('habit', hp, t('ngLineHabit'), 'a'), svg('neuro', npath, t('ngLineNeuro'), 'b')),
-      h('p', {class: 'ng-muted'}, t('ngS2Nature')));
+      muted('ngS2Nature'));
   },
   // 3. request / theme
-  () => h('div', {class: 'ng-single'}, title('ngS5Title'), h('p', {class: 'ng-lead'}, t('ngS5Text')),
+  () => h('div', {class: 'ng-single'}, title('ngS5Title'), lead('ngS5Text'),
     h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'theme'}, t('ngThemeLabel')),
-      h('input', {class: 'ng-input', id: 'theme', type: 'text', maxlength: '60', autocomplete: 'off', placeholder: t('ngThemePh'), value: state.theme, oninput: e => { state.theme = e.target.value; }})),
-    h('p', {class: 'ng-muted'}, t('ngPrivate'))),
+      h('input', {class: 'ng-input', id: 'theme', type: 'text', maxlength: '300', autocomplete: 'off', placeholder: t('ngThemePh'), value: state.theme, oninput: e => { state.theme = e.target.value; save(); }})),
+    muted('ngPrivate')),
   // 4. 20 words in 2 minutes
   () => wordsStep(),
   // 5. check-in
-  () => h('div', {class: 'ng-single'}, title('ngS7Title'), h('p', {class: 'ng-lead'}, t('ngS7Text')),
+  () => h('div', {class: 'ng-single'}, title('ngS7Title'), lead('ngS7Text'),
     [1, 2, 3, 4].map(i => h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'f' + i}, t('ngF' + i)),
-      h('textarea', {class: 'ng-text', id: 'f' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check[i - 1] = e.target.value; }}, state.check[i - 1]))),
-    h('p', {class: 'ng-muted'}, t('ngPrivate'))),
-  // 6. neuro-lines over the sheet: the one drawing
+      h('textarea', {class: 'ng-text', id: 'f' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check[i - 1] = e.target.value; save(); }}, state.check[i - 1]))),
+    muted('ngPrivate')),
+  // 6. neuro-lines over the sheet: many of them (on paper, or the one drawing on the screen)
   () => {
-    const board = makeBoard('main', {extras: true});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS8Title'), h('p', {class: 'ng-lead'}, t('ngS8Text')), h('p', {class: 'ng-muted'}, t('ngS3Text')), breathing(), changedField()), board.el);
+    const texts = [title('ngS8Title'), lead('ngS8Text'), muted('ngS3Text'), h('p', {class: 'ng-lead ng-many'}, t('ngManyLines'))];
+    if (paper()) return cols([...texts, breathing(), changedField()], illus(demoSheets().lines));
+    const info = h('p', {class: 'ng-info', role: 'status'});
+    const count = sh => { const n = sh.items.filter(it => it.t === 's' && !it.fig).length; info.textContent = n >= LINES_MIN ? t('ngLinesMany', {n}) : t('ngLinesCount', {n, min: LINES_MIN}); info.classList.toggle('good', n >= LINES_MIN); };
+    const board = makeBoard('main', {extras: true, onChange: count});
+    return cols([...texts, info, breathing(), changedField()], board.el);
   },
   // 7. rounding the corners of that same drawing
-  () => {
-    const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS4Title'), h('p', {class: 'ng-lead'}, t('ngS4Text')), h('p', {class: 'ng-muted'}, t('ngS4Text2')), info), board.el);
-  },
+  () => paper() ? cols([title('ngS4Title'), lead('ngS4Text'), note('ngPaperRound'), muted('ngS4Text2')], illusPair(demoSheets().lines, demoSheets().rounded))
+    : roundBoard('ngS4Title', [lead('ngS4Text'), muted('ngS4Text2')]),
   // 8. rules
   () => {
-    const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))}); // colouring belongs to step 11
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS9Title'), h('p', {class: 'ng-lead'}, t('ngS9Text')), h('ul', {class: 'ng-list rules'}, [1, 2, 3, 4, 5, 6].map(i => h('li', {}, t('ngRule' + i)))), info), board.el);
+    const rules = [lead('ngS9Text'), h('ul', {class: 'ng-list rules'}, [1, 2, 3, 4, 5, 6].map(i => h('li', {}, t('ngRule' + i))))];
+    return paper() ? cols([title('ngS9Title'), ...rules], illus(demoSheets().rounded)) : roundBoard('ngS9Title', rules); // colouring belongs to step 11
   },
-  // 9. figure of choice
+  // 9. the figure: drawn by hand, the way you feel it (no ready-made shapes)
   () => {
-    const board = makeBoard('main', {extras: true}); // the figure and its lines; their corners are rounded in step 10
-    const sheet = state.sheets.main;
-    const add = kind => board.addItem({t: 's', pts: shapePts(kind), color: COLORS[state.tool.color === 0 ? 0 : state.tool.color], w: WIDTHS[2], fig: true});
-    const shapes = ['Circle', 'Triangle', 'Square', 'Ellipse'].map(k => h('button', {type: 'button', class: 'tbtn', onclick: () => add(k.toLowerCase())}, t('ngShape' + k)));
-    const own = h('button', {type: 'button', class: 'tbtn', onclick: () => { state.tool.width = 2; state.tool.mode = 'pen'; board.sync(); board.el.querySelector('.swatch').focus(); }}, t('ngShapeOwn'));
-    const auto = h('button', {type: 'button', class: 'tbtn', onclick: () => {
-      const fig = [...sheet.items].reverse().find(it => it.t === 's' && it.fig);
-      if (!fig) return board.say(t('ngNeedFigure'));
-      const col = COLORS[state.tool.color] === fig.color ? COLORS[(state.tool.color + 1) % COLORS.length] : COLORS[state.tool.color];
-      board.addItem({t: 's', pts: neurographFigure(fig, col), color: col, w: WIDTHS[1]}); board.say('');
-    }}, t('ngAutoNeuro'));
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS10Title'), h('p', {class: 'ng-lead'}, t('ngS10Text')),
-      h('span', {class: 'ng-label'}, t('ngShapes')), h('div', {class: 'shape-row'}, shapes, own),
-      h('p', {class: 'ng-lead'}, t('ngS10Text2')), h('div', {class: 'shape-row'}, auto), changedField()), board.el);
+    if (paper()) return cols([title('ngS10Title'), lead('ngS10Text'), lead('ngS10Text2'), changedField()], illus(demoSheets().figure));
+    const sheet = state.sheets.main, figs = () => sheet.items.filter(it => it.t === 's' && it.fig);
+    if (state.figDone && !figs().length) state.figDone = false;
+    if (!state.figDone) { state.tool.width = 2; state.tool.mode = 'pen'; } // the figure: the thick marker
+    let doneBtn = null;
+    const board = makeBoard('main', {extras: true, fig: () => !state.figDone, onChange: () => { if (doneBtn) doneBtn.disabled = !figs().length; }});
+    const left = [title('ngS10Title'), lead('ngS10Text')];
+    if (!state.figDone) {
+      doneBtn = h('button', {type: 'button', class: 'btn btn-solid', id: 'figDone', disabled: !figs().length, onclick: () => { state.figDone = true; state.tool.width = 1; save(); renderStep(false); }}, t('ngShapeDone'));
+      left.push(note('ngShapeDraw'));
+      return cols(left, h('div', {}, board.el, h('div', {class: 'shape-row'}, doneBtn))); // under the sheet, where the finger is
+    } else {
+      const auto = h('button', {type: 'button', class: 'tbtn', onclick: () => {
+        const f = figs(); if (!f.length) return board.say(t('ngNeedFigure'));
+        const figColor = f[f.length - 1].color, col = COLORS[state.tool.color] === figColor ? COLORS[(state.tool.color + 1) % COLORS.length] : COLORS[state.tool.color];
+        board.addItem({t: 's', pts: neurographFigure(f.flatMap(it => it.pts)), color: col, w: WIDTHS[1]}); board.say('');
+      }}, t('ngAutoNeuro'));
+      left.push(lead('ngS10Text2'), h('div', {class: 'shape-row'}, auto), changedField());
+    }
+    return cols(left, board.el);
   },
   // 10. over the drawing again: connect the figure and round the new corners (draft text for Sandra's approval)
-  () => {
-    const info = h('p', {class: 'ng-info', role: 'status'});
-    const board = makeBoard('main', {round: true, sharp: true, tapOnly: true, onChange: sh => roundInfo(info, sh, t('ngCrossNone'))});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS11aTitle'), h('p', {class: 'ng-lead'}, t('ngS11aText')), info), board.el);
-  },
+  () => paper() ? cols([title('ngS11aTitle'), lead('ngS11aText'), note('ngPaperRound')], illusPair(demoSheets().figure, demoSheets().figureRounded))
+    : roundBoard('ngS11aTitle', [lead('ngS11aText')]),
   // 11. colouring by feeling: any enclosed space, any colour, tap again to change it (draft text for Sandra's approval)
   () => {
+    if (paper()) return cols([title('ngS12Title'), lead('ngS12Text')], illus(demoSheets().colored));
     const board = makeBoard('main', {paint: true});
-    return h('div', {class: 'ng-cols'}, h('div', {}, title('ngS12Title'), h('p', {class: 'ng-lead'}, t('ngS12Text')), h('p', {class: 'ng-muted'}, t('ngS12Text2'))), board.el);
+    return cols([title('ngS12Title'), lead('ngS12Text'), muted('ngS12Text2')], board.el);
   },
   // 12. check in again: what do I feel now (draft text for Sandra's approval)
-  () => h('div', {class: 'ng-single'}, title('ngS13Title'), h('p', {class: 'ng-lead'}, t('ngS13Text')),
+  () => h('div', {class: 'ng-single'}, title('ngS13Title'), lead('ngS13Text'),
     [1, 2, 3, 4].map(i => h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'g' + i}, t('ngF' + i)),
       state.check[i - 1].trim() ? h('p', {class: 'ng-muted ng-before'}, t('ngBefore') + ' ' + state.check[i - 1].trim()) : null,
-      h('textarea', {class: 'ng-text', id: 'g' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check2[i - 1] = e.target.value; }}, state.check2[i - 1]))),
-    h('p', {class: 'ng-muted'}, t('ngPrivate'))),
+      h('textarea', {class: 'ng-text', id: 'g' + i, rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.check2[i - 1] = e.target.value; save(); }}, state.check2[i - 1]))),
+    muted('ngPrivate')),
   // 13. final
   () => {
+    const again = h('button', {type: 'button', class: 'btn btn-ghost', onclick: restart}, t('ngRestart'));
+    if (paper()) {
+      const tryPhone = h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => { setMode('phone'); go(5); }}, t(phoneKey()));
+      return h('div', {class: 'ng-single'}, title('ngPaperFinalTitle'), lead('ngPaperFinalText'), h('div', {class: 'final-actions'}, tryPhone, again), ctaBox('ngCtaNotePaper'));
+    }
     const sheet = state.sheets.main, cv = h('canvas', {class: 'final-sheet', role: 'img', 'aria-label': t('ngFinalAlt')});
     cv.width = cv.height = 1000; paintFull(cv.getContext('2d'), sheet, 1000);
     const dl = h('button', {type: 'button', class: 'btn btn-solid', onclick: download}, t('ngDownload'));
     const keep = h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => go(9)}, t('ngKeepDrawing'));
-    const again = h('button', {type: 'button', class: 'btn btn-ghost', onclick: restart}, t('ngRestart'));
-    const cta = h('div', {class: 'cta'}, h('h3', {}, t('ngCtaTitle')), h('p', {class: 'ng-lead'}, t('ngCtaText')),
-      h('a', {class: 'btn btn-solid gold', id: 'ctaBtn', href: S.waNeuro(lang), target: '_blank', rel: 'noopener', onclick: () => document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'book', slug: 'neurographics'}}))}, t('ngCtaBtn')), h('p', {class: 'ng-muted'}, t('ngCtaNote')));
-    return h('div', {class: 'ng-cols'}, cv, h('div', {}, title('ngS11Title'), h('p', {class: 'ng-lead'}, t('ngS11Text')), h('div', {class: 'final-actions'}, dl, keep, again), cta));
+    return h('div', {class: 'ng-cols'}, cv, h('div', {}, title('ngS11Title'), lead('ngS11Text'), h('div', {class: 'final-actions'}, dl, keep, again), ctaBox('ngCtaNote')));
   }
 ];
 
 function changedField() {
   return h('div', {class: 'ng-field'}, h('label', {class: 'ng-label', for: 'changed'}, t('ngChanged')),
-    h('textarea', {class: 'ng-text', id: 'changed', rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.changed = e.target.value; }}, state.changed));
+    h('textarea', {class: 'ng-text', id: 'changed', rows: '2', placeholder: t('ngFieldPh'), oninput: e => { state.changed = e.target.value; save(); }}, state.changed));
 }
 
 /* ---------- 20 words in 2 minutes ---------- */
+// The words live in state.words.text, updated on every keystroke. The timer is one module-level interval that reads the
+// box on screen, never a box captured when the step was first drawn (that stale box emptied the words when time ran out).
 const wordList = text => text.match(WORDS) || [];
+function wordsTick() {
+  const left = state.words.end - Date.now(), tm = document.querySelector('.timer'), bi = document.querySelector('.t-bar i');
+  if (tm) tm.textContent = fmt(Math.max(0, left));
+  if (bi) bi.style.transform = `scaleX(${Math.max(0, left) / 120000})`;
+  if (left <= 0) finishWords();
+}
+function ensureWordsTimer() { if (state.words.phase === 'run' && !timerId) timerId = setInterval(wordsTick, 200); }
+function stopWordsTimer() { clearInterval(timerId); timerId = 0; }
+function finishWords() {
+  liveWords(); stopWordsTimer();
+  state.words.phase = 'done'; save(true);
+  if (state.step === WORDS_STEP) { renderStep(false); $('announce').textContent = t('ngTimeUp'); }
+}
 function wordsStep() {
   const W = state.words, root = h('div', {class: 'ng-cols narrow ng-single'});
-  const head = [title('ngS6Title'), h('p', {class: 'ng-lead'}, t('ngS6Text'))];
+  const head = [title('ngS6Title'), lead('ngS6Text')];
   if (state.theme.trim()) head.push(h('p', {class: 'ng-by'}, `${t('ngThemeLabel')}: ${state.theme.trim()}`));
   const area = h('textarea', {class: 'ng-text', id: 'words', rows: '6', placeholder: t('ngWordsPh'), 'aria-label': t('ngWordsLabel'), disabled: W.phase !== 'run', readonly: W.phase === 'done', style: 'min-height:150px'}, W.text);
   const count = h('p', {class: 'words-count', 'aria-live': 'off'}, t('ngWordCount', {n: wordList(W.text).length}));
   const timer = h('div', {class: 'timer', role: 'timer', 'aria-label': t('ngTimeLeft')}, fmt(Math.max(0, W.phase === 'run' ? W.end - Date.now() : W.phase === 'done' ? 0 : 120000)));
   const bar = h('div', {class: 't-bar', 'aria-hidden': 'true'}, h('i'));
-  const body = h('div');
-  const upd = () => { count.textContent = t('ngWordCount', {n: wordList(area.value).length}); };
-  area.addEventListener('input', () => { W.text = area.value; upd(); });
-  const finish = () => {
-    clearInterval(timerId); timerId = 0; W.phase = 'done'; W.text = area.value; render();
-    $('announce').textContent = t('ngTimeUp');
-  };
+  area.addEventListener('input', () => { W.text = area.value; count.textContent = t('ngWordCount', {n: wordList(area.value).length}); save(); });
   const start = () => {
-    W.phase = 'run'; W.end = Date.now() + 120000; render();
-    document.getElementById('words').focus();
-    clearInterval(timerId);
-    timerId = setInterval(() => {
-      const left = W.end - Date.now(), tm = document.querySelector('.timer'), bi = document.querySelector('.t-bar i');
-      if (!tm) return clearInterval(timerId);
-      tm.textContent = fmt(Math.max(0, left)); if (bi) bi.style.transform = `scaleX(${Math.max(0, left) / 120000})`;
-      if (left <= 0) finish();
-    }, 200);
-  };
-  function render() { // re-render the step in place (keeps state)
+    W.phase = 'run'; W.end = Date.now() + 120000; save(true);
     renderStep(false);
-    if (W.phase === 'run') document.getElementById('words').focus();
-  }
+    document.getElementById('words').focus();
+  };
   const parts = [];
   if (W.phase === 'idle') {
-    parts.push(h('p', {class: 'ng-muted'}, t('ngTimerNote')), h('button', {type: 'button', class: 'btn btn-solid', onclick: start}, t('ngStartTimer')), timer, bar, h('label', {class: 'ng-label', for: 'words'}, t('ngWordsLabel')), area, count);
+    parts.push(muted('ngTimerNote'), h('button', {type: 'button', class: 'btn btn-solid', onclick: start}, t('ngStartTimer')), timer, bar, h('label', {class: 'ng-label', for: 'words'}, t('ngWordsLabel')), area, count);
   } else if (W.phase === 'run') {
-    parts.push(timer, bar, h('label', {class: 'ng-label', for: 'words'}, t('ngWordsLabel')), area, count, h('button', {type: 'button', class: 'btn btn-ghost', onclick: finish}, t('ngFinishNow')));
+    parts.push(timer, bar, h('label', {class: 'ng-label', for: 'words'}, t('ngWordsLabel')), area, count, h('button', {type: 'button', class: 'btn btn-ghost', onclick: finishWords}, t('ngFinishNow')));
   } else {
     const words = wordList(W.text), n = words.length;
     parts.push(h('p', {class: 'words-count'}, t('ngWordCount', {n})), h('p', {class: 'words-msg'}, n > 20 ? t('ngFlow') : t('ngFewer')),
       h('p', {class: 'ng-label'}, t('ngSurprise')),
       h('div', {class: 'chips', role: 'group', 'aria-label': t('ngSurprise')}, words.map((w, i) => h('button', {type: 'button', class: 'chip', 'aria-pressed': String(W.surprised.has(i)), onclick: e => {
-        if (W.surprised.has(i)) W.surprised.delete(i); else W.surprised.add(i); e.currentTarget.setAttribute('aria-pressed', String(W.surprised.has(i)));
+        if (W.surprised.has(i)) W.surprised.delete(i); else W.surprised.add(i); e.currentTarget.setAttribute('aria-pressed', String(W.surprised.has(i))); save();
       }}, w))),
-      h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => { W.phase = 'idle'; W.text = ''; W.surprised = new Set(); renderStep(false); }}, t('ngTryAgain')));
-    area.hidden = true;
+      h('button', {type: 'button', class: 'btn btn-ghost', onclick: () => { W.phase = 'idle'; W.text = ''; W.surprised = new Set(); save(true); renderStep(false); }}, t('ngTryAgain')));
   }
   root.append(...head, ...parts);
-  if (W.phase === 'run') { const bi = bar.querySelector('i'); bi.style.transform = `scaleX(${Math.max(0, W.end - Date.now()) / 120000})`; }
+  if (W.phase === 'run') { const bi = bar.querySelector('i'); bi.style.transform = `scaleX(${Math.max(0, W.end - Date.now()) / 120000})`; ensureWordsTimer(); }
   return root;
 }
 const fmt = ms => { const s = Math.ceil(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -865,25 +963,26 @@ function download() {
 }
 
 /* ---------- flow ---------- */
-function stopWordsIfRunning() {
-  if (timerId) { clearInterval(timerId); timerId = 0; }
-  if (state.words.phase === 'run') { state.words.text = (document.getElementById('words') || {value: state.words.text}).value; state.words.phase = 'done'; }
+function stopWordsIfRunning() { // leaving the words step closes the two minutes, keeping every word
+  if (state.words.phase === 'run') { liveWords(); state.words.phase = 'done'; }
+  stopWordsTimer();
 }
 function renderStep(focus = true) {
   clearTimers();
   const stage = $('stage'), n = state.step;
   stage.replaceChildren(STEPS[n]());
-  if (n === 3 && state.words.phase === 'run') { /* returning to a running timer is not possible: it was closed */ }
   $('stepOf').textContent = t('ngStepOf', {n: n + 1, m: TOTAL});
+  const ms = $('modeSwitch'); ms.hidden = n === 0 || !state.mode; ms.textContent = paper() ? t(phoneKey()) : t('ngChoosePaper');
   const bar = $('bar'); bar.setAttribute('aria-valuenow', n + 1); bar.setAttribute('aria-valuemax', TOTAL); bar.setAttribute('aria-valuetext', t('ngStepOf', {n: n + 1, m: TOTAL})); bar.setAttribute('aria-label', t('ngSteps'));
   $('barFill').style.width = ((n + 1) / TOTAL * 100) + '%';
   $('dots').replaceChildren(...Array.from({length: TOTAL}, (_, i) => h('li', {class: i < n ? 'done' : i === n ? 'now' : ''})));
+  $('nav').hidden = n === 0; // step 1 ends with the choice of paper or phone
   $('backBtn').hidden = n === 0; $('backTxt').textContent = t('ngBack');
-  $('nextBtn').hidden = n === TOTAL - 1; $('nextTxt').textContent = n === 0 ? t('ngStart') : t('ngNext');
+  $('nextBtn').hidden = n === TOTAL - 1; $('nextTxt').textContent = t('ngNext');
   if (focus) { const ti = document.getElementById('stepTitle'); if (ti) ti.focus({preventScroll: true}); window.scrollTo({top: 0, behavior: reduced() ? 'auto' : 'smooth'}); }
 }
-function go(n) { stopWordsIfRunning(); state.step = Math.max(0, Math.min(TOTAL - 1, n)); renderStep(); }
-function restart() { stopWordsIfRunning(); state.sheets = {main: newSheet()}; state.theme = ''; state.words = {text: '', phase: 'idle', end: 0, surprised: new Set()}; state.check = ['', '', '', '']; state.check2 = ['', '', '', '']; state.changed = ''; go(0); }
+function go(n) { stopWordsIfRunning(); state.step = Math.max(0, Math.min(TOTAL - 1, n)); if (state.step > 0 && !state.mode) state.mode = 'phone'; save(true); renderStep(); }
+function restart() { stopWordsIfRunning(); state.sheets = {main: newSheet()}; state.mode = null; state.figDone = false; state.theme = ''; state.words = {text: '', phase: 'idle', end: 0, surprised: new Set()}; state.check = ['', '', '', '']; state.check2 = ['', '', '', '']; state.changed = ''; sess.clear(); go(0); }
 
 /* ---------- language ---------- */
 function applyLang() {
@@ -902,11 +1001,15 @@ document.querySelectorAll('[data-lang-link]').forEach(a => a.addEventListener('c
   e.preventDefault();
   try { localStorage.setItem('sl_lang', a.dataset.langLink); } catch (err) {} // remembered; the home's first-visit suggestion never overrides it
   const next = a.dataset.langLink; if (next === lang) return;
-  const val = document.getElementById('words'); if (val && state.words.phase === 'run') state.words.text = val.value;
+  liveWords(); save(true); // the words and the running timer carry over to the new language
   lang = next; history.replaceState(null, '', '?lang=' + lang); applyLang(); renderStep(false);
 }));
 $('backBtn').addEventListener('click', () => go(state.step - 1));
 $('nextBtn').addEventListener('click', () => go(state.step + 1));
+restore();
+addEventListener('pagehide', () => save(true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
+$('modeSwitch').addEventListener('click', () => { setMode(paper() ? 'phone' : 'paper'); renderStep(false); });
 applyLang(); renderStep(false);
-window.__ng = {state, go, get lang() { return lang; }, jx: () => junctions(state.sheets.main)}; // jx: for the browser tests
+window.__ng = {state, go, setMode, save, get lang() { return lang; }, jx: () => junctions(state.sheets.main)}; // for the browser tests
 })();

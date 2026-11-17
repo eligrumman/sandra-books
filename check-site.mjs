@@ -111,6 +111,25 @@ for (const k of ['ngS1Title', 'ngS11Title', 'ngCtaBtn', 'waNeuro', 'navNeuro', '
 for (const l of ['he', 'ru', 'en']) assert.ok(SITE.waNeuro(l).startsWith('https://wa.me/972535380014?text='), `waNeuro ${l}`);
 assert.ok(read('sitemap.xml').includes(`<loc>${SITE_URL}neurographics/</loc>`), 'neurographics in sitemap');
 for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('neurographics/'), `${page} links to neurographics`);
+// NeuroGraphica, Owner 2026-11-17 ("כתבנו 23 מילים ואז הם נעלמו", paper first, many lines, the figure by hand, forgiving taps).
+{
+  const app = read('neurographics/app.js'), num = re => +(app.match(re) || [])[1];
+  // the words: the 2-minute timer once read a stale, empty box captured at the idle render and wiped the words when time ran out
+  assert.ok(/function liveWords\(\) \{[^}]*document\.getElementById\('words'\)/.test(app) && /function finishWords\(\) \{\s*liveWords\(\);/.test(app), 'NG words: the end of the timer reads the box on screen');
+  assert.ok(/timerId = setInterval\(wordsTick, 200\)/.test(app) && !/W\.text = area\.value; render\(\)/.test(app) && !/clearInterval\(timerId\); breathTimer = timerId = 0/.test(app), 'NG words: one module timer, not cleared by a re-render or a language switch');
+  assert.ok(/try \{ return JSON\.parse\(sessionStorage\.getItem\(SKEY\)/.test(app) && /try \{ sessionStorage\.setItem\(SKEY/.test(app) && /\nrestore\(\);\n/.test(app), 'NG: the visit (texts, words, step, drawing) is kept in sessionStorage, guarded by try/catch');
+  assert.ok(num(/maxlength: '(\d+)'/) >= 200, 'NG: the request field takes a long text');
+  // paper first: the opening choice, and the paper steps carry no drawing sheet
+  for (const k of ['ngPaperBest', 'ngChooseQ', 'ngChoosePaper', 'ngChoosePhone', 'ngChooseScreen', 'ngManyLines', 'ngLinesCount', 'ngLinesMany', 'ngPaperRound', 'ngIllAlt', 'ngIllBefore', 'ngIllAfter', 'ngShapeDraw', 'ngShapeDone', 'ngPaperFinalTitle', 'ngPaperFinalText', 'ngCtaNotePaper']) for (const l of ['he', 'ru', 'en']) assert.ok(SITE.text[l][k], `NG text ${k} ${l}`);
+  assert.equal(SITE.text.he.ngChoosePaper, 'יש לי דף וטושים – רוצה הדרכה', 'NG: the paper choice in the Owner\'s words');
+  assert.ok(app.includes("id: 'choosePaper'") && app.includes("id: 'choosePhone'") && (app.match(/paper\(\)(\) return | \? )cols\(/g) || []).length >= 6 && app.includes("$('nav').hidden = n === 0"), 'NG: opening choice; paper mode steps are instructions with pictures, no sheet');
+  // many lines (a hint, never a block), the figure drawn by hand (no ready triangle)
+  assert.ok(num(/const LINES_MIN = (\d+)/) >= 8 && !/nextBtn'\)\.disabled/.test(app), 'NG: at least 8 lines encouraged, Next never blocked');
+  assert.ok(!/shapePts|ngShapeTriangle|ngShapeCircle/.test(app) && !('ngShapeTriangle' in SITE.text.he) && app.includes("fig: () => !state.figDone"), 'NG: no ready-made shapes; the figure is drawn freehand');
+  // forgiving taps: a finger rounds every sharp corner within >= 28 CSS px; anything that moves is a line, so lines can be added after rounding
+  assert.ok(num(/TAP_TOUCH_PX = (\d+)/) >= 28 && /const hit = sharp\.filter\(c => d\(c\) <= R\)/.test(app), 'NG taps: generous radius, all the near corners');
+  assert.ok(num(/SLOP_TOUCH_PX = (\d+)/) <= 16 && /down\.travel < \(down\.touch \? SLOP_TOUCH_PX : SLOP_MOUSE_PX\)/.test(app) && /sheet\.items\.push\(it\); changed\(\);/.test(app), 'NG: a drag on a rounding step still adds a line');
+}
 
 // Biography: a page per language, the home About link points to it, the switcher reaches the other versions, bullets and pull quote present.
 for (const [i, l] of ['he', 'ru', 'en'].entries()) {
