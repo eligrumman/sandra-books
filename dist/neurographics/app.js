@@ -37,7 +37,10 @@ const L = arr => arr[LANGS.indexOf(lang)] ?? arr[0];
 const PAPER = '#f4ead6'; // the cream of the sheet: canvas, unfilled spaces and the saved PNG (same as --paper-sheet in style.css)
 const COLORS = ['#1d1b24', '#2459c6', '#d23b3b', '#2f8f5b', '#e8862b', '#7a46c2', '#f2c11b']; // no metallic markers
 const PAINT = COLORS.concat(['#ef8fb1', '#7cc4ee', '#a5d77a', '#b8a1e8', '#a19fa8']); // colouring: the same markers and a few lighter ones, still no metallic
-const WIDTHS = [5, 9, 20]; // logical units on a 1000 x 1000 sheet
+const INK = COLORS[0]; // every line is black (Owner 2026-11-18: "הקווים תמיד תמיד שחורים בעובי שונה"); colour only in the colouring step
+const WIDTHS = [6, 10, 14]; // line widths in logical units on a 1000 x 1000 sheet (thin, medium, thick; about 2-5 CSS px on a phone)
+const FIG_W = 26; // the central line, the hand-drawn figure: clearly the thickest line on the sheet
+const lineW = i => Math.round(WIDTHS[i] * (0.65 + Math.random() * 0.7) * 10) / 10; // each line its own width, as with a hand on a marker
 const WORDS = /[\p{L}\p{N}][\p{L}\p{N}'’\-־]*/gu;
 const TOTAL = 13;
 const WORDS_STEP = 3;
@@ -100,7 +103,7 @@ function restore() {
   state.words = {text: str(w.text), phase, end: +w.end || 0, surprised: new Set(Array.isArray(w.surprised) ? w.surprised : []), id: 0};
   if (Array.isArray(d.items)) {
     state.sheets.main.items = d.items.filter(it => it && (it.t === 's' ? Array.isArray(it.pts) && it.pts.length : it.t === 'r' ? Array.isArray(it.keys) : it.t === 'f'));
-    for (const it of state.sheets.main.items) uid = Math.max(uid, it.id || 0);
+    for (const it of state.sheets.main.items) { uid = Math.max(uid, it.id || 0); if (it.t === 's') it.color = INK; }
   }
 }
 
@@ -319,7 +322,15 @@ function hull(pts) { // convex hull (monotone chain)
   for (const q of p.reverse()) { while (up.length > 1 && x(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
   return lo.slice(0, -1).concat(up.slice(0, -1));
 }
-function roundedSet(sheet) { const s = new Set(); for (const it of sheet.items) if (it.t === 'r') for (const k of it.keys) s.add(k); return s; }
+// A rounding belongs to the junction as it was when the corner was filled: when a later line runs through that junction
+// (the central line of step 9, say), its corners count as sharp again and are filled in the next rounding step, never
+// while that line is being drawn (Owner 2026-11-18: "בשלב של הקו הגדול המרכזי הוא מילא פינות. מילוי פינות זה השלב הבא").
+function roundedSet(sheet) {
+  const at = new Map(); sheet.items.forEach((it, i) => { if (it.t === 'r') for (const k of it.keys) at.set(k, i); }); // the latest filling of a corner counts
+  const s = new Set(); if (!at.size) return s;
+  for (const c of junctions(sheet).corners) { const i = at.get(c.id); if (i !== undefined && c.order < i) s.add(c.id); }
+  return s;
+}
 function sharpCorners(sheet) { const rs = roundedSet(sheet); return junctions(sheet).corners.filter(c => !rs.has(c.id)); }
 function filletPath(ctx, c, k = 1) { // k < 1 grows the shape from the inner vertex (animation)
   const tr = k === 1 ? q => q : q => [c.V[0] + (q[0] - c.V[0]) * k, c.V[1] + (q[1] - c.V[1]) * k];
@@ -389,8 +400,11 @@ function maskOf(sheet) { // barrier raster of the lines and their rounded corner
   const widest = new Float32Array(area.length), deep = new Int32Array(area.length), edge = new Uint8Array(area.length), cx = new Float64Array(area.length), cy = new Float64Array(area.length);
   for (let i = 0; i < N; i++) { const l = lab[i]; if (l < 0) continue; if (dist[i] > widest[l]) { widest[l] = dist[i]; deep[l] = i; } const x0 = i % MASK; cx[l] += x0; cy[l] += (i - x0) / MASK; if (x0 === 0 || x0 === MASK - 1 || i < MASK || i >= N - MASK) edge[l] = 1; }
   const thin = area.map((a, l) => !edge[l] && a < N * 0.02 && widest[l] <= 3.6);
+  // small closed spaces (under about 0.3% of the sheet, some 55 x 55 units): inked in with the corner beside them
+  // (Owner 2026-11-18: "כשיש חללים קטנים תסגור אותם במילוי", and rule 4: very small closed parts are simply filled)
+  const small = area.map((a, l) => !edge[l] && (thin[l] || a < N * 0.003));
   const mid = area.map((a, l) => [cx[l] / a * 1000 / MASK, cy[l] / a * 1000 / MASK]); // centre of each space, in sheet units
-  sheet.mask = {m, lab, area, thin, mid, widest, deep}; sheet.maskKey = key;
+  sheet.mask = {m, lab, area, thin, small, mid, widest, deep}; sheet.maskKey = key;
   return sheet.mask;
 }
 // a thin sliver of paper right next to a rounded junction is inked in, as when inking by hand (its colour: the junction's)
@@ -400,14 +414,14 @@ function slivers(sheet) {
   const rs = roundedSet(sheet), byId = new Map();
   const corners = rs.size ? junctions(sheet).corners.filter(c => rs.has(c.id)) : [];
   if (corners.length) {
-    const {m, lab, thin} = maskOf(sheet);
+    const {m, lab, thin, small} = maskOf(sheet);
     for (const c of corners) {
       const d = unit([c.M[0] - c.V[0], c.M[1] - c.V[1]]);
       for (const s of [1.5, 3, 5, 8]) {
         const px = Math.round((c.M[0] + d[0] * s) * MASK / 1000), py = Math.round((c.M[1] + d[1] * s) * MASK / 1000);
         if (px < 0 || py < 0 || px >= MASK || py >= MASK) continue;
         const i = py * MASK + px; if (m[i]) continue;
-        if (thin[lab[i]] && !byId.has(lab[i])) byId.set(lab[i], {color: c.color, node: c.node});
+        if (small[lab[i]] && !byId.has(lab[i])) byId.set(lab[i], {color: c.color, node: c.node});
         break;
       }
     }
@@ -561,25 +575,26 @@ function makeBoard(key, o = {}) {
   const sw = h('div', {class: 'sheet-wrap'}, canvas, hint);
   const status = h('p', {class: 'board-status', role: 'status'});
   const say = (msg, good) => { status.textContent = msg || ''; status.classList.toggle('good', !!good); };
-  const swatches = h('div', {class: 'tool-group', role: 'radiogroup', 'aria-label': t('ngColor')}, PAL.map((c, i) => h('button', {type: 'button', class: 'swatch', role: 'radio', 'aria-checked': String(cur() === i), 'aria-label': t('ngCol' + i), 'data-c': i,
+  const swatches = !o.paint ? null : h('div', {class: 'tool-group', role: 'radiogroup', 'aria-label': t('ngColor')}, PAL.map((c, i) => h('button', {type: 'button', class: 'swatch', role: 'radio', 'aria-checked': String(cur() === i), 'aria-label': t('ngCol' + i), 'data-c': i,
     onclick: () => { if (o.paint) tool.paint = i; else { tool.color = i; if (tool.mode === 'fill') tool.mode = 'pen'; } sync(); }}, h('i', {style: 'background:' + c}))));
-  const widths = o.paint ? null : h('div', {class: 'tool-group', role: 'radiogroup', 'aria-label': t('ngWidth')}, [['ngThin', 4], ['ngMed', 8], ['ngThick', 14]].map(([k, px], i) => h('button', {type: 'button', class: 'wbtn', role: 'radio', 'aria-checked': String(tool.width === i), 'aria-label': t(k), title: t(k), 'data-w': i,
+  const widths = o.paint || !o.extras ? null : h('div', {class: 'tool-group', role: 'radiogroup', 'aria-label': t('ngWidth')}, [['ngThin', 4], ['ngMed', 8], ['ngThick', 14]].map(([k, px], i) => h('button', {type: 'button', class: 'wbtn', role: 'radio', 'aria-checked': String(tool.width === i), 'aria-label': t(k), title: t(k), 'data-w': i,
     onclick: () => { tool.width = i; if (tool.mode === 'fill') tool.mode = 'pen'; sync(); }}, h('i', {style: `height:${px}px`}))));
   const undo = h('button', {type: 'button', class: 'tbtn', onclick: () => { // one step back; a recolour gives the space its earlier colour back
     const it = sheet.items.pop(); if (it && it.was) for (const [i, f] of it.was) sheet.items.splice(i, 0, f); changed(); }}, t('ngUndo'));
   const clear = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.length = 0; sheet.anim = null; changed(); }}, t('ngClear'));
-  const sample = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: COLORS[tool.color], w: WIDTHS[Math.min(tool.width, 1)]}); changed(); if (o.onStroke) o.onStroke(sheet); }}, t('ngSample'));
+  const sample = o.paint || !o.extras ? null : h('button', {type: 'button', class: 'tbtn', onclick: () => { sheet.items.push({t: 's', pts: sampleLine(), color: INK, w: lineW(Math.min(tool.width, 1))}); changed(); if (o.onStroke) o.onStroke(sheet); }}, t('ngSample'));
   const fillBtn = o.fill ? h('button', {type: 'button', class: 'tbtn', 'aria-pressed': 'false', onclick: () => { tool.mode = tool.mode === 'fill' ? 'pen' : 'fill'; say(tool.mode === 'fill' ? t('ngFillOn') : ''); sync(); }}, t('ngFill')) : null;
   const roundBtn = o.round ? h('button', {type: 'button', class: 'tbtn round', onclick: () => roundKeys(sharpCorners(sheet).map(c => c.id))}, t('ngRoundBtn')) : null;
   const tools = h('div', {class: 'tools', role: 'group', 'aria-label': t('ngTools')}, swatches, widths, h('div', {class: 'tool-group'}, undo, clear, sample, fillBtn, roundBtn));
   wrap.append(sw, tools, status);
   if (o.round) wrap.append(h('p', {class: 'ng-muted board-tip'}, t('ngTapRound')));
-  const mode = () => o.paint ? 'fill' : tool.mode;
+  const mode = () => o.paint ? 'fill' : o.fill ? tool.mode : 'pen'; // colour fills only on the colouring board (or one that asks for a fill tool)
 
   const ctx = canvas.getContext('2d');
   let W = 0, base = null, baseKey = '', raf = 0, live = null;
   function sync() {
-    swatches.querySelectorAll('.swatch').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.c === cur() && (o.paint || tool.mode !== 'fill'))));
+    if (swatches) swatches.querySelectorAll('.swatch').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.c === cur() && (o.paint || tool.mode !== 'fill'))));
+    if (widths) widths.hidden = !!(o.fig && o.fig()); // the central figure is always the thickest marker: no width choice while it is drawn
     if (widths) widths.querySelectorAll('.wbtn').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.w === tool.width && tool.mode !== 'fill')));
     if (fillBtn) fillBtn.setAttribute('aria-pressed', String(tool.mode === 'fill'));
     canvas.style.cursor = mode() === 'fill' ? 'cell' : 'crosshair';
@@ -642,18 +657,19 @@ function makeBoard(key, o = {}) {
   }
   const pos = e => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 1000, (e.clientY - r.top) / r.height * 1000]; };
   const perCss = () => 1000 / (canvas.getBoundingClientRect().width || 1); // sheet units per CSS pixel
-  // the corners a tap or click means, generously (Owner 2026-11-17: "if you tapped near, close the nearby corners"):
-  // every sharp corner whose mark, vertex or junction centre lies within reach (32 CSS px for a finger, 20 for a mouse);
-  // when none is that close, the nearest sharp corner within 1.6 x reach.
+  // the corner a tap or click means: one corner per tap, the nearest (Owner 2026-11-18: "כל לחיצה על מילוי פינות ממלא את
+  // הפינה הקרובה ביותר כל פעם פינה אחת"). Reach stays forgiving: a sharp corner whose mark, vertex or junction centre lies
+  // within 32 CSS px of a finger (20 for a mouse) counts, else one within 1.6 x that; of those, the one whose mark is nearest.
   function cornersNear(p, touch) {
     const R = (touch ? TAP_TOUCH_PX : TAP_MOUSE_PX) * perCss(), rs = roundedSet(sheet);
     const sharp = junctions(sheet).corners.filter(c => !rs.has(c.id));
     const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]), d = c => Math.min(dist(p, c.anchor), dist(p, c.P), dist(p, c.node.p));
-    const hit = sharp.filter(c => d(c) <= R);
-    if (hit.length) return hit.map(c => c.id);
-    let best = null;
-    for (const c of sharp) { const x = d(c); if (!best || x < best.x) best = {c, x}; }
-    return best && best.x <= 1.6 * R ? [best.c.id] : [];
+    for (const reach of [R, 1.6 * R]) {
+      let best = null;
+      for (const c of sharp) if (d(c) <= reach) { const x = dist(p, c.anchor); if (!best || x < best.x) best = {c, x}; }
+      if (best) return [best.c.id];
+    }
+    return [];
   }
   let pid = null, down = null;
   canvas.addEventListener('pointerdown', e => {
@@ -664,7 +680,7 @@ function makeBoard(key, o = {}) {
     if (mode() === 'fill') { fillAt(p); pid = null; return; }
     down = {t: performance.now(), x: e.clientX, y: e.clientY, travel: 0, touch: e.pointerType !== 'mouse'};
     const fig = !!(o.fig && o.fig()); // drawing the figure: always the thick marker
-    live = {pts: [p], color: COLORS[tool.color], w: WIDTHS[fig ? 2 : tool.width], fig}; paint();
+    live = {pts: [p], color: INK, w: fig ? FIG_W : lineW(tool.width), fig}; paint();
   });
   canvas.addEventListener('pointermove', e => {
     if (e.pointerId !== pid || !live) {
@@ -714,7 +730,7 @@ function makeBoard(key, o = {}) {
     sheet.items.push({t: 'f', x: p[0], y: p[1], color, was: same.length ? same : null}); say(''); changed();
   }
   new ResizeObserver(() => { baseKey = ''; paint(); }).observe(canvas);
-  const api = {el: wrap, paint, sync, say, changed, sheet, color: () => COLORS[tool.color], addItem: it => { sheet.items.push(it); changed(); }, loop};
+  const api = {el: wrap, paint, sync, say, changed, sheet, color: () => INK, addItem: it => { sheet.items.push(it); changed(); }, loop};
   requestAnimationFrame(() => { changed(); loop(); });
   return api;
 }
@@ -746,10 +762,10 @@ function demoSheets() {
   if (demo) return demo;
   const rnd = seeded(1117), mk = items => ({...newSheet(), items});
   const roundAll = sh => mk(sh.items.concat([{t: 'r', keys: sharpCorners(sh).map(c => c.id), id: ++uid}]));
-  const lines = mk([1, 2, 3, 5, 4, 0, 1].map(c => ({t: 's', pts: demoLine(rnd), color: COLORS[c], w: WIDTHS[1], id: ++uid})));
+  const lines = mk([1, 0, 2, 1, 0, 2, 1].map(k => ({t: 's', pts: demoLine(rnd), color: INK, w: WIDTHS[k] * (0.85 + rnd() * 0.3), id: ++uid})));
   const rounded = roundAll(lines);
-  const fig = {t: 's', pts: handShape(rnd), color: COLORS[0], w: WIDTHS[2], fig: true, id: ++uid};
-  const figure = mk(rounded.items.concat([fig, {t: 's', pts: neurographFigure(fig.pts, rnd), color: COLORS[1], w: WIDTHS[1], id: ++uid}]));
+  const fig = {t: 's', pts: handShape(rnd), color: INK, w: FIG_W, fig: true, id: ++uid};
+  const figure = mk(rounded.items.concat([fig, {t: 's', pts: neurographFigure(fig.pts, rnd), color: INK, w: WIDTHS[1], id: ++uid}]));
   const figureRounded = roundAll(figure);
   const {area, widest, deep} = maskOf(figureRounded), fills = [];
   area.forEach((a, l) => { if (widest[l] < 5) return; const i = deep[l]; fills.push({t: 'f', x: (i % MASK + 0.5) * 1000 / MASK, y: (Math.floor(i / MASK) + 0.5) * 1000 / MASK, color: PAINT[1 + Math.floor(rnd() * (PAINT.length - 1))], id: ++uid}); });
@@ -843,20 +859,20 @@ const STEPS = [
     if (paper()) return cols([title('ngS10Title'), lead('ngS10Text'), lead('ngS10Text2'), changedField()], illus(demoSheets().figure));
     const sheet = state.sheets.main, figs = () => sheet.items.filter(it => it.t === 's' && it.fig);
     if (state.figDone && !figs().length) state.figDone = false;
-    if (!state.figDone) { state.tool.width = 2; state.tool.mode = 'pen'; } // the figure: the thick marker
+    if (!state.figDone) state.tool.mode = 'pen'; // the figure: always the thickest marker (FIG_W)
     let doneBtn = null;
     const board = makeBoard('main', {extras: true, fig: () => !state.figDone, onChange: () => { if (doneBtn) doneBtn.disabled = !figs().length; }});
     const left = [title('ngS10Title'), lead('ngS10Text')];
     if (!state.figDone) {
-      doneBtn = h('button', {type: 'button', class: 'btn btn-solid', id: 'figDone', disabled: !figs().length, onclick: () => { state.figDone = true; state.tool.width = 1; save(); renderStep(false); }}, t('ngShapeDone'));
+      doneBtn = h('button', {type: 'button', class: 'btn btn-solid', id: 'figDone', disabled: !figs().length, onclick: () => { state.figDone = true; save(); renderStep(false); }}, t('ngShapeDone'));
       left.push(note('ngShapeDraw'));
       board.el.firstChild.after(h('div', {class: 'shape-row'}, doneBtn)); // right under the sheet, above the tools, so the sticky nav never hides it
       return cols(left, board.el);
     } else {
       const auto = h('button', {type: 'button', class: 'tbtn', onclick: () => {
         const f = figs(); if (!f.length) return board.say(t('ngNeedFigure'));
-        const figColor = f[f.length - 1].color, col = COLORS[state.tool.color] === figColor ? COLORS[(state.tool.color + 1) % COLORS.length] : COLORS[state.tool.color];
-        board.addItem({t: 's', pts: neurographFigure(f.flatMap(it => it.pts)), color: col, w: WIDTHS[1]}); board.say('');
+        // black, like every line
+        board.addItem({t: 's', pts: neurographFigure(f.flatMap(it => it.pts)), color: INK, w: lineW(1)}); board.say('');
       }}, t('ngAutoNeuro'));
       left.push(lead('ngS10Text2'), h('div', {class: 'shape-row'}, auto), changedField());
     }
@@ -1012,5 +1028,5 @@ addEventListener('pagehide', () => save(true));
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
 $('modeSwitch').addEventListener('click', () => { setMode(paper() ? 'phone' : 'paper'); renderStep(false); });
 applyLang(); renderStep(false);
-window.__ng = {state, go, setMode, save, get lang() { return lang; }, jx: () => junctions(state.sheets.main)}; // for the browser tests
+window.__ng = {state, go, setMode, save, get lang() { return lang; }, jx: () => junctions(state.sheets.main), sl: () => [...slivers(state.sheets.main).values()].length, mask: () => { const m = maskOf(state.sheets.main); return {regions: m.area.length, thin: m.thin.filter(Boolean).length}; }}; // for the browser tests
 })();

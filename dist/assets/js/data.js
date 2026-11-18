@@ -312,7 +312,7 @@ window.SITE = {
     ngWorkCap: ['מעבודותיה של סנדרה: ״{title}״', 'Из работ Сандры: «{title}»', 'From Sandra’s works: “{title}”'],
     ngMatTitle: ['מה צריך', 'Что понадобится', 'What you need'],
     ngMat1: ['דף נייר לבן, או המסך הזה', 'Лист белой бумаги или этот экран', 'A white sheet of paper, or this screen'],
-    ngMat2: ['טושים או עטי ג׳ל בכמה צבעים, למשל כחול וצהוב', 'Маркеры или гелевые ручки нескольких цветов, например синий и жёлтый', 'Markers or gel pens in a few colors, for example blue and yellow'],
+    ngMat2: ['טוש שחור לקווים, וכמה טושים בצבעים לצביעה בסוף', 'Чёрный маркер для линий и несколько цветных маркеров для раскрашивания в конце', 'A black marker for the lines, and a few colored markers for the coloring at the end'],
     ngMat3: ['עט ג׳ל דק לעיגול פינות', 'Тонкая гелевая ручка, чтобы скруглять углы', 'A thin gel pen for rounding corners'],
     ngMat4: ['טוש עבה אחד ל״צורה שבחרתם״', 'Один толстый маркер для «фигуры по выбору»', 'One thick marker for your “figure of choice”'],
     ngMat5: ['בלי טושים מתכתיים (זהב, כסף, נחושת): הם ״קורעים״ את הדף במקום לאחד אותו', 'Без металлических маркеров (золото, серебро, медь): они «рвут» лист, а не объединяют его', 'No metallic markers (gold, silver, copper): they “tear” the sheet apart instead of uniting it'],
@@ -347,7 +347,7 @@ window.SITE = {
     ngCol4: ['כתום', 'Оранжевый', 'Orange'], ngCol5: ['סגול', 'Фиолетовый', 'Violet'], ngCol6: ['צהוב', 'Жёлтый', 'Yellow'],
     ngCol7: ['ורוד', 'Розовый', 'Pink'], ngCol8: ['תכלת', 'Голубой', 'Light blue'], ngCol9: ['ירוק בהיר', 'Светло-зелёный', 'Light green'], ngCol10: ['לילך', 'Сиреневый', 'Lilac'], ngCol11: ['אפור', 'Серый', 'Grey'],
     // tap-to-round and the closing steps (rounding again, colouring, check-in again): new, draft for Sandra's approval
-    ngTapRound: ['הקישו ליד פינה חדה או חיתוך, והפינות הקרובות יתמלאו ויתעגלו. כדי להוסיף קווים, פשוט גררו.', 'Коснитесь рядом с острым углом или пересечением, и ближние углы заполнятся и скруглятся. Чтобы добавить линии, просто ведите пальцем.', 'Tap near a sharp corner or a crossing, and the corners close by fill in and round. To add more lines, just drag.'],
+    ngTapRound: ['הקישו ליד פינה חדה: הפינה הקרובה ביותר תתמלא ותתעגל, פינה אחת בכל הקשה. כדי להוסיף קווים, פשוט גררו.', 'Коснитесь рядом с острым углом: ближайший угол заполнится и скруглится, по одному углу за касание. Чтобы добавить линии, просто ведите пальцем.', 'Tap near a sharp corner: the nearest corner fills in and rounds, one corner per tap. To add more lines, just drag.'],
     // a tap that hits no sharp corner on the rounding steps (7, 8, 10): new, draft for Sandra's approval
     ngTapMiss: ['אין כאן פינה חדה. הקישו ליד נקודה אדומה, או גררו כדי לצייר קו.', 'Здесь нет острого угла. Нажмите рядом с красной точкой или проведите, чтобы нарисовать линию.', 'No sharp corner here. Tap near a red dot, or drag to draw a line.'],
     ngWidth: ['עובי הקו', 'Толщина линии', 'Stroke width'],
