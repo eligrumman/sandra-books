@@ -322,14 +322,27 @@ function hull(pts) { // convex hull (monotone chain)
   for (const q of p.reverse()) { while (up.length > 1 && x(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
   return lo.slice(0, -1).concat(up.slice(0, -1));
 }
-// A rounding belongs to the junction as it was when the corner was filled: when a later line runs through that junction
-// (the central line of step 9, say), its corners count as sharp again and are filled in the next rounding step, never
-// while that line is being drawn (Owner 2026-11-18: "בשלב של הקו הגדול המרכזי הוא מילא פינות. מילוי פינות זה השלב הבא").
-function roundedSet(sheet) {
-  const at = new Map(); sheet.items.forEach((it, i) => { if (it.t === 'r') for (const k of it.keys) at.set(k, i); }); // the latest filling of a corner counts
-  const s = new Set(); if (!at.size) return s;
-  for (const c of junctions(sheet).corners) { const i = at.get(c.id); if (i !== undefined && c.order < i) s.add(c.id); }
-  return s;
+function roundedSet(sheet) { const s = new Set(); for (const it of sheet.items) if (it.t === 'r') for (const k of it.keys) s.add(k); return s; } // every corner ever filled
+// The filled corners to draw. A filling belongs to the junction as it was when the corner was filled: when a later line runs
+// through that junction (the central line of step 9, say), the old ink stays exactly as it was, under the new line, as on
+// paper, and only the new corners that line makes are sharp, filled in the next rounding step. Before, the old fillets were
+// recomputed with the new line in their knot and painted over it, so drawing the central line seemed to fill its corners
+// (Owner 2026-11-18: "בשלב של הקו הגדול המרכזי הוא מילא פינות. מילוי פינות זה השלב הבא").
+function fillets(sheet) {
+  const key = geomKey(sheet);
+  if (sheet.flKey === key) return sheet.fl;
+  const I = sheet.items, at = new Map(); I.forEach((it, i) => { if (it.t === 'r') for (const k of it.keys) at.set(k, i); });
+  const out = [], done = new Set(), stale = new Map();
+  for (const c of at.size ? junctions(sheet).corners : []) { const i = at.get(c.id); if (i !== undefined && c.order < i) { out.push(c); done.add(c.id); } }
+  for (const [k, i] of at) if (!done.has(k)) { let e = i; while (e > 0 && I[e - 1].t !== 's') e--; if (!stale.has(e)) stale.set(e, new Set()); stale.get(e).add(k); }
+  if (!sheet.pre || sheet.pre.size > 24) sheet.pre = new Map();
+  for (const [e, ks] of stale) { // the sheet as it was when these corners were filled
+    const pk = I.slice(0, e).filter(it => it.t === 's').map(it => it.id).join(',');
+    let ps = sheet.pre.get(pk); if (!ps) { ps = {items: I.slice(0, e)}; sheet.pre.set(pk, ps); }
+    for (const c of junctions(ps).corners) if (ks.has(c.id) && !done.has(c.id)) { out.push(c); done.add(c.id); }
+  }
+  sheet.fl = out; sheet.flKey = key;
+  return out;
 }
 function sharpCorners(sheet) { const rs = roundedSet(sheet); return junctions(sheet).corners.filter(c => !rs.has(c.id)); }
 function filletPath(ctx, c, k = 1) { // k < 1 grows the shape from the inner vertex (animation)
@@ -355,9 +368,9 @@ function drawStroke(ctx, it, extra = 0) {
 }
 // strokes in order, each followed by the rounded corners it tops (so a later line still passes over them)
 function drawLines(ctx, sheet, skip, mono, extra = 0) {
-  const rs = roundedSet(sheet), by = new Map();
+  const by = new Map();
   const cores = new Set();
-  for (const c of junctions(sheet).corners) if (rs.has(c.id) && !(skip && skip.has(c.id))) { if (!by.has(c.order)) by.set(c.order, []); by.get(c.order).push(c); if (c.node.core) cores.add(c.node); }
+  for (const c of fillets(sheet)) if (!(skip && skip.has(c.id))) { if (!by.has(c.order)) by.set(c.order, []); by.get(c.order).push(c); if (c.node.core) cores.add(c.node); }
   sheet.items.forEach((it, n) => {
     if (it.t !== 's') return;
     drawStroke(ctx, mono ? {...it, color: mono} : it, extra);
@@ -411,8 +424,8 @@ function maskOf(sheet) { // barrier raster of the lines and their rounded corner
 function slivers(sheet) {
   const key = geomKey(sheet);
   if (sheet.slKey === key) return sheet.sl;
-  const rs = roundedSet(sheet), byId = new Map();
-  const corners = rs.size ? junctions(sheet).corners.filter(c => rs.has(c.id)) : [];
+  const byId = new Map();
+  const corners = fillets(sheet);
   if (corners.length) {
     const {m, lab, thin, small} = maskOf(sheet);
     for (const c of corners) {
@@ -434,6 +447,38 @@ function slivers(sheet) {
       for (const k of knots) { const d = Math.hypot(mid[l][0] - k.nd.p[0], mid[l][1] - k.nd.p[1]) - k.ext; if (d <= 20 && (!best || d < best.d)) best = {d, nd: k.nd}; }
       if (best) byId.set(l, {color: best.nd.color, node: best.nd});
     });
+  }
+  // a space along a line drawn after the last corner filling is inked only if it was inked already before that line:
+  // drawing a line (the central line of step 9, say) never fills anything new; its new small spaces wait for the next
+  // rounding step, while ink that was there stays under it
+  if (byId.size) {
+    let lastR = -1; sheet.items.forEach((it, i) => { if (it.t === 'r') lastR = i; });
+    const fresh = sheet.items.slice(lastR + 1).filter(it => it.t === 's'), touched = new Set();
+    const {lab, m} = maskOf(sheet), k = MASK / 1000;
+    for (const st of fresh) {
+      const r = Math.ceil(st.w / 2 * k) + 3, pts = st.pts;
+      for (let j = 0; j < pts.length; j++) {
+        const a = pts[j], b = pts[Math.min(j + 1, pts.length - 1)], n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * k / 2));
+        for (let q = 0; q < n; q++) {
+          const cx = Math.round((a[0] + (b[0] - a[0]) * q / n) * k), cy = Math.round((a[1] + (b[1] - a[1]) * q / n) * k);
+          for (let dy = -r; dy <= r; dy += 2) for (let dx = -r; dx <= r; dx += 2) {
+            const px = cx + dx, py = cy + dy; if (px < 0 || py < 0 || px >= MASK || py >= MASK) continue;
+            const i = py * MASK + px; if (!m[i] && byId.has(lab[i])) touched.add(lab[i]);
+          }
+        }
+      }
+    }
+    if (touched.size) {
+      const pk = 'sl:' + sheet.items.slice(0, lastR + 1).map(it => it.id).join(',');
+      if (!sheet.pre || sheet.pre.size > 24) sheet.pre = new Map();
+      let ps = sheet.pre.get(pk); if (!ps) { ps = {items: sheet.items.slice(0, lastR + 1)}; sheet.pre.set(pk, ps); }
+      const before = maskOf(ps), was = slivers(ps), tot = new Map(), ink = new Map();
+      for (let i = 0; i < MASK * MASK; i++) {
+        const l = lab[i]; if (m[i] || !touched.has(l)) continue;
+        tot.set(l, (tot.get(l) || 0) + 1); if (!before.m[i] && was.has(before.lab[i])) ink.set(l, (ink.get(l) || 0) + 1);
+      }
+      for (const l of touched) if ((ink.get(l) || 0) * 2 < tot.get(l)) byId.delete(l);
+    }
   }
   sheet.sl = byId; sheet.slKey = key; sheet.slCanvas = null;
   return byId;
@@ -1028,5 +1073,5 @@ addEventListener('pagehide', () => save(true));
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
 $('modeSwitch').addEventListener('click', () => { setMode(paper() ? 'phone' : 'paper'); renderStep(false); });
 applyLang(); renderStep(false);
-window.__ng = {state, go, setMode, save, get lang() { return lang; }, jx: () => junctions(state.sheets.main), sl: () => [...slivers(state.sheets.main).values()].length, mask: () => { const m = maskOf(state.sheets.main); return {regions: m.area.length, thin: m.thin.filter(Boolean).length}; }}; // for the browser tests
+window.__ng = {state, go, setMode, save, get lang() { return lang; }, jx: () => junctions(state.sheets.main), fl: () => fillets(state.sheets.main).map(c => c.order), sl: () => [...slivers(state.sheets.main).values()].length, mask: () => { const m = maskOf(state.sheets.main); return {regions: m.area.length, thin: m.thin.filter(Boolean).length}; }}; // for the browser tests
 })();
