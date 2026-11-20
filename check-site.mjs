@@ -188,6 +188,8 @@ for (const page of publicPages) assert.ok(/<script src="(\.\.\/)*assets\/js\/ana
 assert.ok(!read('dragon/index.html').includes('analytics.js'), 'dragon: no analytics');
 const an = read('assets/js/analytics.js');
 assert.ok(an.includes("persistence: 'memory'") && an.includes('disable_session_recording: true') && an.includes("api_host: 'https://eu.i.posthog.com'") && an.includes("document.addEventListener('sl:wa'") && !/phx_/.test(an), 'analytics.js: cookieless config and sl:wa');
+assert.ok(an.includes("sl_notrack") && an.includes("notrack") && /if \(off\) return;/.test(an) && /he: '[^']+', ru: '[^']+', en: '[^']+'/.test(an), 'analytics.js: ?notrack=1 opt-out (localStorage sl_notrack) with he/ru/en toast');
+new vm.Script(an);
 assert.ok(SITE.works.find(w => w.id === 'thoughtful-wanderer').t[0] === 'הנווד המהורהר', 'thoughtful-wanderer title matches the catalog');
 
 // Home hero wall: every body-art photo is mixed in once, including the nudity-tagged ones (Owner, 2026-11-15: no problem with them anywhere).
