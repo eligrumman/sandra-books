@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {NG} from '../src/site/neurographica.mjs';
+import {YOGA} from '../src/site/yoga.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -140,6 +141,7 @@ function homePage(lang) {
   if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|tel:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
   // the biography page of this language (about/ next to the home page)
   if (base) html = html.split('href="../about/" data-bio-link').join(`href="../${lang}/about/" data-bio-link`);
+  if (base) html = html.split('href="../yoga/" data-yoga-link').join(`href="../${lang}/yoga/" data-yoga-link`);
   // the NeuroGraphica landing page of this language (Hebrew and Russian only), next to this home page
   html = html.replace('<!--ng-landing-->', NG[lang] ? `<p class="studio-ng-more"><a class="link-arrow" href="neurographica/" data-ng-landing>${esc(NG[lang].homeLink)}</a></p>` : '');
   // links to the works of this language: works/<id>/ next to this page
@@ -614,6 +616,146 @@ ${X.faq.map(([q, a]) => `  <div class="ngl-qa"><h3>${esc(q)}</h3><p>${esc(a).rep
 }
 for (const lang of NG_LANGS) write(ngPath(lang) + 'index.html', ngLanding(lang));
 
+/* ---------- yoga landing page (/ru/yoga/, /yoga/, /en/yoga/) ---------- */
+// Owner 2026-11-20: a yoga landing like the NeuroGraphica one. Texts in src/site/yoga.mjs (DRAFT pending Sandra; the file lists the known and unknown facts).
+// Same layout and CSS as the NeuroGraphica landing (neurographica.css). Plain HTML, no script but analytics.js; no HowTo/Course/Offer/Review markup (no data).
+const yogaPath = lang => `${prefix(lang)}yoga/`;
+function yogaLanding(lang) {
+  const X = YOGA[lang], S = SEO[lang], T = SITE.text[lang], up = '../'.repeat(lang === 'he' ? 1 : 2);
+  const url = SITE_URL + yogaPath(lang), wa = SITE.waLink(X.wa + '\n' + url);
+  const hero = works.find(w => w.id === 'drawing'), hm = IMAGES.works.drawing, hsizes = hm.s.filter(x => x <= 1600);
+  const ogImage = `${SITE_URL}assets/img/og-yoga-${lang}.jpg`;
+  const alternates = NG_LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${SITE_URL}${yogaPath(l)}">`).join('\n') + `\n<link rel="alternate" hreflang="x-default" href="${SITE_URL}${yogaPath('ru')}">`;
+  const graph = [
+    {'@type': 'WebPage', '@id': url + '#page', url, name: X.title, description: X.desc, inLanguage: lang,
+      isPartOf: {'@id': SITE_URL + '#site'}, about: {'@type': 'Thing', name: X.crumb, alternateName: ['Yoga', 'Йога', 'יוגה']},
+      author: {'@id': SITE_URL + '#sandra'}, primaryImageOfPage: {'@type': 'ImageObject', url: ogImage, width: 1200, height: 630},
+      breadcrumb: {'@id': url + '#crumbs'}, mainEntity: {'@id': url + '#faq'}},
+    person(lang),
+    {'@type': 'WebSite', '@id': SITE_URL + '#site', url: SITE_URL, name: S.name, inLanguage: LANGS, publisher: {'@id': SITE_URL + '#sandra'}},
+    {'@type': 'FAQPage', '@id': url + '#faq', inLanguage: lang,
+      mainEntity: X.faq.map(([q, a]) => ({'@type': 'Question', name: q, acceptedAnswer: {'@type': 'Answer', text: a}}))},
+    {'@type': 'BreadcrumbList', '@id': url + '#crumbs', itemListElement: [
+      {'@type': 'ListItem', position: 1, name: S.name, item: homeUrl(lang)},
+      {'@type': 'ListItem', position: 2, name: X.crumb, item: url}]}
+  ];
+  const tel = s => esc(s).replace(/(\+972 53-538-0014|053-538-0014)/g, '<bdi dir="ltr" class="ngl-tel">$1</bdi>');
+  return `<!doctype html>
+<html lang="${lang}" dir="${dir(lang)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0c13">
+<!-- DRAFT pending Sandra: every text on this page comes from src/site/yoga.mjs; styles, certificate, format, city and price are unknown and not on the page -->
+<title>${esc(X.title)}</title>
+<meta name="description" content="${esc(X.desc)}">
+<link rel="canonical" href="${url}">
+${alternates}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${esc(S.name)}">
+<meta property="og:locale" content="${S.locale}">
+${NG_LANGS.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" content="${SEO[l].locale}">`).join('\n')}
+<meta property="og:title" content="${esc(X.title)}">
+<meta property="og:description" content="${esc(X.desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${ogImage}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(X.ogAlt)}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="${up}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="${up}assets/css/site.css">
+<link rel="stylesheet" href="${up}assets/css/neurographica.css">
+<script src="${up}assets/js/analytics.js" defer></script>
+${ld({'@context': 'https://schema.org', '@graph': graph})}
+</head>
+<body class="ngl-page yoga-page">
+<header class="ngl-head">
+  <a class="wordmark" href="${up}${prefix(lang)}" aria-label="Sandra Leifer"><span class="wordmark-name">Sandra Leifer</span><span class="wordmark-mark" aria-hidden="true">✳</span></a>
+  <nav class="ngl-nav" aria-label="${esc(T.navLabel || X.crumb)}">
+    <a href="#what">${esc(X.nav.what)}</a>
+    <a href="#styles">${esc(X.nav.styles)}</a>
+    <a href="#faq">${esc(X.nav.faq)}</a>
+    <a href="${up}${bioPath(lang)}" data-bio-link>${esc(X.nav.about)}</a>
+    <a href="${up}${ngPath(lang)}" data-ng-landing>${esc(X.nav.neuro)}</a>
+  </nav>
+  <nav class="lang" aria-label="שפה / Язык / Language">${NG_LANGS.map(l => `<a href="${up}${yogaPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU', en: 'EN'}[l]}</a>`).join('')}</nav>
+</header>
+<main class="ngl" id="main">
+<nav class="ngl-crumbs" aria-label="${esc(X.crumb)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <span aria-current="page">${esc(X.crumb)}</span></nav>
+<section class="ngl-hero">
+  <div class="ngl-hero-text">
+    <h1>${esc(X.h1)}<span class="ngl-h1-sub"> ${esc(X.h1Sub)}</span></h1>
+    <p class="ngl-lead">${esc(X.lead)}</p>
+    <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a><a class="btn btn-ghost" href="${up}${ngPath(lang)}" data-ng-landing>${esc(X.ctaNeuro)}</a></p>
+    <p class="ngl-by">${esc(X.by)}</p>
+  </div>
+  <figure class="ngl-hero-art" style="--bg:${hm.c}"><a href="${up}${workPath('drawing', lang)}"><img src="${up}${imgUrl('drawing', 800)}" srcset="${hsizes.map(x => `${up}${imgUrl('drawing', x)} ${Math.min(x, hm.w)}w`).join(', ')}" sizes="(max-width:900px) 92vw, 40vw" width="${hm.w}" height="${hm.h}" alt="${esc(S.imgAlt(L(hero.t, lang), S.name))}" decoding="async" fetchpriority="high"></a><figcaption>${esc(X.heroCap.replace('{title}', L(hero.t, lang)))}</figcaption></figure>
+</section>
+
+<section class="ngl-sec" id="what" aria-labelledby="h-what">
+  <h2 id="h-what">${esc(X.whatH)}</h2>
+  ${X.what.map(p => `<p>${esc(p)}</p>`).join('\n  ')}
+</section>
+
+<section class="ngl-sec" id="styles" aria-labelledby="h-styles">
+  <h2 id="h-styles">${esc(X.stylesH)}</h2>
+  <p>${esc(X.stylesNote)}</p>
+  <ol class="ngl-steps">
+${X.styles.map(([name, text], i) => `    <li id="style-${i + 1}"><h3>${esc(name)}</h3><p>${esc(text)}</p></li>`).join('\n')}
+  </ol>
+</section>
+
+<section class="ngl-sec" id="class" aria-labelledby="h-expect">
+  <h2 id="h-expect">${esc(X.expectH)}</h2>
+  ${X.expect.map(p => `<p>${esc(p)}</p>`).join('\n  ')}
+</section>
+
+<section class="ngl-sec" id="art" aria-labelledby="h-art">
+  <h2 id="h-art">${esc(X.artH)}</h2>
+  <p>${esc(X.art)}</p>
+  <p><a class="link-arrow" href="${up}${ngPath(lang)}" data-ng-landing>${esc(X.artLink)}</a></p>
+</section>
+
+<section class="ngl-sec ngl-about" id="sandra" aria-labelledby="h-sandra">
+  <img class="ngl-portrait" src="${up}assets/img/portrait-900.webp?v=2" width="580" height="725" alt="${esc(X.portraitAlt)}" loading="lazy" decoding="async">
+  <div>
+    <h2 id="h-sandra">${esc(X.aboutH)}</h2>
+    <ul class="ngl-facts">
+${X.facts.map(f => `      <li>${esc(f)}</li>`).join('\n')}
+    </ul>
+    <p><a class="link-arrow" href="${up}${bioPath(lang)}" data-bio-link>${esc(X.bio)}</a></p>
+  </div>
+</section>
+
+<section class="ngl-sec" id="classes" aria-labelledby="h-classes">
+  <h2 id="h-classes">${esc(X.classH)}</h2>
+  <p>${esc(X.class)}</p>
+  <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a></p>
+  <p class="ngl-phone">${esc(X.phone)} <a href="tel:+972535380014"><bdi dir="ltr">+972 53-538-0014</bdi></a></p>
+</section>
+
+<section class="ngl-sec" id="faq" aria-labelledby="h-faq">
+  <h2 id="h-faq">${esc(X.faqH)}</h2>
+${X.faq.map(([q, a]) => `  <div class="ngl-qa"><h3>${esc(q)}</h3><p>${tel(a)}</p></div>`).join('\n')}
+</section>
+
+<section class="ngl-end" aria-labelledby="h-end">
+  <h2 id="h-end">${esc(X.endH)}</h2>
+  <p>${esc(X.end)}</p>
+  <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a></p>
+</section>
+</main>
+<footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-wa]'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'yoga', slug: 'yoga-${lang}'}})); });</script>
+</body>
+</html>
+`;
+}
+for (const lang of NG_LANGS) write(yogaPath(lang) + 'index.html', yogaLanding(lang));
+
 /* ---------- sitemap and robots ---------- */
 const today = new Date().toISOString().slice(0, 10);
 const entry = (pathFor, priority) => LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${pathFor(l)}</loc>\n` +
@@ -629,6 +771,7 @@ ${entry(bodyPath, '0.7')}
 ${single('museum/', '0.7')}
 ${single('neurographics/', '0.7')}
 ${NG_LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${ngPath(l)}</loc>\n` + NG_LANGS.map(k => `    <xhtml:link rel="alternate" hreflang="${k}" href="${SITE_URL}${ngPath(k)}"/>`).join('\n') + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${ngPath('ru')}"/>\n    <lastmod>${today}</lastmod>\n    <priority>0.9</priority>\n  </url>`).join('\n')}
+${NG_LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${yogaPath(l)}</loc>\n` + NG_LANGS.map(k => `    <xhtml:link rel="alternate" hreflang="${k}" href="${SITE_URL}${yogaPath(k)}"/>`).join('\n') + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${yogaPath('ru')}"/>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`).join('\n')}
 ${single('book/', '0.6')}
 </urlset>
 `);
@@ -637,4 +780,4 @@ Allow: /
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 3) * LANGS.length + 3 + NG_LANGS.length} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 3) * LANGS.length + 3 + 2 * NG_LANGS.length} addresses`);

@@ -54,6 +54,7 @@ function applyLang() {
   $$('[data-dragon-link]').forEach(a => a.href = BASE + 'dragon/?lang=' + lang);
   $$('[data-museum-link]').forEach(a => a.href = BASE + 'museum/?lang=' + lang);
   $$('[data-bio-link]').forEach(a => a.href = home(lang) + 'about/');
+  $$('[data-yoga-link]').forEach(a => a.href = home(lang) + 'yoga/');
   $$('[data-body-link]').forEach(a => a.href = home(lang) + 'body-art/');
   $$('[data-ng-link]').forEach(a => a.href = BASE + 'neurographics/?lang=' + lang);
   $$('[data-wa]').forEach(a => a.href = S.waHello(lang));

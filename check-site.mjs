@@ -402,6 +402,41 @@ console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${S
   assert.ok(tpl.includes('<!--lang-suggest-->') && tpl.includes('body-art-data.js'), 'home template: lang-suggest marker and body-art-data.js');
   for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('assets/js/body-art-data.js" defer'), `${page}: body-art-data.js`);
 }
+// Yoga landing page (Owner 2026-11-20): same pattern as the NeuroGraphica landing; DRAFT text, no invented facts, no Course/Offer/Review markup.
+{
+  const YG_PAGES = [['ru', 'ru/yoga/'], ['he', 'yoga/'], ['en', 'en/yoga/']];
+  for (const [l, dir] of YG_PAGES) {
+    assert.ok(exists(dir + 'index.html'), `${dir}: exists`);
+    const h = read(dir + 'index.html'), url = SITE_URL + dir;
+    assert.ok(h.includes(`<html lang="${l}" dir="${l === 'he' ? 'rtl' : 'ltr'}">`), `${dir}: lang and dir`);
+    assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, `${dir}: exactly one h1`);
+    assert.ok(/<h1>[^<]*(Йога|יוגה|Yoga)/.test(h), `${dir}: the h1 names yoga`);
+    assert.ok((h.match(/<h2[\s>]/g) || []).length >= 5, `${dir}: h2 sections`);
+    assert.ok(/<title>[^<]{20,}<\/title>/.test(h) && /<meta name="description" content="[^"]{80,160}">/.test(h), `${dir}: title and description (<= 160 characters)`);
+    assert.ok(h.includes(`<link rel="canonical" href="${url}">`), `${dir}: canonical`);
+    for (const [k, href] of [['ru', 'ru/yoga/'], ['he', 'yoga/'], ['en', 'en/yoga/'], ['x-default', 'ru/yoga/']]) {
+      assert.ok(h.includes(`<link rel="alternate" hreflang="${k}" href="${SITE_URL}${href}">`), `${dir}: hreflang ${k}`);
+      assert.ok(new RegExp(`<loc>${url}</loc>[\\s\\S]*?hreflang="${k}" href="${SITE_URL}${href}"[\\s\\S]*?</url>`).test(sitemap), `sitemap: ${dir} alternate ${k}`);
+    }
+    assert.ok(h.includes(`<meta property="og:image" content="${SITE_URL}assets/img/og-yoga-${l}.jpg">`) && exists(`assets/img/og-yoga-${l}.jpg`), `${dir}: its own og:image`);
+    for (const og of ['og:title', 'og:description', 'og:url', 'og:locale']) assert.ok(h.includes(`property="${og}"`), `${dir}: ${og}`);
+    const blocks = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1]));
+    assert.equal(blocks.length, 1, `${dir}: one JSON-LD block`);
+    const graph = blocks[0]['@graph'], type = t => graph.find(x => x['@type'] === t);
+    for (const t of ['WebPage', 'Person', 'FAQPage', 'BreadcrumbList']) assert.ok(type(t), `${dir}: JSON-LD ${t}`);
+    for (const t of ['Course', 'Offer', 'Review', 'AggregateRating', 'HowTo']) assert.ok(!graph.some(x => x['@type'] === t), `${dir}: no ${t} markup (no data)`);
+    assert.ok(type('FAQPage').mainEntity.length >= 4 && type('FAQPage').mainEntity.every(q => q.name && q.acceptedAnswer.text), `${dir}: FAQPage questions and answers`);
+    const text = h.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    for (const q of type('FAQPage').mainEntity) assert.ok(text.includes(q.name) && text.includes(q.acceptedAnswer.text), `${dir}: FAQ "${q.name}" visible`);
+    assert.ok(/href="https:\/\/wa\.me\/972535380014\?text=/.test(h) && h.includes('data-wa') && h.includes('sl:wa') && h.includes('data-bio-link') && h.includes('data-ng-landing'), `${dir}: WhatsApp with sl:wa, bio and NeuroGraphica links`);
+    assert.ok(!/<script(?![^>]*(application\/ld\+json|analytics\.js))[^>]*src=/.test(h), `${dir}: no page script beyond analytics`);
+    assert.ok(!/₪|\$\d|отзыв|ביקורת|testimonial|review|сертификат|תעודה|certified/i.test(text), `${dir}: no prices, reviews or certificates (Sandra gave none)`);
+    for (const [k, d] of YG_PAGES) assert.ok(new RegExp(`<nav class="lang"[^>]*>.*href="(?:\\.\\./)+${d}" hreflang="${k}" lang="${k}"${k === l ? ' aria-current="page"' : ''}>`).test(h), `${dir}: language switch to ${k}`);
+  }
+  for (const [pre, d] of [['', 'yoga/'], ['ru/', '../ru/yoga/'], ['en/', '../en/yoga/']]) assert.ok(read(pre + 'index.html').includes(`href="${d}" data-yoga-link`), `${pre}index.html: menu link to its own yoga page`);
+  const llms = read('llms.txt');
+  assert.ok(llms.includes('https://sandraleifer.com/ru/yoga/') && llms.includes('https://sandraleifer.com/yoga/') && llms.includes('https://sandraleifer.com/en/yoga/'), 'llms.txt lists the yoga pages');
+}
 // Phone header must fit 360px (menu button was pushed off-screen at 390, 2026-11-20): the narrow-width rules must outrank the later `.wordmark{font-size:32px}`.
 {
   const css = read('assets/css/site.css');
