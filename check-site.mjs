@@ -127,7 +127,12 @@ for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(r
   assert.ok(num(/const LINES_MIN = (\d+)/) >= 8 && !/nextBtn'\)\.disabled/.test(app), 'NG: at least 8 lines encouraged, Next never blocked');
   assert.ok(!/shapePts|ngShapeTriangle|ngShapeCircle/.test(app) && !('ngShapeTriangle' in SITE.text.he) && app.includes("fig: () => !state.figDone"), 'NG: no ready-made shapes; the figure is drawn freehand');
   // forgiving taps: a finger rounds every sharp corner within >= 28 CSS px; anything that moves is a line, so lines can be added after rounding
-  assert.ok(num(/TAP_TOUCH_PX = (\d+)/) >= 28 && /const hit = sharp\.filter\(c => d\(c\) <= R\)/.test(app), 'NG taps: generous radius, all the near corners');
+  assert.ok(num(/TAP_TOUCH_PX = (\d+)/) >= 28 && /for \(const reach of \[R, 1\.6 \* R\]\)/.test(app) && /if \(best\) return \[best\.c\.id\];/.test(app) && !/hit\.map\(/.test(app), 'NG taps (Owner 2026-11-18): generous reach, but one tap fills exactly one corner, the nearest');
+  // round 2 (Owner 2026-11-18): no colouring while filling corners; lines always black, of different widths; the central line thickest
+  assert.ok(/const swatches = !o\.paint \? null :/.test(app) && /const mode = \(\) => o\.paint \? 'fill' : o\.fill \? tool\.mode : 'pen';/.test(app) && !/COLORS\[tool\.color\]/.test(app) && !/COLORS\[state\.tool\.color\]/.test(app), 'NG: the colour palette exists only on the colouring board, never on the line or corner boards');
+  assert.ok(/const INK = COLORS\[0\]/.test(app) && (app.match(/color: INK/g) || []).length >= 6 && /if \(it\.t === 's'\) it\.color = INK;/.test(app), 'NG: every line is black (drawn, sample, neuro-line, paper pictures, restored sessions)');
+  assert.ok(/const lineW = i => Math\.round\(WIDTHS\[i\] \* \(0\.\d+ \+ Math\.random\(\) \* 0\.\d+\)/.test(app) && num(/const FIG_W = (\d+)/) > 1.25 * Math.max(...app.match(/const WIDTHS = \[([\d, ]+)\]/)[1].split(',').map(Number)), 'NG: each line its own width; the central figure line clearly thicker than any other');
+  assert.ok(/if \(i !== undefined && c\.order < i\) \{ out\.push\(c\); done\.add\(c\.id\); \}/.test(app) && /for \(const c of junctions\(ps\)\.corners\)/.test(app) && /for \(const c of fillets\(sheet\)\) if \(!\(skip/.test(app), 'NG: a corner filled before a later line ran through its junction keeps its old ink under that line (no corner filling while the central line is drawn)');
   assert.ok(num(/SLOP_TOUCH_PX = (\d+)/) <= 16 && /down\.travel < \(down\.touch \? SLOP_TOUCH_PX : SLOP_MOUSE_PX\)/.test(app) && /sheet\.items\.push\(it\); changed\(\);/.test(app), 'NG: a drag on a rounding step still adds a line');
 }
 
