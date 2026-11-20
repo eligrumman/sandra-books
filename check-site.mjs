@@ -401,3 +401,9 @@ console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${S
   assert.ok(tpl.includes('<!--lang-suggest-->') && tpl.includes('body-art-data.js'), 'home template: lang-suggest marker and body-art-data.js');
   for (const page of ['index.html', 'ru/index.html', 'en/index.html']) assert.ok(read(page).includes('assets/js/body-art-data.js" defer'), `${page}: body-art-data.js`);
 }
+// Phone header must fit 360px (menu button was pushed off-screen at 390, 2026-11-20): the narrow-width rules must outrank the later `.wordmark{font-size:32px}`.
+{
+  const css = read('assets/css/site.css');
+  assert.ok(/@media \(max-width:520px\)\{[^@]*\.header \.wordmark\{font-size:28px/.test(css), 'site.css: .header .wordmark must shrink at <=520px');
+  assert.ok(/@media \(max-width:380px\)\{\s*\.header \.wordmark\{font-size:25px/.test(css), 'site.css: .header .wordmark must shrink at <=380px');
+}
