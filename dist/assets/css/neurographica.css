@@ -1,0 +1,82 @@
+/* NeuroGraphica landing page (/ru/neurographica/, /neurographica/): the site's dark page, one readable column, wide gallery */
+.ngl-page{background:var(--ink);font-family:var(--sans)}
+.ngl-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px 24px;padding:14px var(--pad-x);border-bottom:1px solid var(--line)}
+.ngl-nav{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px}
+.ngl-nav a{padding:6px 0;color:#d9d1c8;border-bottom:1px solid transparent;transition:color .25s,border-color .25s}
+.ngl-nav a:hover{color:#fff;border-color:var(--gold)}
+.ngl{max-width:1180px;margin:0 auto;padding:clamp(20px,4vw,48px) var(--pad-x) 0;overflow-wrap:break-word}
+.ngl-crumbs{font-size:13.5px;color:var(--muted);margin-bottom:clamp(18px,3vw,30px)}
+.ngl-crumbs a:hover{color:var(--text)}
+.ngl-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(24px,5vw,72px);align-items:center;padding-bottom:clamp(36px,6vw,80px);border-bottom:1px solid var(--line)}
+.ngl h1{font-family:var(--serif);font-weight:700;font-size:clamp(54px,8vw,112px);line-height:.95;margin:0 0 22px;color:var(--text)}
+.ngl-h1-sub{display:block;margin-top:12px;font-family:var(--sans);font-weight:400;font-size:clamp(19px,2.1vw,26px);line-height:1.35;color:var(--gold-soft)}
+.ngl-lead{font-size:clamp(18px,1.6vw,20px);line-height:1.75;margin:0 0 16px;color:#f2ebe1}
+.ngl-by{margin:22px 0 0;color:var(--muted);line-height:1.7}
+.ngl-cta{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0 0}
+.ngl-cta .btn{text-align:center;line-height:1.3;padding-block:10px}
+.ngl-hero-art{margin:0}
+.ngl-hero-art a{display:block;border-radius:16px;overflow:hidden;background:var(--bg)}
+.ngl-hero-art img{width:100%;height:auto}
+.ngl-hero-art figcaption{margin-top:10px;font-size:13.5px;color:var(--muted)}
+.ngl-sec{max-width:780px;margin:0 auto;padding:clamp(36px,6vw,72px) 0 0}
+.ngl-wide{max-width:none}
+.ngl h2{font-family:var(--serif);font-weight:700;font-size:clamp(34px,4.4vw,54px);line-height:1.05;margin:0 0 18px;color:var(--gold-soft)}
+.ngl h3{font-family:var(--sans);font-weight:500;font-size:18px;line-height:1.4;margin:0 0 6px;color:var(--text)}
+.ngl-sec p{margin:0 0 16px;line-height:1.85}
+.ngl-sim-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:center}
+.ngl-sim{max-width:1000px}
+.ngl-lines{display:grid;gap:10px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);transition:transform .3s var(--ease)}
+.ngl-lines:hover{transform:translateY(-3px)}
+.ngl-line{display:grid;gap:2px}
+.ngl-line svg{width:100%;height:auto}
+.ngl-line span{font-size:13.5px;color:var(--muted-ink)}
+.ngl-line path{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+.ngl-line .habit{stroke:#9a918b}
+.ngl-line .neuro{stroke:#17141f}
+@media (prefers-reduced-motion:no-preference){.ngl-line .neuro{animation:ngl-draw 4.5s var(--ease) .3s both}}
+@keyframes ngl-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.ngl-steps{list-style:none;margin:8px 0 0;padding:0;counter-reset:step;display:grid;gap:14px}
+.ngl-steps li{counter-increment:step;position:relative;padding:14px 18px;padding-inline-start:64px;border:1px solid var(--line);border-radius:14px;background:var(--ink-2)}
+.ngl-steps li::before{content:counter(step);position:absolute;inset-inline-start:18px;top:14px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:var(--ink);font-weight:500;font-size:15px}
+.ngl-steps p{margin:0;line-height:1.7;color:#ddd5cb}
+.ngl-works{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:clamp(10px,1.6vw,18px);margin-top:8px}
+.ngl-work{position:relative;display:block;border-radius:12px;overflow:hidden;background:var(--bg);aspect-ratio:4/5}
+.ngl-work img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.ngl-work:hover img{transform:scale(1.05)}
+.ngl-work-t{position:absolute;inset-inline:0;bottom:0;padding:26px 12px 10px;font-size:14px;line-height:1.3;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.72))}
+.ngl-more{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:20px}
+.ngl-more .link-arrow{color:var(--gold-soft)}
+.ngl-about{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:clamp(20px,4vw,44px);align-items:start;max-width:960px}
+.ngl-portrait{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border-radius:999px 999px 14px 14px}
+.ngl-facts{margin:0 0 18px;padding-inline-start:1.3em;list-style:disc}
+.ngl-facts li{margin:0 0 8px;line-height:1.7}
+.ngl-facts li::marker{color:var(--gold)}
+.ngl-about .link-arrow{color:var(--gold-soft)}
+.ngl-photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.6vw,18px);margin:8px 0 0}
+.ngl-photo{margin:0}
+.ngl-photo img{width:100%;height:auto;border-radius:12px}
+.ngl-photo figcaption{margin-top:8px;font-size:13.5px;color:var(--muted)}
+.ngl-phone{margin-top:14px;color:var(--muted)}
+.ngl-phone a{color:var(--gold-soft);border-bottom:1px solid currentColor}
+.ngl-qa{padding:16px 0;border-top:1px solid var(--line)}
+.ngl-qa p{margin:0;color:#ddd5cb}
+.ngl-end{max-width:780px;margin:clamp(40px,6vw,80px) auto clamp(48px,7vw,96px);padding:clamp(24px,4vw,40px);border:1px solid var(--line);border-radius:18px;background:var(--ink-2);text-align:center}
+.ngl-end .ngl-cta{justify-content:center}
+.ngl-end p{margin:0;line-height:1.8}
+@media (max-width:900px){
+  .ngl-hero,.ngl-sim-grid{grid-template-columns:1fr}
+  .ngl-hero-art{max-width:520px}
+  .ngl-works{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  .ngl-head{padding:12px 16px}
+  .ngl-head .wordmark{font-size:19px}
+  .ngl-nav{order:3;width:100%;gap:4px 16px;font-size:14.5px}
+  .ngl{padding-inline:16px}
+  .ngl-about{grid-template-columns:1fr}
+  .ngl-portrait{max-width:170px}
+  .ngl-photos{grid-template-columns:1fr}
+  .ngl-cta .btn{width:100%}
+  .ngl-steps li{padding-inline-start:58px}
+}
+.ngl-tel{white-space:nowrap}

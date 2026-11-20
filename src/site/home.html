@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0e0c13">
+<!--lang-suggest-->
 <!--seo-->
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +27,7 @@
     <a href="#studio" data-t="navStudio">סדנאות</a>
     <a href="museum/" data-museum-link data-t="navMuseum">גלריית 3D</a>
     <a href="about/" data-bio-link data-t="navAbout">סנדרה</a>
-    <a href="#stories" data-t="navStories">סיפורים</a>
+    <a href="book/" data-book-link data-t="navStories">אגדות</a>
     <a href="#contact" data-t="navContact">קשר</a>
   </nav>
   <div class="header-tools">
@@ -104,6 +105,7 @@
   <div class="studio-ng reveal">
     <p data-t="ngTeaser">מדריך אינטראקטיבי: נסו את שיטת הנוירוגרפיקה בעצמכם, צעד אחר צעד, ישירות בדפדפן. כמה דקות, קו אחד ודף ריק.</p>
     <a class="btn btn-ghost" href="neurographics/" data-ng-link data-t="ngTeaserCta">לנסות עכשיו</a>
+    <!--ng-landing-->
   </div>
 </section>
 
@@ -151,40 +153,9 @@
   </div>
 </section>
 
-<!-- STORIES -->
-<section class="stories pad" id="stories" aria-labelledby="storiesTitle">
-  <div class="section-head">
-    <div>
-      <p class="index reveal">07 — <span data-t="storiesIndex">גם למילים יש צבע</span></p>
-      <h2 class="section-title reveal" id="storiesTitle" data-t="storiesTitle">אגדות<br><em>מאת סנדרה.</em></h2>
-    </div>
-    <p class="section-note reveal" data-t="storiesNote">לקריאה בעברית וברוסית, על המסך או בקול רם לפני השינה.</p>
-  </div>
-  <div class="story-cards">
-    <a class="story-card reveal" href="book/" data-book-link>
-      <div class="story-cover"><img src="assets/img/unicorn-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"></div>
-      <div class="story-body">
-        <span class="tag" data-t="unicornTag">ספר מאויר · 29 עמודים</span>
-        <h3 data-t="unicornTitle">סיפור על החד־קרן</h3>
-        <p data-t="unicornText">בעמק נסתר בין הרים גבוהים, ילדה אחת יוצאת למסע של אומץ, חמלה וחברות מופלאה.</p>
-        <span class="link-arrow" data-t="unicornCta">לפתוח את הספר</span>
-      </div>
-    </a>
-    <a class="story-card reveal" href="dragon/" data-dragon-link hidden>
-      <div class="story-cover dragon-cover"><img src="assets/img/dragon-cover-900.webp" width="900" height="1350" alt="" loading="lazy" decoding="async"></div>
-      <div class="story-body">
-        <span class="tag" data-t="dragonTag">אגדה חדשה · לקריאה</span>
-        <h3 data-t="dragonTitle">סיפור על הדרקון</h3>
-        <p data-t="dragonText">על הדרקון האחרון בעמק, על רוח הצפון שכיבתה את האש, ועל נדיה — המרפאה שידעה שלכל יצור יש זכות לחיות.</p>
-        <span class="link-arrow" data-t="dragonCta">לקרוא את האגדה</span>
-      </div>
-    </a>
-  </div>
-</section>
-
 <!-- CONTACT -->
 <section class="contact pad" id="contact" aria-labelledby="contactTitle">
-  <p class="index reveal">08 — <span data-t="contactIndex">להמשיך את השיחה</span></p>
+  <p class="index reveal">07 — <span data-t="contactIndex">להמשיך את השיחה</span></p>
   <h2 class="contact-title reveal" id="contactTitle"><a href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactTitle">בואו נדבר<br><em>על יצירה.</em> ↗</a></h2>
   <p class="contact-note reveal" data-t="contactNote">לקניית עבודות, להזמנת סדנה או סתם לשאלה, כתבו לסנדרה בוואטסאפ.</p>
   <p class="contact-cta reveal"><a class="btn btn-dark" href="https://wa.me/972535380014" target="_blank" rel="noopener" data-wa data-t="contactBtn">לכתוב בוואטסאפ</a></p>
@@ -229,6 +200,7 @@
 <script src="assets/js/images.js" defer></script>
 <script src="assets/js/data.js" defer></script>
 <script src="assets/js/catalog.js" defer></script>
+<script src="assets/js/body-art-data.js" defer></script>
 <script src="assets/js/wall.js" defer></script>
 <script src="assets/js/site.js" defer></script>
 </body>

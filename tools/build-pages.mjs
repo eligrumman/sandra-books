@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import {NG} from '../src/site/neurographica.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const DIST = path.join(ROOT, 'dist');
@@ -132,11 +133,15 @@ function homePage(lang) {
     ]})
   ].join('\n');
   html = html.replace('<!--seo-->', head);
+  // the language suggestion banner: Hebrew home only (src/site/lang-suggest.html; see check-site.mjs)
+  html = html.replace('<!--lang-suggest-->\n', lang === 'he' ? read('src/site/lang-suggest.html') : '');
   html = html.replace(/href="https:\/\/wa\.me\/[^"]*"(?= target="_blank" rel="noopener" data-wa)/, `href="${esc(SITE.waHello(lang))}"`);
   // relative links from /ru/ and /en/ lead back to the site root
   if (base) html = html.replace(/\b(src|href)="(?!https?:|#|data:|mailto:|tel:|\/|\.\.\/)([^"]+)"/g, (m, a, u) => `${a}="${base}${u}"`);
   // the biography page of this language (about/ next to the home page)
   if (base) html = html.split('href="../about/" data-bio-link').join(`href="../${lang}/about/" data-bio-link`);
+  // the NeuroGraphica landing page of this language (Hebrew and Russian only), next to this home page
+  html = html.replace('<!--ng-landing-->', NG[lang] ? `<p class="studio-ng-more"><a class="link-arrow" href="neurographica/" data-ng-landing>${esc(NG[lang].homeLink)}</a></p>` : '');
   // links to the works of this language: works/<id>/ next to this page
   return html.replace(/<!--works-->[\s\S]*?(?=<\/div>)/, '<!--works-->' + cards);
 }
@@ -428,6 +433,188 @@ ${sections}${closingBlock(lang, up, 'body-art')}</main>
 }
 for (const lang of LANGS) write(bodyPath(lang) + 'index.html', bodyPage(lang));
 
+/* ---------- NeuroGraphica landing page (/ru/neurographica/, /neurographica/) ---------- */
+// Russian is the main search language and the x-default, Hebrew the second (Owner, 2026-11-20, investor#893); no English page.
+// All words are in src/site/neurographica.mjs (drafts for Sandra). Plain HTML: the text, steps, FAQ and gallery need no script.
+const NG_LANGS = ['ru', 'he'];
+const ngPath = lang => `${prefix(lang)}neurographica/`;
+function ngAlternates() {
+  return NG_LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${SITE_URL}${ngPath(l)}">`).join('\n') +
+    `\n<link rel="alternate" hreflang="x-default" href="${SITE_URL}${ngPath('ru')}">`;
+}
+// the two lines of the guide's step 2 (the same seeded drawing as neurographics/app.js): a habit line that repeats and a neuro-line that never does
+const NG_LINES = (() => {
+  const hab = []; for (let i = 0; i <= 40; i++) hab.push([10 + i * 9.75, 80 + Math.sin(i * 0.9) * 38]);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const np = []; let a = 0, x = 12, y = 80;
+  for (let i = 0; i < 70; i++) { a += (rnd() - 0.5) * 1.6 + 0.25 * Math.sin(i * 0.37); a = Math.max(-1.3, Math.min(1.3, a)); x += 5.4 + rnd() * 2.2; y += Math.sin(a) * 9 + (80 - y) * 0.06; np.push([x, Math.max(14, Math.min(146, y))]); }
+  const d = pts => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  return {habit: d(hab), neuro: d(np)};
+})();
+function ngLanding(lang) {
+  const X = NG[lang], S = SEO[lang], T = SITE.text[lang], up = '../'.repeat(lang === 'he' ? 1 : 2);
+  const url = SITE_URL + ngPath(lang), sim = `${up}neurographics/?lang=${lang}`;
+  const wa = SITE.waLink(X.wa + '\n' + url);
+  const ngWorks = works.filter(w => w.kind === 'neuro');
+  const hero = works.find(w => w.id === 'spiral'), hm = IMAGES.works.spiral;
+  const thumb = id => IMAGES.works[id].s.includes(480) || fs.existsSync(path.join(DIST, imgUrl(id, 480))) ? 480 : 800;
+  const ogImage = `${SITE_URL}assets/img/og-neurographica-${lang}.jpg`;
+  const studio = id => SITE.studio.find(x => x.id === id);
+  const graph = [
+    {'@type': 'WebPage', '@id': url + '#page', url, name: X.title, description: X.desc, inLanguage: lang,
+      isPartOf: {'@id': SITE_URL + '#site'}, about: {'@type': 'Thing', name: X.crumb, alternateName: ['NeuroGraphica', 'Нейрографика', 'НейроГрафика', 'נוירוגרפיקה']},
+      author: {'@id': SITE_URL + '#sandra'}, primaryImageOfPage: {'@type': 'ImageObject', url: ogImage, width: 1200, height: 630},
+      breadcrumb: {'@id': url + '#crumbs'}, mainEntity: {'@id': url + '#faq'}},
+    person(lang),
+    {'@type': 'WebSite', '@id': SITE_URL + '#site', url: SITE_URL, name: S.name, inLanguage: LANGS, publisher: {'@id': SITE_URL + '#sandra'}},
+    {'@type': 'HowTo', '@id': url + '#steps', name: X.howName, description: X.stepsIntro, inLanguage: lang,
+      supply: [1, 2, 3, 4].map(i => ({'@type': 'HowToSupply', name: T['ngMat' + i]})),
+      step: X.steps.map(([name, text], i) => ({'@type': 'HowToStep', position: i + 1, name, text, url: `${url}#step-${i + 1}`}))},
+    {'@type': 'FAQPage', '@id': url + '#faq', inLanguage: lang,
+      mainEntity: X.faq.map(([q, a]) => ({'@type': 'Question', name: q, acceptedAnswer: {'@type': 'Answer', text: a}}))},
+    {'@type': 'BreadcrumbList', '@id': url + '#crumbs', itemListElement: [
+      {'@type': 'ListItem', position: 1, name: S.name, item: homeUrl(lang)},
+      {'@type': 'ListItem', position: 2, name: X.crumb, item: url}]}
+  ];
+  const card = w => { const m = IMAGES.works[w.id], title = L(w.t, lang), t = thumb(w.id);
+    return `<a class="ngl-work" href="${up}${workPath(w.id, lang)}" style="--bg:${m.c}"><img src="${up}${imgUrl(w.id, t)}" width="${m.w}" height="${m.h}" alt="${esc(S.imgAlt(title, S.name))}" loading="lazy" decoding="async"><span class="ngl-work-t">${esc(title)}</span></a>`; };
+  const photo = id => `<figure class="ngl-photo"><img src="${up}assets/img/studio/${id}.webp" width="1400" height="933" alt="${esc(studio(id)[lang])}" loading="lazy" decoding="async"><figcaption>${esc(studio(id)[lang])}</figcaption></figure>`;
+  const hsizes = hm.s.filter(x => x <= 1600);
+  const other = NG_LANGS.find(l => l !== lang);
+  return `<!doctype html>
+<html lang="${lang}" dir="${dir(lang)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0c13">
+<title>${esc(X.title)}</title>
+<meta name="description" content="${esc(X.desc)}">
+<link rel="canonical" href="${url}">
+${ngAlternates()}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${esc(S.name)}">
+<meta property="og:locale" content="${S.locale}">
+<meta property="og:locale:alternate" content="${SEO[other].locale}">
+<meta property="og:title" content="${esc(X.title)}">
+<meta property="og:description" content="${esc(X.desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${ogImage}">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(X.ogAlt)}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="${up}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Fredoka:wght@300;400;500&family=Comfortaa:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="${up}assets/css/site.css">
+<link rel="stylesheet" href="${up}assets/css/neurographica.css">
+<script src="${up}assets/js/analytics.js" defer></script>
+${ld({'@context': 'https://schema.org', '@graph': graph})}
+</head>
+<body class="ngl-page">
+<header class="ngl-head">
+  <a class="wordmark" href="${up}${prefix(lang)}" aria-label="Sandra Leifer"><span class="wordmark-name">Sandra Leifer</span><span class="wordmark-mark" aria-hidden="true">✳</span></a>
+  <nav class="ngl-nav" aria-label="${esc(T.navLabel || X.crumb)}">
+    <a href="${sim}" data-ng-link>${esc(X.nav.guide)}</a>
+    <a href="#works">${esc(X.nav.works)}</a>
+    <a href="#faq">${esc(X.nav.faq)}</a>
+    <a href="${up}${bioPath(lang)}" data-bio-link>${esc(X.nav.about)}</a>
+    <a href="${up}book/?lang=${lang}" data-book-link>${esc(X.nav.tales)}</a>
+  </nav>
+  <nav class="lang" aria-label="שפה / Язык">${NG_LANGS.map(l => `<a href="${up}${ngPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU'}[l]}</a>`).join('')}</nav>
+</header>
+<main class="ngl" id="main">
+<nav class="ngl-crumbs" aria-label="${esc(X.crumb)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <span aria-current="page">${esc(X.crumb)}</span></nav>
+<section class="ngl-hero">
+  <div class="ngl-hero-text">
+    <h1>${esc(X.h1)}<span class="ngl-h1-sub"> ${esc(X.h1Sub)}</span></h1>
+    <p class="ngl-lead">${esc(X.lead)}</p>
+    <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a><a class="btn btn-ghost" href="${sim}" data-ng-link>${esc(X.ctaTry)}</a></p>
+    <p class="ngl-by">${esc(X.by)}</p>
+  </div>
+  <figure class="ngl-hero-art" style="--bg:${hm.c}"><a href="${up}${workPath('spiral', lang)}"><img src="${up}${imgUrl('spiral', 800)}" srcset="${hsizes.map(x => `${up}${imgUrl('spiral', x)} ${Math.min(x, hm.w)}w`).join(', ')}" sizes="(max-width:900px) 92vw, 40vw" width="${hm.w}" height="${hm.h}" alt="${esc(S.imgAlt(L(hero.t, lang), S.name))}" decoding="async" fetchpriority="high"></a><figcaption>${esc(X.heroCap.replace('{title}', L(hero.t, lang)))}</figcaption></figure>
+</section>
+
+<section class="ngl-sec" id="what" aria-labelledby="h-what">
+  <h2 id="h-what">${esc(X.whatH)}</h2>
+  ${X.what.map(p => `<p>${esc(p)}</p>`).join('\n  ')}
+</section>
+
+<section class="ngl-sec ngl-sim" id="guide" aria-labelledby="h-guide">
+  <h2 id="h-guide">${esc(X.simH)}</h2>
+  <div class="ngl-sim-grid">
+    <div>
+      ${X.sim.map(p => `<p>${esc(p)}</p>`).join('\n      ')}
+      <p class="ngl-cta"><a class="btn btn-solid" href="${sim}" data-ng-link>${esc(X.simBtn)}</a></p>
+    </div>
+    <a class="ngl-lines" href="${sim}" data-ng-link aria-label="${esc(X.simBtn)}">
+      <span class="ngl-line"><svg viewBox="0 0 400 160" aria-hidden="true"><path class="habit" pathLength="1" d="${NG_LINES.habit}"/></svg><span>${esc(T.ngLineHabit)}</span></span>
+      <span class="ngl-line"><svg viewBox="0 0 400 160" aria-hidden="true"><path class="neuro" pathLength="1" d="${NG_LINES.neuro}"/></svg><span>${esc(T.ngLineNeuro)}</span></span>
+    </a>
+  </div>
+</section>
+
+<section class="ngl-sec" id="algorithm" aria-labelledby="h-algo">
+  <h2 id="h-algo">${esc(X.algoH)}</h2>
+  <p>${esc(X.algo)}</p>
+</section>
+
+<section class="ngl-sec" id="steps" aria-labelledby="h-steps">
+  <h2 id="h-steps">${esc(X.stepsH)}</h2>
+  <p>${esc(X.stepsIntro)}</p>
+  <ol class="ngl-steps">
+${X.steps.map(([name, text], i) => `    <li id="step-${i + 1}"><h3>${esc(name)}</h3><p>${esc(text)}</p></li>`).join('\n')}
+  </ol>
+  <p class="ngl-cta"><a class="btn btn-ghost" href="${sim}" data-ng-link>${esc(X.simBtn)}</a></p>
+</section>
+
+<section class="ngl-sec ngl-wide" id="works" aria-labelledby="h-works">
+  <h2 id="h-works">${esc(X.worksH)}</h2>
+  <p>${esc(X.worksNote)}</p>
+  <div class="ngl-works">
+${ngWorks.map(card).join('\n')}
+  </div>
+  <p class="ngl-more"><a class="link-arrow" href="${up}${prefix(lang)}#works">${esc(X.allWorks)}</a> <a class="link-arrow" href="${up}museum/?lang=${lang}" data-museum-link>${esc(X.museum)}</a></p>
+</section>
+
+<section class="ngl-sec ngl-about" id="sandra" aria-labelledby="h-sandra">
+  <img class="ngl-portrait" src="${up}assets/img/portrait-900.webp?v=2" width="580" height="725" alt="${esc(X.portraitAlt)}" loading="lazy" decoding="async">
+  <div>
+    <h2 id="h-sandra">${esc(X.aboutH)}</h2>
+    <ul class="ngl-facts">
+${X.facts.map(f => `      <li>${esc(f)}</li>`).join('\n')}
+    </ul>
+    <p><a class="link-arrow" href="${up}${bioPath(lang)}" data-bio-link>${esc(X.bio)}</a></p>
+  </div>
+</section>
+
+<section class="ngl-sec ngl-wide" id="classes" aria-labelledby="h-classes">
+  <h2 id="h-classes">${esc(X.classH)}</h2>
+  <p>${esc(X.class)}</p>
+  <div class="ngl-photos">${photo('ws-1')}${photo('ws-8')}</div>
+  <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a></p>
+  <p class="ngl-phone">${esc(X.phone)} <a href="tel:+972535380014"><bdi dir="ltr">+972 53-538-0014</bdi></a></p>
+</section>
+
+<section class="ngl-sec" id="faq" aria-labelledby="h-faq">
+  <h2 id="h-faq">${esc(X.faqH)}</h2>
+${X.faq.map(([q, a]) => `  <div class="ngl-qa"><h3>${esc(q)}</h3><p>${esc(a).replace(/(\+972 53-538-0014|053-538-0014)/g, '<bdi dir="ltr" class="ngl-tel">$1</bdi>')}</p></div>`).join('\n')}
+</section>
+
+<section class="ngl-end" aria-labelledby="h-end">
+  <h2 id="h-end">${esc(X.endH)}</h2>
+  <p>${esc(X.end)}</p>
+  <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a><a class="btn btn-ghost" href="${sim}" data-ng-link>${esc(X.ctaTry)}</a></p>
+</section>
+</main>
+<footer class="footer"><span>© ${new Date().getFullYear()} Sandra Leifer</span><span>${esc(T.rights)}</span><span class="foot-titles">${esc(T.footTitles)}</span><a href="${up}${bioPath(lang)}" data-bio-link>${esc(T.navAbout)}</a><a href="${up}${prefix(lang)}">${esc(S.name)}</a></footer>
+<script>document.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('[data-wa]'); if (a) document.dispatchEvent(new CustomEvent('sl:wa', {detail: {type: 'neuro', slug: 'neurographica-${lang}'}})); });</script>
+</body>
+</html>
+`;
+}
+for (const lang of NG_LANGS) write(ngPath(lang) + 'index.html', ngLanding(lang));
+
 /* ---------- sitemap and robots ---------- */
 const today = new Date().toISOString().slice(0, 10);
 const entry = (pathFor, priority) => LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${pathFor(l)}</loc>\n` +
@@ -442,6 +629,7 @@ ${entry(bioPath, '0.7')}
 ${entry(bodyPath, '0.7')}
 ${single('museum/', '0.7')}
 ${single('neurographics/', '0.7')}
+${NG_LANGS.map(l => `  <url>\n    <loc>${SITE_URL}${ngPath(l)}</loc>\n` + NG_LANGS.map(k => `    <xhtml:link rel="alternate" hreflang="${k}" href="${SITE_URL}${ngPath(k)}"/>`).join('\n') + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}${ngPath('ru')}"/>\n    <lastmod>${today}</lastmod>\n    <priority>0.9</priority>\n  </url>`).join('\n')}
 ${single('book/', '0.6')}
 </urlset>
 `);
@@ -450,4 +638,4 @@ Allow: /
 
 Sitemap: ${SITE_URL}sitemap.xml
 `);
-console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 3) * LANGS.length + 3} addresses`);
+console.log(`${LANGS.length} home pages, ${works.length * LANGS.length} work pages, sitemap with ${(works.length + 3) * LANGS.length + 3 + NG_LANGS.length} addresses`);
