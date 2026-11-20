@@ -310,9 +310,15 @@ em{font-style:normal}
   .work p{font-size:12.5px}
   .facts{grid-template-columns:1fr}
   .facts div:nth-child(odd){padding-inline-end:0}
-  .wordmark{font-size:21px}
-  .lang button{padding:5px 9px;min-width:34px}
+  .header{gap:10px}
+  .header-tools{gap:6px}
+  .menu-btn{margin-inline-end:-8px}
+  .header .wordmark{font-size:28px;gap:6px}
+  .lang button,.lang a{padding:5px 7px;min-width:30px}
   .hero-cta .btn{flex:1 1 auto}
+}
+@media (max-width:380px){
+  .header .wordmark{font-size:25px}
 }
 
 /* ---------- Reduced motion ---------- */
