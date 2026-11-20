@@ -529,8 +529,8 @@ ${ld({'@context': 'https://schema.org', '@graph': graph})}
   <div class="ngl-hero-text">
     <h1>${esc(X.h1)}<span class="ngl-h1-sub"> ${esc(X.h1Sub)}</span></h1>
     <p class="ngl-lead">${esc(X.lead)}</p>
-    <p class="ngl-by">${esc(X.by)}</p>
     <p class="ngl-cta"><a class="btn btn-solid" href="${esc(wa)}" target="_blank" rel="noopener" data-wa>${esc(X.ctaBook)}</a><a class="btn btn-ghost" href="${sim}" data-ng-link>${esc(X.ctaTry)}</a></p>
+    <p class="ngl-by">${esc(X.by)}</p>
   </div>
   <figure class="ngl-hero-art" style="--bg:${hm.c}"><a href="${up}${workPath('spiral', lang)}"><img src="${up}${imgUrl('spiral', 800)}" srcset="${hsizes.map(x => `${up}${imgUrl('spiral', x)} ${Math.min(x, hm.w)}w`).join(', ')}" sizes="(max-width:900px) 92vw, 40vw" width="${hm.w}" height="${hm.h}" alt="${esc(S.imgAlt(L(hero.t, lang), S.name))}" decoding="async" fetchpriority="high"></a><figcaption>${esc(X.heroCap.replace('{title}', L(hero.t, lang)))}</figcaption></figure>
 </section>
