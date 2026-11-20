@@ -1,6 +1,6 @@
 # Sandra Leifer (Сандра Лейфер, סנדרה לייפר)
 
-> Sandra Leifer is an artist and visual-arts teacher who lives and works in Israel. She is a NeuroGraphica (Нейрографика, נוירוגרפיקה) instructor and supervisor with more than 20 years of experience teaching visual arts, and a member of the Union of Professional Artists of Israel and of the UNESCO Artists' Union. The site shows her paintings, NeuroGraphica works and body art, a free interactive NeuroGraphica guide, and her illustrated fairy tales. Pages are in Hebrew, Russian and English; the NeuroGraphica landing page is in Russian (main) and Hebrew.
+> Sandra Leifer is an artist and visual-arts teacher who lives and works in Israel. She is a NeuroGraphica (Нейрографика, נוירוגרפיקה) instructor and supervisor with more than 20 years of experience teaching visual arts, and a member of the Union of Professional Artists of Israel and of the UNESCO Artists' Union. The site shows her paintings, NeuroGraphica works and body art, a free interactive NeuroGraphica guide, and her illustrated fairy tales. Pages are in Hebrew, Russian and English; the NeuroGraphica landing page is in Russian (main), Hebrew and English.
 
 Contact: WhatsApp +972 53-538-0014 (https://wa.me/972535380014). Individual lessons, group workshops and creative labs for children and adults; format, place, language and time are agreed with Sandra directly. The site gives no prices or dates for lessons.
 
@@ -8,6 +8,7 @@ Contact: WhatsApp +972 53-538-0014 (https://wa.me/972535380014). Individual less
 
 - [Нейрографика с Сандрой Лейфер (Russian)](https://sandraleifer.com/ru/neurographica/): what NeuroGraphica is, the limit-removal algorithm, the basic steps, FAQ, Sandra's NeuroGraphica works, how to book a session.
 - [נוירוגרפיקה עם סנדרה לייפר (Hebrew)](https://sandraleifer.com/neurographica/): the same page in Hebrew.
+- [NeuroGraphica with Sandra Leifer (English)](https://sandraleifer.com/en/neurographica/): the same page in English.
 - [Free interactive NeuroGraphica guide](https://sandraleifer.com/neurographics/): try the method step by step in the browser, on paper or on the phone, in Hebrew, Russian or English. Nothing is sent anywhere.
 
 ## Sandra and her work

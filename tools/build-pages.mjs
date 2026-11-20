@@ -433,10 +433,10 @@ ${sections}${closingBlock(lang, up, 'body-art')}</main>
 }
 for (const lang of LANGS) write(bodyPath(lang) + 'index.html', bodyPage(lang));
 
-/* ---------- NeuroGraphica landing page (/ru/neurographica/, /neurographica/) ---------- */
-// Russian is the main search language and the x-default, Hebrew the second (Owner, 2026-11-20, investor#893); no English page.
+/* ---------- NeuroGraphica landing page (/ru/neurographica/, /neurographica/, /en/neurographica/) ---------- */
+// Russian is the main search language and the x-default, Hebrew the second, English the third (Owner, 2026-11-20, investor#893).
 // All words are in src/site/neurographica.mjs (drafts for Sandra). Plain HTML: the text, steps, FAQ and gallery need no script.
-const NG_LANGS = ['ru', 'he'];
+const NG_LANGS = ['ru', 'he', 'en'];
 const ngPath = lang => `${prefix(lang)}neurographica/`;
 function ngAlternates() {
   return NG_LANGS.map(l => `<link rel="alternate" hreflang="${l}" href="${SITE_URL}${ngPath(l)}">`).join('\n') +
@@ -462,7 +462,7 @@ function ngLanding(lang) {
   const studio = id => SITE.studio.find(x => x.id === id);
   const graph = [
     {'@type': 'WebPage', '@id': url + '#page', url, name: X.title, description: X.desc, inLanguage: lang,
-      isPartOf: {'@id': SITE_URL + '#site'}, about: {'@type': 'Thing', name: X.crumb, alternateName: ['NeuroGraphica', 'Нейрографика', 'НейроГрафика', 'נוירוגרפיקה']},
+      isPartOf: {'@id': SITE_URL + '#site'}, about: {'@type': 'Thing', name: X.crumb, alternateName: ['NeuroGraphica', 'Neurographics', 'Нейрографика', 'НейроГрафика', 'נוירוגרפיקה']},
       author: {'@id': SITE_URL + '#sandra'}, primaryImageOfPage: {'@type': 'ImageObject', url: ogImage, width: 1200, height: 630},
       breadcrumb: {'@id': url + '#crumbs'}, mainEntity: {'@id': url + '#faq'}},
     person(lang),
@@ -480,7 +480,6 @@ function ngLanding(lang) {
     return `<a class="ngl-work" href="${up}${workPath(w.id, lang)}" style="--bg:${m.c}"><img src="${up}${imgUrl(w.id, t)}" width="${m.w}" height="${m.h}" alt="${esc(S.imgAlt(title, S.name))}" loading="lazy" decoding="async"><span class="ngl-work-t">${esc(title)}</span></a>`; };
   const photo = id => `<figure class="ngl-photo"><img src="${up}assets/img/studio/${id}.webp" width="1400" height="933" alt="${esc(studio(id)[lang])}" loading="lazy" decoding="async"><figcaption>${esc(studio(id)[lang])}</figcaption></figure>`;
   const hsizes = hm.s.filter(x => x <= 1600);
-  const other = NG_LANGS.find(l => l !== lang);
   return `<!doctype html>
 <html lang="${lang}" dir="${dir(lang)}">
 <head>
@@ -494,7 +493,7 @@ ${ngAlternates()}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${esc(S.name)}">
 <meta property="og:locale" content="${S.locale}">
-<meta property="og:locale:alternate" content="${SEO[other].locale}">
+${NG_LANGS.filter(l => l !== lang).map(l => `<meta property="og:locale:alternate" content="${SEO[l].locale}">`).join('\n')}
 <meta property="og:title" content="${esc(X.title)}">
 <meta property="og:description" content="${esc(X.desc)}">
 <meta property="og:url" content="${url}">
@@ -521,7 +520,7 @@ ${ld({'@context': 'https://schema.org', '@graph': graph})}
     <a href="${up}${bioPath(lang)}" data-bio-link>${esc(X.nav.about)}</a>
     <a href="${up}book/?lang=${lang}" data-book-link>${esc(X.nav.tales)}</a>
   </nav>
-  <nav class="lang" aria-label="שפה / Язык">${NG_LANGS.map(l => `<a href="${up}${ngPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU'}[l]}</a>`).join('')}</nav>
+  <nav class="lang" aria-label="שפה / Язык / Language">${NG_LANGS.map(l => `<a href="${up}${ngPath(l)}" hreflang="${l}" lang="${l}"${l === lang ? ' aria-current="page"' : ''}>${{he: 'עב', ru: 'RU', en: 'EN'}[l]}</a>`).join('')}</nav>
 </header>
 <main class="ngl" id="main">
 <nav class="ngl-crumbs" aria-label="${esc(X.crumb)}"><a href="${up}${prefix(lang)}">${esc(S.name)}</a> / <span aria-current="page">${esc(X.crumb)}</span></nav>
