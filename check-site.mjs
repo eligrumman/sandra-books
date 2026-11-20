@@ -49,7 +49,7 @@ for (const j of SITE.journey) assert.ok(j.he.length === 2 && j.ru.length === 2);
 
 // Local references in every page resolve.
 const workPages = ['', 'ru/', 'en/'].flatMap(p => SITE.works.map(w => `${p}works/${w.id}/index.html`));
-for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', 'neurographica/index.html', 'ru/neurographica/index.html', ...workPages]) {
+for (const page of ['index.html', 'ru/index.html', 'en/index.html', 'museum/index.html', 'dragon/index.html', 'book/index.html', 'neurographics/index.html', 'about/index.html', 'ru/about/index.html', 'en/about/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', 'neurographica/index.html', 'ru/neurographica/index.html', 'en/neurographica/index.html', ...workPages]) {
   const dir = page.includes('/') ? page.slice(0, page.lastIndexOf('/') + 1) : '';
   for (const [, ref] of read(page).matchAll(/(?:src|href)="([^"#?]+)[^"]*"/g)) {
     if (/^(https?:|mailto:|tel:|data:)/.test(ref) || ref.endsWith('/')) continue;
@@ -183,7 +183,7 @@ assert.ok(read('museum/index.html').includes('id="lbio"'), 'museum: bio link');
 assert.ok(read('assets/js/site.js').includes("new CustomEvent('sl:wa'") && read('neurographics/app.js').includes("'sl:wa'"), 'sl:wa hook');
 assert.ok(!/<script[^>]+src="https?:\/\/(?!fonts)/.test(read('index.html')), 'no third-party scripts in the HTML (PostHog loads from assets/js/analytics.js)');
 // Analytics: every public page loads the shared PostHog file; the unpublished dragon tale does not.
-const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', 'neurographica/index.html', 'ru/neurographica/index.html'];
+const publicPages = [...workPages, ...['', 'ru/', 'en/'].flatMap(p => [p + 'index.html', p + 'about/index.html']), 'book/index.html', 'museum/index.html', 'neurographics/index.html', 'body-art/index.html', 'ru/body-art/index.html', 'en/body-art/index.html', 'mirror-room/index.html', 'neurographica/index.html', 'ru/neurographica/index.html', 'en/neurographica/index.html'];
 for (const page of publicPages) assert.ok(/<script src="(\.\.\/)*assets\/js\/analytics\.js" defer><\/script>/.test(read(page)), `${page}: analytics.js`);
 assert.ok(!read('dragon/index.html').includes('analytics.js'), 'dragon: no analytics');
 const an = read('assets/js/analytics.js');
@@ -356,19 +356,19 @@ for (const pre of ['', 'ru/', 'en/']) { const h = read(pre + 'index.html'); asse
 }
 console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${SITE.studio.length} studio photos, ${he.length} text keys in Hebrew, Russian and English, museum rooms, pages in three languages with sitemap and structured data, local references, dragon tale 29 pages per language.`);
 
-// NeuroGraphica landing page (investor#893, Owner 2026-11-20): Russian first (x-default), Hebrew second; static text that needs no script.
+// NeuroGraphica landing page (investor#893, Owner 2026-11-20): Russian first (x-default), Hebrew second, English third; static text that needs no script.
 {
-  const NG_PAGES = [['ru', 'ru/neurographica/'], ['he', 'neurographica/']];
+  const NG_PAGES = [['ru', 'ru/neurographica/'], ['he', 'neurographica/'], ['en', 'en/neurographica/']];
   for (const [l, dir] of NG_PAGES) {
     assert.ok(exists(dir + 'index.html'), `${dir}: exists`);
     const h = read(dir + 'index.html'), url = SITE_URL + dir;
     assert.ok(h.includes(`<html lang="${l}" dir="${l === 'he' ? 'rtl' : 'ltr'}">`), `${dir}: lang and dir`);
     assert.equal((h.match(/<h1[\s>]/g) || []).length, 1, `${dir}: exactly one h1`);
-    assert.ok(/<h1>[^<]*(Нейрографика|נוירוגרפיקה)/.test(h), `${dir}: the h1 names the method`);
+    assert.ok(/<h1>[^<]*(Нейрографика|נוירוגרפיקה|NeuroGraphica)/.test(h), `${dir}: the h1 names the method`);
     assert.ok((h.match(/<h2[\s>]/g) || []).length >= 6, `${dir}: h2 sections`);
     assert.ok(/<title>[^<]{30,}<\/title>/.test(h) && /<meta name="description" content="[^"]{80,160}">/.test(h), `${dir}: title and description (<= 160 characters)`);
     assert.ok(h.includes(`<link rel="canonical" href="${url}">`), `${dir}: canonical`);
-    for (const [k, href] of [['ru', 'ru/neurographica/'], ['he', 'neurographica/'], ['x-default', 'ru/neurographica/']]) {
+    for (const [k, href] of [['ru', 'ru/neurographica/'], ['he', 'neurographica/'], ['en', 'en/neurographica/'], ['x-default', 'ru/neurographica/']]) {
       assert.ok(h.includes(`<link rel="alternate" hreflang="${k}" href="${SITE_URL}${href}">`), `${dir}: hreflang ${k}`);
       assert.ok(new RegExp(`<loc>${url}</loc>[\\s\\S]*?hreflang="${k}" href="${SITE_URL}${href}"[\\s\\S]*?</url>`).test(sitemap), `sitemap: ${dir} alternate ${k}`);
     }
@@ -387,15 +387,16 @@ console.log(`PASS: ${ids.length} works in ${series.size} series with images, ${S
     for (const st of type('HowTo').step) assert.ok(text.includes(st.text), `${dir}: step ${st.position} visible`);
     // internal links: the simulator, WhatsApp booking, the gallery of works, the bio
     assert.ok(h.includes(`neurographics/?lang=${l}"`) && /href="https:\/\/wa\.me\/972535380014\?text=/.test(h) && h.includes('class="ngl-work"') && h.includes('data-bio-link'), `${dir}: links to the guide, WhatsApp, works and bio`);
-    for (const [, id] of h.matchAll(/class="ngl-work" href="(?:\.\.\/)+(?:ru\/)?works\/([\w-]+)\//g)) assert.ok(SITE.works.find(w => w.id === id && w.kind === 'neuro'), `${dir}: ${id} is a NeuroGraphica work`);
+    for (const [, id] of h.matchAll(/class="ngl-work" href="(?:\.\.\/)+(?:(?:ru|en)\/)?works\/([\w-]+)\//g)) assert.ok(SITE.works.find(w => w.id === id && w.kind === 'neuro'), `${dir}: ${id} is a NeuroGraphica work`);
     assert.ok(!/<script(?![^>]*(application\/ld\+json|analytics\.js))[^>]*src=/.test(h), `${dir}: no page script beyond analytics`);
-    assert.ok(!/₪|отзыв|ביקורת/i.test(text), `${dir}: no prices or reviews (Sandra gave none)`);
+    assert.ok(!/₪|\$\d|отзыв|ביקורת|testimonial|review/i.test(text), `${dir}: no prices or reviews (Sandra gave none)`);
+    // the language switch reaches every landing page, the current one marked
+    for (const [k, d] of NG_PAGES) assert.ok(new RegExp(`<nav class="lang"[^>]*>.*href="(?:\\.\\./)+${d}" hreflang="${k}" lang="${k}"${k === l ? ' aria-current="page"' : ''}>`).test(h), `${dir}: language switch to ${k}`);
   }
-  for (const [pre, dir] of [['', 'neurographica/'], ['ru/', 'neurographica/']]) assert.ok(read(pre + 'index.html').includes(`href="${dir}" data-ng-landing`), `${pre}index.html links to its landing page`);
-  assert.ok(!read('en/index.html').includes('data-ng-landing'), 'en home: no link (no English landing page)');
+  for (const pre of ['', 'ru/', 'en/']) assert.ok(read(pre + 'index.html').includes('href="neurographica/" data-ng-landing'), `${pre}index.html links to its landing page`);
   assert.ok(read('robots.txt').includes('Allow: /') && !/Disallow:\s*\/\S/.test(read('robots.txt')), 'robots.txt allows crawling');
   const llms = read('llms.txt');
-  assert.ok(llms.startsWith('# Sandra Leifer') && llms.includes('https://sandraleifer.com/ru/neurographica/') && llms.includes('https://sandraleifer.com/neurographica/'), 'llms.txt lists the landing pages');
+  assert.ok(llms.startsWith('# Sandra Leifer') && llms.includes('https://sandraleifer.com/ru/neurographica/') && llms.includes('https://sandraleifer.com/neurographica/') && llms.includes('https://sandraleifer.com/en/neurographica/'), 'llms.txt lists the landing pages');
   // the home template keeps what dist/index.html had (template drift, 2026-11-15): the language suggestion and the body-art data
   const tpl = fs.readFileSync(new URL('./src/site/home.html', import.meta.url), 'utf8');
   assert.ok(tpl.includes('<!--lang-suggest-->') && tpl.includes('body-art-data.js'), 'home template: lang-suggest marker and body-art-data.js');
